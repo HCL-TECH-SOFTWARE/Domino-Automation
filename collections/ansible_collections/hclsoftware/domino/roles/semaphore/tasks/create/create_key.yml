@@ -1,0 +1,81 @@
+---
+- name: Get list of keys
+  ansible.builtin.uri:
+    url: '{{ semaphore__url }}/project/{{ project_number }}/keys'
+    method: GET
+    body_format: json
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: 'Bearer {{ semaphore_token }}'
+  register: keys_list_result
+
+- name: Get list of keys with the name "{{ semaphore__key }}"
+  ansible.builtin.set_fact:
+    keys: '{{ keys_list_result.json | selectattr("name", "equalto", semaphore__key) }}'
+
+- name: Check if multiple keys with this name exist
+  ansible.builtin.assert:
+    that:
+      - (keys | length) <= 1
+    fail_msg: 'Multiple ({{ keys | length }}) projects with the name {{ semaphore__key }} exist. Keep just one of them and delete the others.'
+
+- name: Get the key number (if exists)
+  ansible.builtin.set_fact:
+    key_number: '{{ (keys | first)["id"] }}'
+  when: (keys | length) == 1
+
+- name: Create a new key
+  when: (keys | length) == 0
+  block:
+    - name: Read SSH key from a local file
+      ansible.builtin.slurp:
+        path: '{{ semaphore__key_file }}'
+      register: ssh_key_result
+
+    - name: Create a new key {{ semaphore__key }}
+      ansible.builtin.uri:
+        url: '{{ semaphore__url }}/project/{{ project_number }}/keys'
+        method: POST
+        body_format: json
+        body: >-
+          {
+            'name': '{{ semaphore__key }}',
+            'project_id': {{ project_number | int }},
+            'type': 'ssh',
+            'ssh': {
+              'login': '{{ semaphore__key_user }}',
+              'private_key': {{ ssh_key_result.content | b64decode | to_json }}
+            }
+          }
+        status_code: 204
+        headers:
+          Content-Type: application/json
+          Accept: application/json
+          Authorization: 'Bearer {{ semaphore_token }}'
+      changed_when: create_key_result.status == 204
+      register: create_key_result
+
+    - name: Get list of keys
+      ansible.builtin.uri:
+        url: '{{ semaphore__url }}/project/{{ project_number }}/keys'
+        method: GET
+        body_format: json
+        headers:
+          Content-Type: application/json
+          Accept: application/json
+          Authorization: 'Bearer {{ semaphore_token }}'
+      register: keys_new_list_result
+
+    - name: Get list of keys with the name "{{ semaphore__key }}"
+      ansible.builtin.set_fact:
+        keys_new: '{{ keys_new_list_result.json | selectattr("name", "equalto", semaphore__key) }}'
+
+    - name: Store the newly created key number
+      ansible.builtin.set_fact:
+        key_number: '{{ (keys_new | first)["id"] }}'
+
+
+- name: Print Key number
+  ansible.builtin.debug:
+    msg: 'KEY NUMBER: {{ key_number }}'

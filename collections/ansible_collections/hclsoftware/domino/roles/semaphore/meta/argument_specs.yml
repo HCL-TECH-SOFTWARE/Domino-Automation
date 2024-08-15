@@ -1,0 +1,142 @@
+---
+argument_specs:
+  main:
+    short_description: Performs initial Semaphore configuration
+    description:
+      - 'This is the main entrypoint for the role.'
+      - 'Initialize Semaphore deployment by creating configuration documents:'
+      - 'Token, Project, SSH key, Repository, Inventory, Task Templates'
+    author:
+      - Petr Kunc
+    options:
+      semaphore__username:
+        type: str
+        required: false
+        default: admin
+        description:
+          - 'Administrator login name'
+      semaphore__password:
+        type: str
+        required: false
+        default: password
+        description:
+          - 'Administrator password'
+      semaphore__hostname:
+        type: str
+        required: false
+        default: localhost
+        description:
+          - 'Semaphore hostname.'
+          - 'When run in a local container, use `localhost`.'
+      semaphore__port:
+        type: int
+        required: false
+        default: 3000
+        description:
+          - 'Semaphore port.'
+      semaphore__project:
+        type: str
+        required: false
+        default: My Project
+        description:
+          - 'Project name.'
+          - 'Used as a name of a configuration document.'
+      semaphore__repository:
+        type: str
+        required: false
+        default: My Repository
+        description:
+          - 'Repository name.'
+          - 'Used as a name of a configuration document.'
+      semaphore__repository_path:
+        type: str
+        required: false
+        default: /repo
+        description:
+          - 'Repository path.'
+          - 'When run in a local container, must be valid inside the container.'
+      semaphore__key:
+        type: str
+        required: false
+        default: My Key
+        description:
+          - 'SSH key name.'
+          - 'Used as a name of a configuration document.'
+      semaphore__key_file:
+        type: str
+        required: false
+        default: ~/.ssh/id_rsa
+        description:
+          - 'SSH key file path used to log into the remore server.'
+          - 'When run in a local container, must be valid inside the container.'
+      semaphore__key_user:
+        type: str
+        required: false
+        default: ansible
+        description:
+          - 'User account name used to log into the remote server.'
+      semaphore__inventory:
+        type: str
+        required: false
+        default: My Inventory
+        description:
+          - 'Inventory name.'
+          - 'Used as a name of a configuration document.'
+      semaphore__inventory_file:
+        type: str
+        required: false
+        default: /repo/inventory.yml
+        description:
+          - 'Path to the inventory file.'
+          - 'When run in a local container, must be valid inside the container.'
+      semaphore__environment:
+        type: str
+        required: false
+        default: My Environment
+        description:
+          - 'Environment name.'
+          - 'Used as a name of a configuration document.'
+      semaphore__environment_json:
+        type: dict
+        required: false
+        default: {}
+        description:
+          - 'Dictionary with optional parameters, specific for the environment.'
+      semaphore__view:
+        type: str
+        required: false
+        default: My View
+        description:
+          - 'View name.'
+          - 'Used as a name of a configuration document.'
+      semaphore__templates:
+        type: list
+        elements: dict
+        required: false
+        default: "[
+            {
+              name: My Template,
+              playbook: playbook.yml,
+              description: Playbook description,
+              arguments: []
+            }
+          ]"
+        description:
+          - 'List with dictionary items. Templates for creating Semaphore tasks documents.'
+
+  assert:
+    short_description: Check input values before configuring Sempahore
+    description:
+      - 'This is an alternative entrypoint for the role.'
+      - 'Performs validation (assertion) of values, combined from the role defaults values and playbook values.'
+      - 'This validation is part of the main role task.'
+    author:
+      - Petr Kunc
+
+  delete:
+    short_description: Deletes template tasks documents
+    description:
+      - 'This is an alternative entrypoint for the role.'
+      - 'Deletes task templates documents.'
+    author:
+      - Petr Kunc

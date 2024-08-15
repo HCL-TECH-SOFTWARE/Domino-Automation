@@ -1,0 +1,56 @@
+---
+- name: Check directories
+  vars:
+    common__dir_name: '{{ dir }}'
+  ansible.builtin.include_role:
+    name: hclsoftware.domino.common
+    tasks_from: assert_directory
+  loop:
+    - semaphore__repository_path
+  loop_control:
+    loop_var: dir
+
+
+- name: Check files
+  vars:
+    common__file_name: '{{ file }}'
+  ansible.builtin.include_role:
+    name: hclsoftware.domino.common
+    tasks_from: assert_file
+  loop:
+    - semaphore__inventory_file
+    - semaphore__key_file
+  loop_control:
+    loop_var: file
+
+
+- name: Check parameters
+  vars:
+    common__param_name: '{{ param.name }}'
+    common__param_type: '{{ param.type }}'
+  ansible.builtin.include_role:
+    name: hclsoftware.domino.common
+    tasks_from: assert_parameter
+  loop:
+    - { name: semaphore__username, type: alphanumeric }
+    - { name: semaphore__password, type: string }
+    - { name: semaphore__hostname, type: string }
+    - { name: semaphore__port, type: number }
+    - { name: semaphore__project, type: alphanumeric-ext }
+    - { name: semaphore__repository, type: alphanumeric-ext }
+    - { name: semaphore__repository_path, type: path }
+    - { name: semaphore__key, type: alphanumeric-ext }
+    - { name: semaphore__key_file, type: filename }
+    - { name: semaphore__key_user, type: alphanumeric-ext }
+    - { name: semaphore__inventory, type: alphanumeric-ext }
+    - { name: semaphore__inventory_file, type: filename }
+    - { name: semaphore__environment, type: alphanumeric-ext }
+    - { name: semaphore__environment_json, type: dictionary }
+    - { name: semaphore__view, type: alphanumeric-ext }
+    - { name: semaphore__templates, type: list }
+  loop_control:
+    loop_var: param
+
+- name: Print final parameters for the installation
+  ansible.builtin.debug:
+    msg: "{{ lookup('template', 'values.j2') }}"

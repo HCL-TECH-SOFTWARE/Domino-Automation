@@ -1,0 +1,7 @@
+---
+- name: Create templates
+  ansible.builtin.include_tasks: create_template_task.yml
+  loop: '{{ semaphore__templates }}'
+  loop_control:
+    loop_var: template
+    label: '{{ template.name }}'

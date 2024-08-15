@@ -1,0 +1,60 @@
+---
+- name: Make sure the Semaphore server is listening on the specified port {{ semaphore__port }}
+  ansible.builtin.wait_for:
+    port: '{{ semaphore__port }}'
+    delay: 3
+
+- name: Log into Semaphore using username and password - {{ semaphore__url }}
+  ansible.builtin.uri:
+    url: '{{ semaphore__url }}/auth/login'
+    method: POST
+    body: '{"auth": "{{ semaphore__username }}", "password": "{{ semaphore__password }}"}'
+    force_basic_auth: true
+    body_format: json
+    status_code: 204
+  register: semaphore_login_result
+
+- name: Store the cookie
+  ansible.builtin.set_fact:
+    semaphore_cookie: '{{ semaphore_login_result.cookies_string }}'
+
+- name: Get list of existing tokens
+  ansible.builtin.uri:
+    url: '{{ semaphore__url }}/user/tokens'
+    method: GET
+    body_format: json
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Cookie: '{{ semaphore_cookie }}'
+  register: semaphore_cookie_result
+
+- name: Get existing token for admin (if exists)
+  vars:
+    active_tokens: '{{ semaphore_cookie_result.json | selectattr("expired", "equalto", false) }}'
+    admin_tokens: '{{ active_tokens | selectattr("user_id", "equalto", 1) }}'
+  ansible.builtin.set_fact:
+    semaphore_token: '{{ ((admin_tokens | length) == 0) | ternary ("", (admin_tokens | first)["id"]) }}'
+
+- name: Create a new token (when none exists)
+  when: semaphore_token | length == 0
+  block:
+    - name: Create a new token
+      ansible.builtin.uri:
+        url: '{{ semaphore__url }}/user/tokens'
+        method: POST
+        body_format: json
+        status_code: 201
+        headers:
+          Content-Type: application/json
+          Accept: application/json
+          Cookie: '{{ semaphore_cookie }}'
+      register: semaphore_token_result
+
+    - name: Store the newly created token
+      ansible.builtin.set_fact:
+        semaphore_token: '{{ semaphore_token_result.json.id }}'
+
+- name: Print token
+  ansible.builtin.debug:
+    msg: 'USING TOKEN: {{ semaphore_token }}'

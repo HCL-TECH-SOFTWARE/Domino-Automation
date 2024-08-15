@@ -1,0 +1,66 @@
+---
+- name: Get list of projects
+  ansible.builtin.uri:
+    url: '{{ semaphore__url }}/projects'
+    method: GET
+    body_format: json
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: 'Bearer {{ semaphore_token }}'
+  register: project_list_result
+
+- name: Get list of projects with the name "{{ semaphore__project }}"
+  ansible.builtin.set_fact:
+    projects: '{{ project_list_result.json | selectattr("name", "equalto", semaphore__project) }}'
+
+- name: Check if multiple projects with this name exist
+  ansible.builtin.assert:
+    that:
+      - (projects | length) <= 1
+    fail_msg: 'Multiple ({{ projects | length }}) projects with the name {{ semaphore__project }} exist. Keep just one of them and delete the others.'
+
+- name: Get the project number (if exists)
+  ansible.builtin.set_fact:
+    project_number: '{{ (projects | first)["id"] }}'
+  when: (projects | length) == 1
+
+- name: Create a new project {{ semaphore__project }}
+  when: (projects | length) == 0
+  block:
+    - name: Create a new project
+      ansible.builtin.uri:
+        url: '{{ semaphore__url }}/projects'
+        method: POST
+        body_format: json
+        body:
+          name: '{{ semaphore__project }}'
+          alert: false
+          alert_chat: ''
+          max_parallel_tasks: 0
+          type: ''
+        status_code: 201
+        headers:
+          Content-Type: application/json
+          Accept: application/json
+          Authorization: 'Bearer {{ semaphore_token }}'
+      changed_when: create_project_result.status == 204
+      register: create_project_result
+
+    - name: Store the newly created project number
+      ansible.builtin.set_fact:
+        project_number: '{{ create_project_result.json.id }}'
+
+- name: Print Project number
+  ansible.builtin.debug:
+    msg: 'PROJECT NUMBER: {{ project_number }}'
+
+- name: Get list of users for project number {{ project_number }}
+  ansible.builtin.uri:
+    url: '{{ semaphore__url }}/project/{{ project_number }}/users'
+    method: GET
+    body_format: json
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: 'Bearer {{ semaphore_token }}'

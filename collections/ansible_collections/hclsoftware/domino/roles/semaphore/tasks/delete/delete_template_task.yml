@@ -1,0 +1,32 @@
+---
+- name: Get list of all templates
+  ansible.builtin.uri:
+    url: '{{ semaphore__url }}/project/{{ project_number }}/templates'
+    method: GET
+    body_format: json
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: 'Bearer {{ semaphore_token }}'
+  register: temp_list_result
+
+- name: Get list of templates with the name "{{ template.name }}"
+  ansible.builtin.set_fact:
+    temps: '{{ temp_list_result.json | selectattr("name", "equalto", template.name) }}'
+
+- name: Delete the template "{{ template.name }}"
+  vars:
+    temp_number: '{{ (temps | first)["id"] }}'
+  ansible.builtin.uri:
+    url: '{{ semaphore__url }}/project/{{ project_number }}/templates/{{ temp_number }}'
+    method: DELETE
+    body_format: json
+    status_code: 204
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: 'Bearer {{ semaphore_token }}'
+    return_content: true
+  changed_when: delete_temp_result.status == 204
+  register: delete_temp_result
+  when: (temps | length) == 1

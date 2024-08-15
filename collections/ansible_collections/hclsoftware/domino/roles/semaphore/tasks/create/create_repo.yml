@@ -1,0 +1,75 @@
+---
+- name: Get list of repositories
+  ansible.builtin.uri:
+    url: '{{ semaphore__url }}/project/{{ project_number }}/repositories'
+    method: GET
+    body_format: json
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: 'Bearer {{ semaphore_token }}'
+  register: repo_list_result
+
+- name: Get list of repositories with the name "{{ semaphore__repository }}"
+  ansible.builtin.set_fact:
+    repos: '{{ repo_list_result.json | selectattr("name", "equalto", semaphore__repository) }}'
+
+- name: Check if multiple repositories with this name exist
+  ansible.builtin.assert:
+    that:
+      - (repos | length) <= 1
+    fail_msg: 'Multiple ({{ repos | length }}) repositories with the name {{ semaphore__repository }} exist. Keep just one of them and delete the others.'
+
+- name: Get the repository number (if exists)
+  ansible.builtin.set_fact:
+    repo_number: '{{ (repos | first)["id"] }}'
+  when: (repos | length) == 1
+
+- name: Create a new repository {{ semaphore__repository }}
+  when: (repos | length) == 0
+  block:
+    - name: Create a new repository
+      ansible.builtin.uri:
+        url: '{{ semaphore__url }}/project/{{ project_number }}/repositories'
+        method: POST
+        body_format: json
+        body: >-
+          {
+            'name': '{{ semaphore__repository }}',
+            'project_id': {{ project_number | int }},
+            'git_url': '{{ semaphore__repository_path }}',
+            'git_branch': '',
+            'ssh_key_id': 1
+          }
+        status_code: 204
+        headers:
+          Content-Type: application/json
+          Accept: application/json
+          Authorization: 'Bearer {{ semaphore_token }}'
+        return_content: true
+      changed_when: create_repo_result.status == 204
+      register: create_repo_result
+
+    - name: Get list of repositories
+      ansible.builtin.uri:
+        url: '{{ semaphore__url }}/project/{{ project_number }}/repositories'
+        method: GET
+        body_format: json
+        headers:
+          Content-Type: application/json
+          Accept: application/json
+          Authorization: 'Bearer {{ semaphore_token }}'
+      register: repo_new_list_result
+
+    - name: Get list of repositories with the name "{{ semaphore__repository }}"
+      ansible.builtin.set_fact:
+        repos_new: '{{ repo_new_list_result.json | selectattr("name", "equalto", semaphore__repository) }}'
+
+    - name: Store the newly created repository number
+      ansible.builtin.set_fact:
+        repo_number: '{{ (repos_new | first)["id"] }}'
+
+
+- name: Print Repository number
+  ansible.builtin.debug:
+    msg: 'REPOSITORY NUMBER: {{ repo_number }}'

@@ -1,0 +1,57 @@
+---
+- name: Get list of views
+  ansible.builtin.uri:
+    url: '{{ semaphore__url }}/project/{{ project_number }}/views'
+    method: GET
+    body_format: json
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: 'Bearer {{ semaphore_token }}'
+  register: view_list_result
+
+- name: Get list of views with the name "{{ semaphore__view }}"
+  ansible.builtin.set_fact:
+    views: '{{ view_list_result.json | selectattr("title", "equalto", semaphore__view) }}'
+
+- name: Check if multiple views with this name exist
+  ansible.builtin.assert:
+    that:
+      - (views | length) <= 1
+    fail_msg: 'Multiple ({{ views | length }}) templates with the name {{ semaphore__view }} exist. Keep just one of them and delete the others.'
+
+- name: Get the view number (if exists)
+  ansible.builtin.set_fact:
+    view_number: '{{ (views | first)["id"] }}'
+  when: (views | length) == 1
+
+- name: Create a new view {{ semaphore__view }}
+  when: (views | length) == 0
+  block:
+    - name: Create a new view
+      ansible.builtin.uri:
+        url: '{{ semaphore__url }}/project/{{ project_number }}/views'
+        method: POST
+        body_format: json
+        body: >-
+          {
+            'title': '{{ semaphore__view }}',
+            'project_id': {{ project_number | int }}
+          }
+        status_code: 201
+        headers:
+          Content-Type: application/json
+          Accept: application/json
+          Authorization: 'Bearer {{ semaphore_token }}'
+        return_content: true
+      changed_when: create_view_result.status == 201
+      register: create_view_result
+
+    - name: Store the newly created template number
+      ansible.builtin.set_fact:
+        view_number: '{{ create_view_result.json.id }}'
+
+
+- name: Print View number
+  ansible.builtin.debug:
+    msg: 'VIEW NUMBER: {{ view_number }}'

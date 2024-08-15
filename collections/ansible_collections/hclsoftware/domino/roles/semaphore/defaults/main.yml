@@ -1,0 +1,30 @@
+semaphore__username: admin
+semaphore__password: password
+
+semaphore__hostname: localhost
+semaphore__port: 3000
+semaphore__project: My Project
+
+semaphore__repository: My Repository
+semaphore__repository_path: /repo
+
+semaphore__key: My Key
+semaphore__key_file: ~/.ssh/id_rsa
+semaphore__key_user: ansible
+
+semaphore__inventory: My Inventory
+semaphore__inventory_file: /repo/inventory.yml
+
+semaphore__environment: My Environment
+semaphore__environment_json: {}
+
+semaphore__view: My View
+
+semaphore__templates: [
+  {
+    name: My Template,
+    playbook: playbook.yml,
+    description: Playbook description,
+    arguments: []
+  }
+]

@@ -1,0 +1,28 @@
+INPUT VALUES FOR INSTALLATION
+=============================
+
+SEMAPHORE - CONTAINER
+  Username:                {{ semaphore__username }}
+  Password:                {{ semaphore__password }}
+  Hostname:                {{ semaphore__hostname }}
+  Port:                    {{ semaphore__port }}
+
+SEMAPHORE – CONFIGURATION
+  Project name:            {{ semaphore__project }}
+
+  Repository name:         {{ semaphore__repository }}
+  Repository path:         {{ semaphore__repository_path }}
+
+  SSH key name:            {{ semaphore__key }}
+  SSH key file:            {{ semaphore__key_file }}
+  SSH user:                {{ semaphore__key_user }}
+
+  Inventory name:          {{ semaphore__inventory }}
+  Inventory file:          {{ semaphore__inventory_file }}
+
+  View name:               {{ semaphore__view }}
+
+  Environment name:        {{ semaphore__environment }}
+  Environment config JSON: {{ semaphore__environment_json | to_nice_json }}
+
+  Task templates JSON:     {{ semaphore__templates | to_nice_json }}

@@ -1,0 +1,36 @@
+---
+- name: Check mandatory parameters
+  ansible.builtin.import_tasks:
+    file: assert.yml
+
+- name: Initialize connection to the Semaphore server
+  ansible.builtin.import_tasks:
+    file: create/init.yml
+
+- name: Create a project
+  ansible.builtin.import_tasks:
+    file: create/create_project.yml
+
+- name: Create a repository
+  ansible.builtin.import_tasks:
+    file: create/create_repo.yml
+
+- name: Create keys
+  ansible.builtin.import_tasks:
+    file: create/create_key.yml
+
+- name: Create inventory
+  ansible.builtin.import_tasks:
+    file: create/create_inventory.yml
+
+- name: Create environment
+  ansible.builtin.import_tasks:
+    file: create/create_env.yml
+
+- name: Create view
+  ansible.builtin.import_tasks:
+    file: create/create_view.yml
+
+- name: Create template
+  ansible.builtin.import_tasks:
+    file: create/create_template.yml

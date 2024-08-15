@@ -1,0 +1,20 @@
+---
+- name: Get list of projects
+  ansible.builtin.uri:
+    url: '{{ semaphore__url }}/projects'
+    method: GET
+    body_format: json
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+      Authorization: 'Bearer {{ semaphore_token }}'
+  register: project_list_result
+
+- name: Get list of projects with the name "{{ semaphore__project }}"
+  ansible.builtin.set_fact:
+    projects: '{{ project_list_result.json | selectattr("name", "equalto", semaphore__project) }}'
+
+- name: Get the project number
+  ansible.builtin.set_fact:
+    project_number: '{{ (projects | first)["id"] }}'
+  when: (projects | length) == 1
