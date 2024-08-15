@@ -1,0 +1,17 @@
+---
+- name: Obtain the variable value
+  ansible.builtin.set_fact:
+    tested_value: "{{ lookup('ansible.builtin.vars', common__file_name) }}"
+
+- name: Check that the local file exists [{{ common__file_name }}]
+  ansible.builtin.stat:
+    path: '{{ tested_value }}'
+  delegate_to: localhost
+  register: file_result
+
+- name: Validate the file [{{ common__file_name }}]
+  ansible.builtin.assert:
+    that:
+      - file_result.stat.exists
+    fail_msg: '"{{ common__file_name }}" must exists on the local workstation: {{ tested_value }}'
+    success_msg: '"{{ common__file_name }}" is defined correctly, the file exists on the local workstation: {{ tested_value }}'

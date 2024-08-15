@@ -1,0 +1,17 @@
+---
+- name: Obtain the variable value
+  ansible.builtin.set_fact:
+    tested_value: "{{ lookup('ansible.builtin.vars', common__dir_name) }}"
+
+- name: Check that the local directory exists [{{ common__dir_name }}]
+  ansible.builtin.stat:
+    path: '{{ tested_value }}'
+  delegate_to: localhost
+  register: dir_result
+
+- name: Validate directory [{{ common__dir_name }}]
+  ansible.builtin.assert:
+    that:
+      - dir_result.stat.exists
+    fail_msg: '"{{ common__dir_name }}" must exists on the local workstation: {{ tested_value }}'
+    success_msg: '"{{ common__dir_name }}" is defined correctly, the directory exists on the local workstation: {{ tested_value }}'
