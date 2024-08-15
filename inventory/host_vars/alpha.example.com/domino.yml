@@ -1,0 +1,9 @@
+domino__server_name: Alpha
+domino__domino_hostname: alpha.example.com
+domino__domino_domain: Example
+domino__org_name: Example
+domino__create_microca: true
+domino__certifier_password: password
+domino__admin_password: password
+domino__register_users: true
+domino__input_data_location: '{{ playbook_dir }}/../local'

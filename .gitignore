@@ -1,8 +1,41 @@
+# Ansible
+inventory/inventory*.yml
+!inventory/*example.yml
+inventory/host_vars/*
+!inventory/host_vars/*example.com
+inventory/group_vars/*
+!inventory/group_vars/example
+.ansible-lint
+ansible.cfg
+
+# Ansible Test
+*.output
+
+# Ansible Molecule
+*.tmp
+
+# Semaphore
+*.log
+
+# SSH
+local/keys/*.pem
+
+# Domino
+*.id
+
+# Documentation
 /mkdocs-preview.sh
+
+# Visual Studio Code
+.vscode
+
+# MacOS
 .DS_Store
+._*
+
+# Windows
 Thumbs.*
 ehthumbs.*
-[Dd]desktop.ini
-*.lnk
+[Dd]esktop.ini
 $RECYCLE.BIN/
-._*
+*.lnk
