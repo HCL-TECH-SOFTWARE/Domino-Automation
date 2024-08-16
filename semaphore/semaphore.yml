@@ -1,0 +1,59 @@
+#!/usr/bin/env ansible-playbook
+
+# Example usage: ansible-playbook semaphore.yml -e server=alpha.example.com
+---
+- name: Check the server hostname
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Check if the hostname is in the inventory
+      ansible.builtin.fail:
+        msg: "{{ server }} not found in the inventory group or hosts file {{ ansible_inventory_sources }}"
+      when: server not in hostvars
+
+    - name: Store the server name
+      ansible.builtin.set_fact:
+        server_to_run: '{{ server }}'
+
+
+- name: Configure Semaphore - manage records
+  hosts: '{{ hostvars["localhost"]["server_to_run"] | default([]) }}'
+  gather_facts: false
+
+  vars:
+    # semaphore__port: 3000
+    semaphore__project: Domino
+    semaphore__repository: DominoRepo
+    semaphore__key: 'Domino-{{ domino__domino_domain }}'        # taken from inventory
+    semaphore__key_user: '{{ ansible_user }}'                   # taken from inventory
+    semaphore__key_file: '{{ ansible_ssh_private_key_file }}'   # taken from inventory
+    semaphore__inventory: 'Domino-{{ domino__domino_domain }}'
+    semaphore__inventory_file: '/repo/inventory/inventory-{{ domino__domino_domain | lower }}.yml'
+
+  tasks:
+    - name: Render templates file into a variable
+      ansible.builtin.set_fact:
+        input_templates: "{{ (lookup('template', './templates.j2', wantlist=true))[0] }}"
+      delegate_to: localhost
+
+    - name: Define custom variables to be used in the Sempahore role
+      ansible.builtin.set_fact:
+        semaphore__key: '{{ semaphore__key }}'
+        semaphore__key_user: '{{ semaphore__key_user }}'
+        semaphore__key_file: '{{ semaphore__key_file }}'
+        semaphore__inventory: '{{ semaphore__inventory }}'
+        semaphore__inventory_file: '{{ semaphore__inventory_file }}'
+        semaphore__environment: '{{ domino__domino_domain }}'
+        semaphore__environment_json: {
+          domino_domain: '{{ domino__domino_domain }}',
+        }
+        semaphore__view: '{{ domino__domino_domain }}'
+        semaphore__templates: '{{ input_templates }}'
+      delegate_to: localhost
+
+    - name: Manage records in Semaphore
+      ansible.builtin.import_role:
+        name: hclsoftware.domino.semaphore
+        tasks_from: '{{ role_start | default("main") }}'
+      delegate_to: localhost
