@@ -17,8 +17,13 @@ ansible.cfg
 # Semaphore
 *.log
 
+# Custom input files
+local/
+!local/example
+!local/reports
+
 # SSH
-local/keys/*.pem
+*.pem
 
 # Domino
 *.id
