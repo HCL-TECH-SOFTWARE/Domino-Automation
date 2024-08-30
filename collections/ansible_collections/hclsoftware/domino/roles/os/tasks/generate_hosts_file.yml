@@ -1,0 +1,35 @@
+# This is script is NOT executed automatically in the "os" role.
+# You have to explicitely call it via import_role and tasks_from.
+
+---
+- name: Print servers from Ansible inventory into hosts files
+  ansible.builtin.debug:
+    msg: '{{ hostvars[item].ansible_default_ipv4.address }} {{ hostvars[item].inventory_hostname }}'
+  when:
+    - hostvars[item].inventory_hostname is defined
+    - hostvars[item].ansible_default_ipv4 is defined
+  loop: "{{ ansible_play_hosts_all }}"
+
+- name: Insert servers from Ansible inventory into hosts files
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: '{{ hostvars[item].ansible_default_ipv4.address }} {{ hostvars[item].inventory_hostname }}'
+    state: present
+  when:
+    - hostvars[item].inventory_hostname is defined
+    - hostvars[item].ansible_default_ipv4 is defined
+  loop: "{{ groups['all'] }}"
+
+- name: Fetch remote hosts file
+  ansible.builtin.slurp:
+    src: /etc/hosts
+  register: hosts_result
+
+- name: Print hosts file for server
+  ansible.builtin.debug:
+    msg: |
+      {{ ansible_nodename }}
+      ......................
+      {{ hosts_result.content | b64decode }}

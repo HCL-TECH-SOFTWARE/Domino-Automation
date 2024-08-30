@@ -1,0 +1,24 @@
+# true = server hostname will be set using a hostname Linux command
+os__set_hostname: false
+# Server hostname; if not specified, ansible_host from Ansible inventory is used
+os__hostname: ''
+
+# true = server hostname will be stored in /etc/hosts, resolving to 192.168.0.1
+os__set_etc_hosts: false
+# /etc/hosts entries will be created for all hosts in the ansible_play_hosts_all group
+os__generate_etc_hosts: false
+
+# true = update all existing OS packages to the latest version
+os__update_all_packages: true
+# YUM packages you want to install, in addition to the default ones
+os__packages_to_install: []
+
+# Options: enforcing, permissive, disabled
+os__selinux: enforcing
+
+# Enable/Disable system firewall in OS
+os__disable_firewall: false
+# Services you want to open in the Linux firewalld
+os__fw_open_services: []
+# Ports you want to open in the Linux firewalld
+os__fw_open_ports: []

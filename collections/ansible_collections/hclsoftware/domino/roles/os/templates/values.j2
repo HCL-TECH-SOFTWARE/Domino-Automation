@@ -1,0 +1,13 @@
+INPUT VALUES FOR INSTALLATION
+=============================
+
+Operating system configuration
+  Set hostname:                       {{ os__set_hostname }}
+  Hostname:                           {{ os__hostname }}
+  Put hostname into /etc/hosts:       {{ os__set_etc_hosts }}
+  Add other servers into /etc/hosts:  {{ os__generate_etc_hosts }}
+  Install packages:                   {{ os__packages_to_install }}
+  SELinux type:                       {{ os__selinux }}
+  Disable firewall:                   {{ os__disable_firewall }}
+  Allow services in firewalld:        {{ os__fw_open_services }}
+  Open ports in firewalld:            {{ os__fw_open_ports }}

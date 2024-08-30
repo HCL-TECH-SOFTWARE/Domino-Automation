@@ -1,0 +1,12 @@
+---
+- name: Restart OS
+  become: true
+  ansible.builtin.reboot:
+  listen: Restart OS
+
+- name: Reload firewalld
+  become: true
+  ansible.builtin.service:
+    name: firewalld
+    state: reloaded
+  listen: Reload firewalld

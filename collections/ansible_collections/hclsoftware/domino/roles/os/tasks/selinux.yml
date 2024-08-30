@@ -1,0 +1,22 @@
+---
+- name: Install SELinux package
+  become: true
+  ansible.builtin.package:
+    name:
+      - selinux-policy-targeted
+      - python3-libselinux
+    state: present
+  notify: Restart OS
+  tags:
+    - molecule-notest
+    - notest
+
+- name: Configure SELinux
+  become: true
+  ansible.posix.selinux:
+    state: '{{ os__selinux }}'
+    policy: targeted
+  notify: Restart OS
+  tags:
+    - molecule-notest
+    - notest

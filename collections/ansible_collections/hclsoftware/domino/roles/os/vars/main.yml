@@ -1,0 +1,7 @@
+os__default_packages_to_install:
+  - tar
+  - nc
+  - net-tools
+  - openldap-clients
+  - unzip
+  - chrony

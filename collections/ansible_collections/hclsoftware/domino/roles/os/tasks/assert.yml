@@ -1,0 +1,33 @@
+---
+- name: Validate parameters
+  vars:
+    common__param_name: '{{ param.name }}'
+    common__param_type: '{{ param.type }}'
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: assert_parameter
+  loop:
+    - { name: os__set_hostname, type: boolean }
+    - { name: os__set_etc_hosts, type: boolean }
+    - { name: os__generate_etc_hosts, type: boolean }
+    - { name: os__packages_to_install, type: list }
+    - { name: os__selinux, type: alphanumeric }
+    - { name: os__disable_firewall, type: boolean }
+    - { name: os__fw_open_services, type: list }
+    - { name: os__fw_open_ports, type: list }
+  loop_control:
+    loop_var: param
+
+- name: Validate parameter when not empty [os__hostname]
+  vars:
+    common__param_name: os__hostname
+    common__param_type: hostname
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: assert_parameter
+  when:
+    - os__hostname | trim | length > 0
+
+- name: Print final parameters for the installation
+  ansible.builtin.debug:
+    msg: "{{ lookup('template', 'values.j2') }}"

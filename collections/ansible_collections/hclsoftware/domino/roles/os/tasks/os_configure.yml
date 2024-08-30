@@ -1,0 +1,43 @@
+---
+- name: Get server OS hostname
+  ansible.builtin.set_fact:
+    # os__hostname: '{{ os__hostname | default(ansible_host, true) }}'
+    os__hostname: '{{ os__hostname | default(inventory_hostname, true) }}'
+  when: os__set_hostname or os__set_etc_hosts
+
+- name: Set server hostname
+  become: true
+  ansible.builtin.hostname:
+    name: '{{ os__hostname }}'
+  when: os__set_hostname
+
+- name: Insert hostname into /etc/hosts file
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '{{ os__hostname }}'
+    line: '127.0.0.1 {{ os__hostname }} {{ os__hostname.split(".")[0] }}'
+    state: present
+  when: os__set_etc_hosts
+
+- name: Update all packages
+  become: true
+  ansible.builtin.package:
+    name: '*'
+    state: latest
+    update_cache: true
+  when: os__update_all_packages
+
+- name: 'Install default packages: {{ os__default_packages_to_install }}'
+  become: true
+  ansible.builtin.package:
+    name: '{{ os__default_packages_to_install }}'
+    state: present
+  when: os__default_packages_to_install | length > 0
+
+- name: 'Install custom packages: {{ os__packages_to_install }}'
+  become: true
+  ansible.builtin.package:
+    name: '{{ os__packages_to_install }}'
+    state: present
+  when: os__packages_to_install | length > 0

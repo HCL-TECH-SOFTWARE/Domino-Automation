@@ -1,0 +1,26 @@
+---
+- name: Check mandatory parameters
+  ansible.builtin.import_tasks:
+    file: assert.yml
+  tags:
+    - check
+
+- name: Configure OS
+  ansible.builtin.import_tasks:
+    file: os_configure.yml
+
+- name: Configure SELinux
+  ansible.builtin.import_tasks:
+    file: selinux.yml
+
+- name: Configure firewall
+  ansible.builtin.import_tasks:
+    file: firewalld_configure.yml
+  when:
+    - not os__disable_firewall
+
+- name: Disable firewall
+  ansible.builtin.import_tasks:
+    file: firewalld_disable.yml
+  when:
+    - os__disable_firewall

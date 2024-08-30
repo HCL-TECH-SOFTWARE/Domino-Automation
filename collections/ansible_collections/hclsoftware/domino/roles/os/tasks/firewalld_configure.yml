@@ -1,0 +1,50 @@
+---
+- name: Install firewalld
+  become: true
+  ansible.builtin.package:
+    name: firewalld
+    state: present
+
+- name: Disable IPv6 filter in firewalld.conf
+  # If not set, it throws errors on some OS
+  # https://stackoverflow.com/questions/70622426/centos-8-firewalld-error-command-failed-python-nftables-failed
+  ansible.builtin.lineinfile:
+    path: /etc/firewalld/firewalld.conf
+    regexp: 'IPv6_rpfilter='
+    line: 'IPv6_rpfilter=no'
+    backrefs: true
+  notify: Reload firewalld
+  when: '"molecule-notest" in ansible_skip_tags'
+
+- name: Start and enable firewalld service
+  become: true
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: 'Enable services in firewalld, specified in vars: {{ os__fw_open_services }}'
+  become: true
+  ansible.posix.firewalld:
+    service: '{{ item }}'
+    permanent: true
+    immediate: true
+    state: enabled
+  loop: '{{ os__fw_open_services }}'
+  when: os__fw_open_services | length > 0
+  notify: Reload firewalld
+  # check ports with command: sudo firewall-cmd --list-all
+
+- name: 'Open custom ports in firewalld, specified in vars: {{ os__fw_open_ports }}'
+  become: true
+  ansible.posix.firewalld:
+    port: '{{ item }}'
+    permanent: true
+    immediate: true
+    state: enabled
+  loop: '{{ os__fw_open_ports }}'
+  when: os__fw_open_ports | length > 0
+  notify: Reload firewalld
+
+- name: Force reload the firewall settings by triggering the handler now
+  ansible.builtin.meta: flush_handlers
