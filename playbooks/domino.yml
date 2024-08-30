@@ -1,0 +1,66 @@
+#!/usr/bin/env ansible-playbook
+
+# Example usage: ansible-playbook domino.yml -e command=install -e server=alpha.example.com
+---
+- name: Check the server hostname
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Check that the server hostname was entered as an '-e' parameter
+      ansible.builtin.fail:
+        msg: |
+          Parameter 'server' is not defined.
+          Run the playbook with the '-e' paramter.
+          Example: ansible-playbook domino.yml -e command=start -e server=alpha.example.com
+      when: server is not defined
+      tags:
+        - always
+
+    - name: Check if the hostname is in the inventory
+      ansible.builtin.fail:
+        msg: '"{{ server }}" not found in the inventory: {{ ansible_inventory_sources }}'
+      when: server not in hostvars
+      tags:
+        - always
+
+    - name: Store the server name
+      ansible.builtin.set_fact:
+        server_to_run: '{{ server }}'
+      tags:
+        - always
+
+    - name: Check that the command was entered as an '-e' parameter
+      ansible.builtin.fail:
+        msg: |
+          Parameter 'command' is not defined.
+          Run the playbook with the '-e' paramter.
+          Example: ansible-playbook domino.yml -e command=install -e server=alpha.example.com
+      when: command is not defined
+      tags:
+        - always
+
+    - name: Check that the command has a correct value
+      ansible.builtin.fail:
+        msg: |
+          Parameter 'command' is not defined correctly.
+          Valid options are: start, stop.
+          Example: ansible-playbook domino.yml -e command=install -e server=alpha.example.com
+      when: command is not in ['install', 'uninstall', 'start', 'stop']
+      tags:
+        - always
+
+
+- name: Manage the Domino server
+  hosts: '{{ hostvars["localhost"]["server_to_run"] | default([]) }}'
+
+  roles:
+    - role: hclsoftware.domino.os
+      tags: os
+      when:
+        - command == 'install'
+
+    - role: hclsoftware.domino.domino
+      tags: domino
+      vars:
+        domino__action: '{{ command }}'

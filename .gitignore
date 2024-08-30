@@ -18,9 +18,9 @@ ansible.cfg
 *.log
 
 # Custom input files
-local/
-!local/example
-!local/reports
+local/*
+!local/example/
+!local/reports/
 
 # SSH
 *.pem
