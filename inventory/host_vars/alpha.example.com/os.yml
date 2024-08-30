@@ -6,3 +6,4 @@ os__hostname: ''
 os__packages_to_install:
   - perl
   - cpio
+  - gdb

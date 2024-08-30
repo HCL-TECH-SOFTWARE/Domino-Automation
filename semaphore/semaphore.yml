@@ -7,9 +7,17 @@
   gather_facts: false
 
   tasks:
-    - name: Check if the hostname is in the inventory
+    - name: Check that the server hostname was entered as an '-e' parameter
       ansible.builtin.fail:
-        msg: "{{ server }} not found in the inventory group or hosts file {{ ansible_inventory_sources }}"
+        msg: |
+          Parameter 'server' is not defined.
+          Run the playbook with the '-e' paramter.
+          Example: ansible-playbook domino_manage.yml -e server=alpha.example.com
+      when: server is not defined
+
+    - name: Check that the server hostname is in the inventory
+      ansible.builtin.fail:
+        msg: "{{ server }} not found in the inventory: {{ ansible_inventory_sources }}"
       when: server not in hostvars
 
     - name: Store the server name
