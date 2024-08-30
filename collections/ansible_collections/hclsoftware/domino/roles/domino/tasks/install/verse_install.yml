@@ -1,0 +1,51 @@
+---
+- name: 'Create named encryption key "{{ domino__nek }}" and store it in the server ID file'
+  become: true
+  become_user: notes
+  ansible.builtin.shell:
+    chdir: '/local/notesdata'
+    cmd: '/opt/hcl/domino/bin/server -c "keymgmt create nek {{ domino__nek }}" 2>&1 &'
+  register: nek_result
+  changed_when:
+    - nek_result.changed
+    - nek_result.rc == 0
+
+- name: 'Create the credential store database "{{ domino__credstore }}"'
+  become: true
+  become_user: notes
+  ansible.builtin.shell:
+    chdir: '/local/notesdata'
+    cmd: '/opt/hcl/domino/bin/server -c "keymgmt create {{ domino__credstore }} {{ domino__nek }}" 2>&1 &'
+    creates: '/local/notesdata/IBM_CredStore/{{ domino__credstore }}.nsf'
+  register: credstore_result
+  changed_when:
+    - credstore_result.changed
+    - credstore_result.rc == 0
+
+- name: Stop the Domino server
+  ansible.builtin.import_tasks: manage/domino_stop.yml
+
+- name: Delete files from the previous Verse version
+        # (Expecting Verse 3.1 that is part of Domino 14.0)
+  become: true
+  ansible.builtin.file:
+    path: '/local/notesdata/domino/workspace/applications/eclipse/plugins/{{ item }}'
+    state: absent
+  loop:
+    - ats-3.1.0-0.0-807.jar
+    - core-3.1.0-0.0-317.jar
+    - sequoia-osgi-3.1.0-0.0-807.jar
+    - servlet-3.1.0-0.0-317.jar
+
+- name: Unzip Verse installation package
+  become: true
+  ansible.builtin.unarchive:
+    src: '{{ domino__verse_install }}/HCL_Verse.zip'
+    dest: /local/notesdata/domino/workspace/applications
+    remote_src: true
+    owner: notes
+    group: notes
+    creates: /local/notesdata/domino/workspace/applications/eclipse/plugins/core-3.2.2-0.0-347.jar
+
+- name: Start the Domino server
+  ansible.builtin.import_tasks: manage/domino_start.yml

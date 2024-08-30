@@ -1,0 +1,84 @@
+---
+- name: Check if the DKIM was already configured on the server
+  become: true
+  ansible.builtin.stat:
+    path: '/local/notesdata/{{ domino__dkim_info }}'
+  register: dkim_file
+
+- name: Create and configure DKIM on Domino
+  when: not dkim_file.stat.exists
+  block:
+    - name: Store server domain
+      ansible.builtin.set_fact:
+        server_domain: '{{ (domino__domino_hostname | split(".", 1))[1] }}'
+
+    - name: Set DKIM selector if not explicitely specified
+      ansible.builtin.set_fact:
+        domino__dkim_selector: '{{ ansible_date_time.date.split("-") | join("") }}'
+      when: domino__dkim_selector | trim | length == 0
+
+    - name: 'Create DKIM signing key for domain "{{ server_domain }}" and selector "{{ domino__dkim_selector }}"'
+      become: true
+      become_user: notes
+      ansible.builtin.shell:
+        chdir: '/local/notesdata'
+        cmd: '/opt/hcl/domino/bin/server -c "keymgmt create DKIM {{ server_domain }} {{ domino__dkim_selector }} RSA 2048" 2>&1 &'
+      register: dkim_create_result
+      changed_when:
+        - dkim_create_result.changed
+        - dkim_create_result.rc == 0
+
+    - name: Calculate DKIM filename
+      ansible.builtin.set_fact:
+        dkim_filename: 'dkim-{{ server_domain }}-{{ domino__dkim_selector }}.txt'
+
+    - name: 'Create DKIM signing key "{{ domino__nek }}"'
+      become: true
+      become_user: notes
+      ansible.builtin.shell:
+        chdir: '/local/notesdata'
+        cmd: '/opt/hcl/domino/bin/server -c "keymgmt export DKIM DNS {{ server_domain }} {{ domino__dkim_selector }} {{ dkim_filename }}" 2>&1 &'
+        creates: '/local/notesdata/{{ dkim_filename }}'
+      register: dkim_export_result
+      changed_when:
+        - dkim_export_result.changed
+        - dkim_export_result.rc == 0
+
+    - name: Download exported DKIM file to local machine
+      ansible.builtin.fetch:
+        src: '/local/notesdata/{{ dkim_filename }}'
+        dest: '{{ domino__input_data_location }}/'
+        flat: true
+
+    - name: Enable DKIM signing
+      become: true
+      become_user: notes
+      ansible.builtin.shell:
+        chdir: '/local/notesdata'
+        cmd: '/opt/hcl/domino/bin/server -c "set conf RouterDKIMSigning=1" 2>&1 &'
+      register: dkim_enable_result
+      changed_when:
+        - dkim_enable_result.changed
+        - dkim_enable_result.rc == 0
+
+    - name: Configure DKIM selector
+      become: true
+      become_user: notes
+      ansible.builtin.shell:
+        chdir: '/local/notesdata'
+        cmd: '/opt/hcl/domino/bin/server -c "set conf DKIM_KEY_{{ server_domain }}={{ domino__dkim_selector }}" 2>&1 &'
+      register: dkim_configure_result
+      changed_when:
+        - dkim_configure_result.changed
+        - dkim_configure_result.rc == 0
+
+    - name: Create info file with the selector name
+      become: true
+      vars:
+        dkim_info: '{{ domino__dkim_selector }}'
+      ansible.builtin.copy:
+        content: '{{ dkim_info }}'
+        dest: '/local/notesdata/{{ domino__dkim_info }}'
+        owner: notes
+        group: notes
+        mode: u=rw,g=r,o=r

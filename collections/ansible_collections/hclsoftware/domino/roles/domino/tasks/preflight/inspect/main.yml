@@ -1,0 +1,24 @@
+---
+- name: Check the Domino version installed on the server
+  ansible.builtin.import_tasks:
+    file: preflight/inspect/domino.yml
+
+- name: Check the Domino Fixpack version installed on the server
+  ansible.builtin.import_tasks:
+    file: preflight/inspect/fp.yml
+
+- name: Check the Verse version installed on the server
+  ansible.builtin.import_tasks:
+    file: preflight/inspect/verse.yml
+
+- name: Check the Nomad version installed on the server
+  ansible.builtin.import_tasks:
+    file: preflight/inspect/nomad.yml
+
+- name: Check the Traveler version installed on the server
+  ansible.builtin.import_tasks:
+    file: preflight/inspect/traveler.yml
+
+- name: Check the Domino Leap version installed on the server
+  ansible.builtin.import_tasks:
+    file: preflight/inspect/leap.yml

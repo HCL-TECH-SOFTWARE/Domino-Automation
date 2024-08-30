@@ -1,0 +1,4 @@
+---
+- name: Print final parameters for the installation
+  ansible.builtin.debug:
+    msg: "{{ lookup('template', 'values.j2') }}"

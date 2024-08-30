@@ -1,0 +1,364 @@
+{
+  "serverSetup": {
+    "server": {
+      "type": "first",
+      "name": "{{ domino__server_name }}",
+      "domainName": "{{ domino__org_name }}",
+      "title": "Domino Server",
+      {% if domino__use_existing_server_id -%}
+      "useExistingServerID": true,
+      "IDFilePath": "/local/notesdata/server-{{ domino__server_name | lower }}.id",
+      {% endif -%}
+      "password": null,
+      "minPasswordLength": 0,
+      "serverTasks": "replica,router,update,amgr,adminp,sched,collect,rnrmgr,http",
+      {% if domino__install_nomad -%}
+      "additionalServerTasks": "nomad",
+      {% endif -%}
+      {% if domino__restart_after_setup -%}
+      "restartServer": true
+      {% else -%}
+      "restartServer": false
+      {% endif -%}
+    },
+
+    "network": {
+      "hostName": "{{ domino__domino_hostname }}",
+      "enablePortEncryption": true,
+      "enablePortCompression": true
+    },
+
+    "org": {
+      "orgName": "{{ domino__org_name }}",
+      {% if domino__use_existing_certifier_id -%}
+      "useExistingCertifierID": true,
+      "certifierIDFilePath": "/local/notesdata/cert.id",
+      {% endif -%}
+      "certifierPassword": "{{ domino__certifier_password }}"
+    },
+
+    "admin": {
+      "firstName": "Super",
+      "lastName": "Admin",
+      {% if domino__use_existing_admin_id -%}
+      "useExistingAdminID": true,
+      "IDFilePath": "/local/notesdata/admin.id",
+      {% endif -%}
+      "password": "{{ domino__admin_password }}"
+    },
+
+    "notesINI": {
+      "Create_R12_databases": "1",
+      "Create_R85_log": "1",
+      "ADMIN_IGNORE_NEW_SERVERNAMING_CONVENTION": "1",
+      "LOG_REPLICATION": "0",
+      "LOG_SESSIONS": "0",
+      "HTTPPublicURLs": "/iwaredir.nsf/*:/robots.txt:/gtwcustomloginform.nsf/*:/.well-known*",
+      "ENABLE_SNI": "1",
+      "HTTPEnableMethods": "GET,POST,PUT,DELETE,HEAD",
+      "HTTPJVMMaxHeapSizeSet": "1",
+      "HTTPJVMMaxHeapSize": "2048M",
+      "ADMIN_CLIENT_SKIP_DOMINO": "1",
+      "COMPRESS_LZ1_CREATE": "1",
+      "CREATE_NIFNSF_DATABASES": "1",
+      "NIFNSFENABLE": "1",
+      "NIFBASEPATH": "/local/nif",
+      "FTBASEPATH": "/local/ft",
+      "DAOS_ENCRYPT_NLO": "0",
+      "DAOS_MAX_FILES_PER_SUBCONTAINER": "10000",
+      "EVENT_POOL_SIZE": "41943040",
+      "SETUPLEAVESERVERTASKS": "1",
+      "SSL_DISABLE_EXTENDED_MASTER_SECRET": "1",
+      "Server_MinPossibleTransTime": "1500",
+      "Server_MaxPossibleTransTime": "20000000",
+      "NSF_BUFFER_POOL_SIZE_MB": "256",
+      "FT_FLY_INDEX_OFF": "1",
+      "UPDATE_FULLTEXT_THREAD": "1",
+      {% if domino__install_verse -%}
+      "VOP_GK_FEATURE_187": "1",
+      "VOP_GK_FEATURE_206": "1",
+      "VOP_GK_FEATURE_209": "1",
+      "VOP_GK_FEATURE_230": "1",
+      "iNotes_WA_Security_NonceCheck": "0",
+      "iNotes_WA_Security_RefererCheck": "0",
+      {% endif -%}
+      {% if domino__install_nomad -%}
+      "NOMAD_WEB_HOST": "{{ domino__domino_hostname }}",
+      {% endif -%}
+      "FTG_USE_SYS_MEMORY": "1",
+      "DEBUG_THREADID": "0"
+    },
+
+    {% if domino__register_users -%}
+    "registerUsers": {
+      "defaults": {
+        "setInternetPassword": true,
+        "saveIDToPersonDocument": false,
+        "mailTemplatePath": "mail14.ntf",
+        "enableFullTextIndex": false,
+        "certificateExpirationMonths": 24
+      },
+      "users": [
+      {% for user in users.list %}
+  {% set userShortName = (user['firstName'].0 | lower) + (user['lastName'] | lower) -%}
+        {
+          "firstName": "{{ user['firstName'] }}",
+          "lastName": "{{ user['lastName'] }}",
+          "password": "{{ user['password'] }}",
+          "IDFilePath": "{{ userShortName }}.id",
+          "internetAddress": "{{ user['firstName'] | lower }}.{{ user['lastName'] | lower }}@{{ (domino__domino_hostname | split(".", 1))[1] }}",
+          "mailFilePath": "mail/{{ userShortName }}.nsf"
+        }{% if not loop.last %},{% endif %}
+
+      {% endfor -%}
+      ]
+    },
+    {% endif -%}
+
+    "security": {
+      {% if domino__create_microca -%}
+      "TLSSetup": {
+        "method": "dominoMicroCA",
+        "CADisplayName": "{{ domino__org_name }} CA",
+        "CAOrgName": "{{ domino__org_name }}",
+        "CAKeyType": "ECDSA",
+        "CAExpirationDays": 1096,
+        "orgName": "{{ domino__org_name }}",
+        "TLSKeyType": "RSA2048",
+        "certExpirationDays": 365
+      },
+      {% endif -%}
+
+      "ACL": {
+        "prohibitAnonymousAccess": true,
+        "addLocalDomainAdmins": true
+      }
+    }
+  },
+
+  "autoConfigPreferences": {
+    "startServerAfterConfiguration": true
+  },
+
+  "IDVault": {
+    "name": "O={{ domino__org_name | lower }}_vault",
+    "description": "{{ domino__org_name }} ID Vault",
+    "IDFile": "vault.id",
+    "IDPassword": "{{ domino__certifier_password }}",
+    "path": "IBM_ID_VAULT/{{ domino__org_name | lower }}_vault.nsf",
+    "passwordReset": {
+      "helpText": "Contact your IT department for a password reset."
+    },
+
+    "securitySettingsPolicy": {
+      "name": "{{ domino__org_name }} Vault Security Settings Policy",
+      "description": "{{ domino__org_name }} Vault Security Settings"
+    },
+
+    "masterPolicy": {
+      "description": "{{ domino__org_name }} Vault Master Policy Description"
+    }
+  },
+
+  "appConfiguration": {
+
+    "databases": [
+      {
+        "filePath": "names.nsf",
+        "action": "update",
+        "documents": [
+          {
+            "action": "update",
+            "findDocument": {
+              "Type": "Server",
+              "ServerName": "CN={{ domino__server_name }}/O={{ domino__org_name }}"
+            },
+            "items": {
+              "LdISite": "1",
+              "HTTP_SSLKeyFile": "{{ domino__domino_hostname }}",
+              "TRANSLOG_AutoFixup": "",
+              "TRANSLOG_MaxSize": 1024,
+              "TRANSLOG_Path": "/local/translog",
+              "TRANSLOG_Performance": "2",
+              "TRANSLOG_Status": "1",
+              "TRANSLOG_Style": "0",
+              "TRANSLOG_UseAll": "0",
+
+              "QtaMthd": "1",
+              "DAOSEnable": "0",
+              "DAOSBasePath": "/local/daos",
+              "DAOSMinObjSize": "256000",
+              "DAOS_ENCRYPT_NLO": "0",
+
+              "HTTP_HomeURL": "homepage.nsf",
+              "FullAdmin": "LocalDomainAdmins",
+              "CreateAccess": "LocalDomainAdmins",
+              "ReplicaAccess": "LocalDomainAdmins",
+              "UnrestrictedList": "LocalDomainAdmins",
+              "OnBehalfOfLst": "LocalDomainAdmins",
+              "RestrictedList": "LocalDomainAdmins",
+
+              "HTTP_EnableSessionAuth": "1",
+              "HTTP_TCPNP": "1",
+              "HTTP_AllowAnonymous": "0",
+              "HTTP_NormalMode": "1",
+              "HTTP_SSLMode": "1",
+              "HTTP_SSLAnonymous": "0",
+
+              "NSDEnbld": "1",
+              "FREnbld": "1",
+              "FltRcvryNot": "LocalDomainAdmins",
+
+              "ServerBuildNumber": "14.0",
+              "MajVer": 14,
+              "SSLCipherList": [
+                "C030",
+                "9F",
+                "C02F",
+                "9E"
+                ],
+              "SSLCipherSupportedList": [
+                "C030",
+                "9F",
+                "C02F",
+                "9E"
+                ]
+            }
+          },
+
+          {
+            "action": "create",
+            "computeWithForm": true,
+            "items": {
+              "Form": "ServerConfig",
+              "UseAsDefault": "1",
+              "ServerName": "*",
+
+              "ILEnforce": "1",
+              "ILLockIP": "0",
+              "ILCountAgainstIP": "0",
+              "ILLogLockouts": "1",
+              "ILLogFailures": "1",
+              "ILMaxTries": 7,
+              "ILExpMinutes": 10,
+              "ILExpNum": 10,
+              "ILTimeFormat": ",minutes",
+              "ILClearNum": 10,
+              "ILClearMinutes": 10,
+              "ILTimeFormat2": ",minutes",
+              "PwdCheckInVault": "2",
+
+              "DCLoc": "CN=HCL Notes/O=Domino Fault Reports",
+              "DCMsgSize": 50,
+              "DCNSDSize": 40,
+              "DCDO": 10000,
+              "FAEnabled": "1",
+              "FADBs": "1"
+            }
+          },
+
+          {
+            "action": "create",
+            "computeWithForm": true,
+            "items": {
+              "Form": "WebSite",
+              "WSIsDflt": "1",
+              "ISiteAdrs": "{{ domino__domino_hostname }}",
+              "ISiteName": "{{ domino__org_name }} Default Web Site",
+              "ISiteOrg": "{{ domino__org_name }}",
+              "WSHostingSrvrs": "*",
+              "TCPAnonymous": "0",
+              "TCPNameAndPwd": "1",
+              "SSLAnonymous": "0",
+              "SSLNameAndPwd": "1",
+              "HTTP_SSLBearerToken": "0",
+              "SSLKeyFile": "keyfile.kyr",
+              "SSLCipherList": [ "C030", "9F", "C02F", "9E" ],
+              "HTTP_EnableSessionAuth": "1",
+              "WSHTTPMthds": [ "1", "2", "3", "6", "7" ],
+              "WSHTTPMthds_ed": [ "1", "2", "3", "6", "7" ]
+            }
+          },
+
+          {
+            "action": "create",
+            "computeWithForm": true,
+            "items": {
+              "Form": "SMTPInboundSite",
+              "ISiteAdrs": "{{ domino__domino_hostname }}",
+              "ISiteName": "{{ domino__org_name }} STMP Site",
+              "ISiteOrg": "{{ domino__org_name }}",
+              "WSHostingSrvrs": "*",
+              "TCPAnonymous": "1",
+              "TCPNameAndPwd": "1",
+              "SSLAnonymous": "1",
+              "SSLNameAndPwd": "1",
+              "SSLKeyFile": "keyfile.kyr",
+              "SSLCipherList": [ "C030", "9F", "C02F", "9E" ]
+            }
+          },
+
+          {
+            "action": "create",
+            "computeWithForm": true,
+            "items": {
+              "Form": "DirectorySite",
+              "ISiteAdrs": "{{ domino__domino_hostname }}",
+              "ISiteName": "{{ domino__org_name }} LDAP Site",
+              "ISiteOrg": "{{ domino__org_name }}",
+              "WSHostingSrvrs": "*",
+              "TCPAnonymous": "0",
+              "TCPNameAndPwd": "1",
+              "SSLAnonymous": "0",
+              "SSLNameAndPwd": "1",
+              "SSLKeyFile": "keyfile.kyr",
+              "SSLCipherList": [ "C030", "9F", "C02F", "9E" ]
+            }
+          },
+
+          {
+            "action": "create",
+            "computeWithForm": true,
+            "items": {
+              "Form": "IMAPSite",
+              "ISiteAdrs": "{{ domino__domino_hostname }}",
+              "ISiteName": "{{ domino__org_name }} IMAP Site",
+              "ISiteOrg": "{{ domino__org_name }}",
+              "WSHostingSrvrs": "*",
+              "TCPAnonymous": "0",
+              "TCPNameAndPwd": "1",
+              "SSLAnonymous": "0",
+              "SSLNameAndPwd": "1",
+              "SSLKeyFile": "keyfile.kyr",
+              "SSLCipherList": [ "C030", "9F", "C02F", "9E" ]
+            }
+          }
+        ]
+      },
+
+      {
+        "action": "create",
+        "filePath": "domcfg.nsf",
+        "title": "Domino Web Server Configuration",
+        "templatePath": "domcfg5.ntf",
+        "signUsingAdminp": true,
+
+        "documents": [
+          {
+            "action": "create",
+            "items": {
+              "Form": "LoginMap",
+              "LF_LoginForm": "CustomLoginForm",
+              "LF_LoginFormDB": "domcfg.nsf",
+              "LF_ServerType": "0",
+              "LF_IP": "",
+              "$PublicAccess": "1"
+            }
+          }
+        ]
+      }
+
+    ]
+  }
+}
+

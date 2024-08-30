@@ -1,0 +1,20 @@
+---
+- name: Start and enable Domino service
+  become: true
+  ansible.builtin.service:
+    name: domino
+    state: started
+
+- name: Wait for 1 minute to finish the start
+  ansible.builtin.pause:
+    minutes: 1
+
+- name: Wait until HTTP task is logged in the console.log file
+  become: true
+  ansible.builtin.wait_for:
+    path: /local/notesdata/IBM_TECHNICAL_SUPPORT/console.log
+    search_regex: 'HTTP Server: Started'
+    timeout: 120
+  register: start_wait_result
+  changed_when:
+    - '"Timeout when waiting" in start_wait_result'

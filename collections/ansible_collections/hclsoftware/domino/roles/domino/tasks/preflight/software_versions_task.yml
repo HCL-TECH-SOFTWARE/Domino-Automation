@@ -1,0 +1,99 @@
+---
+- name: Set the flag to install the product
+  ansible.builtin.set_fact:
+    'domino__install_{{ product }}': 'true'
+
+- name: Get the latest version
+  vars:
+    version: '{{ (software_latest_result.list | selectattr("product", "equalto", product) | list | first).version }}'
+    fixpack: '{{ (software_latest_result.list | selectattr("product", "equalto", product) | list | first).fixpack }}'
+  ansible.builtin.set_fact:
+    latest_version: '{{ version | trim }}{{ fixpack | trim }}'
+
+- name: Use a special version (instead of the latest one), if it is specified in parameters
+  vars:
+    requested_version: '{{ vars["domino__" + product + "_version"] | default("") }}'
+  ansible.builtin.set_fact:
+    version_to_install: '{{ (requested_version | length > 0) | ternary(requested_version, latest_version) }}'
+
+- name: Perform special tasks necessary just for Domino
+  when: product == 'domino'
+  block:
+    - name: 'Strip main version and FixPack version from the version string: {{ version_to_install }}'
+      vars:
+        tmp_fixpack: '{{ (version_to_install | upper).split("FP").1 | default("") }}'
+      ansible.builtin.set_fact:
+        domino_main_version: '{{ (version_to_install | upper).split("FP").0 }}'
+        domino_fixpack: '{{ (tmp_fixpack | trim | length > 0) | ternary("FP" + tmp_fixpack, "") }}'
+
+    - name: Add FixPack to the list of products and to the products info – {{ domino_fixpack }}
+      vars:
+        installer: >-
+          {{ (software_result.list | selectattr("product", "equalto", product)
+                                   | selectattr("version", "equalto", version_to_install)
+                                   | list | first).filename | split(",") | first }}
+        fixpack_item: {
+          "name": "fp",
+          "version": "{{ version_to_install }}",
+          "installer": "{{ installer }}",
+          "installed": false
+        }
+      ansible.builtin.set_fact:
+        product_info: '{{ (product_info | default([])) + [fixpack_item] }}'
+      register: insert_fixpack_result
+      ignore_errors: true
+      when: domino_fixpack | trim | length > 0
+
+    - name: Set the flag to install FixPack
+      ansible.builtin.set_fact:
+        domino__install_fp: true
+      when: domino_fixpack | trim | length > 0
+
+    - name: When the FixPack version is incorrectly specified, fail with a warning
+      ansible.builtin.fail:
+        msg: |
+          Domino FixPack version specified incorrectly: {{ version_to_install }}
+
+          Please check and specify the correct version, or remove the version number completely.
+          When no version is specified, the latest one is used.
+          You can find the list of correct prodcut versions in this subdirectory:
+          {{ domino__software_directory }}
+      when: insert_fixpack_result is failed
+
+    - name: Rewrite the Domino version (remove FixPack)
+      ansible.builtin.set_fact:
+        version_to_install: '{{ domino_main_version }}'
+
+
+- name: Perform a special task necessary just for Nomad – change version to {{ version_to_install }}-{{ domino_main_version }}
+  ansible.builtin.set_fact:
+    version_to_install: '{{ version_to_install }}-{{ domino_main_version }}'
+  when: product == 'nomad'
+
+- name: Add the software info to the dictionary - {{ product }} {{ version_to_install }}
+  vars:
+    installer: >-
+      {{ (software_result.list | selectattr("product", "equalto", product)
+                               | selectattr("version", "equalto", version_to_install)
+                               | list | first).filename }}
+    new_item: {
+      "name": "{{ product }}",
+      "version": "{{ version_to_install }}",
+      "installer": "{{ installer }}",
+      "installed": false
+    }
+  ansible.builtin.set_fact:
+    product_info: '{{ (product_info | default([])) + [new_item] }}'
+  register: insert_fixpack_result
+  ignore_errors: true
+
+- name: When the product version is incorrectly specified, fail with a warning
+  ansible.builtin.fail:
+    msg: |
+      Product version specified incorrectly: {{ product }} {{ version_to_install }}
+
+      Please check and specify the correct version, or remove the version number completely.
+      When no version is specified, the latest one is used.
+      You can find the list of correct prodcut versions in this subdirectory:
+      {{ domino__software_directory }}
+  when: insert_fixpack_result is failed

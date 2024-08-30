@@ -1,0 +1,10 @@
+---
+- name: Enable Sametime integration
+  ansible.builtin.import_tasks:
+    file: integrate/enable_sametime.yml
+  when: domino__sametime_server | trim | length > 0
+
+- name: Enable Connections integration
+  ansible.builtin.import_tasks:
+    file: integrate/enable_connections.yml
+  when: domino__connections_server | trim | length > 0

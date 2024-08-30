@@ -1,0 +1,13 @@
+---
+- name: Prepare Domino installation - OS
+  ansible.builtin.import_tasks:
+    file: prepare/prepare_os.yml
+
+- name: Prepare Domino installation - Firewall
+  ansible.builtin.import_tasks:
+    file: prepare/prepare_firewall.yml
+  when: domino__setup_firewalld
+
+- name: Prepare Domino installation - Installer files
+  ansible.builtin.import_tasks:
+    file: prepare/prepare_files.yml

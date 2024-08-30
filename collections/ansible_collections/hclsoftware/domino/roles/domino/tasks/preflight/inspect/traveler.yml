@@ -1,0 +1,33 @@
+---
+
+# ---------- CHECK WHETHER TRAVELER IS ALREADY INSTALLED
+
+- name: Check if Traveler binary file exists
+  ansible.builtin.stat:
+    path: /opt/hcl/domino/notes/latest/linux/traveler
+  register: traveler_installed_result
+
+- name: Mark Traveler as installed (single variable)
+  ansible.builtin.set_fact:
+    traveler_is_installed: true
+  when:
+    - traveler_installed_result.stat.exists
+
+- name: Mark Traveler as installed (sw dictionary)
+  vars:
+    index: '{{ product_info | ansible.utils.index_of("eq", "traveler", "name") }}'
+  ansible.utils.update_fact:
+    updates:
+      - path: 'product_info.{{ index }}.installed'
+        value: true
+  when:
+    - traveler_installed_result.stat.exists
+    - domino__install_traveler
+  register: product_info_updated_result
+
+- name: Store the updated value into the master fact
+  ansible.builtin.set_fact:
+    product_info: '{{ product_info_updated_result.product_info }}'
+  when:
+    - traveler_installed_result.stat.exists
+    - domino__install_traveler

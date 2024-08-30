@@ -1,0 +1,29 @@
+---
+- name: Calculate defaults
+  ansible.builtin.import_tasks:
+    file: preflight/defaults.yml
+  delegate_to: localhost
+
+- name: Check mandatory parameters
+  ansible.builtin.import_tasks:
+    file: preflight/assert.yml
+  delegate_to: localhost
+
+- name: Calculate requested software versions
+  ansible.builtin.import_tasks:
+    file: preflight/software_versions.yml
+  delegate_to: localhost
+
+- name: Check the all installers are ready
+  ansible.builtin.import_tasks:
+    file: preflight/installers.yml
+  delegate_to: localhost
+
+- name: Check existing installed versions on the server
+  ansible.builtin.import_tasks:
+    file: preflight/inspect/main.yml
+
+- name: Print preflight report
+  ansible.builtin.import_tasks:
+    file: preflight/report.yml
+  delegate_to: localhost

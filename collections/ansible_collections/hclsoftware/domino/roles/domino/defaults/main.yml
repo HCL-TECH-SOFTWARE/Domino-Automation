@@ -1,0 +1,54 @@
+# OS related
+domino__setup_firewalld: true
+
+# Domino installers
+domino__install_path: /local/install
+domino__software_dir: ~/software
+domino__install_products:
+  - domino
+  - verse
+  # - nomad
+  - traveler
+  # - leap
+domino__software_use_local_file: false
+
+# Specify the product version to be installed.
+# When commented out or with empty value, the latest version is installed.
+# domino__domino_version: 14.0FP2
+# domino__verse_version: 3.2.2
+# domino__nomad_version: 1.0.12IF1
+# domino__traveler_version: 14.0FP1
+# domino__leap_version: 1.1.4
+
+domino__install_startup_script: true
+domino__install_ontime: true
+
+# Domino server setup parameters
+domino__server_name: Alpha
+domino__domino_hostname: alpha.example.com
+domino__domino_domain: Example
+domino__org_name: Example
+domino__certifier_password: SecretPassw0rd
+domino__admin_password: SecretPassw0rd
+domino__use_existing_certifier_id: false
+domino__use_existing_server_id: false
+domino__use_existing_admin_id: false
+domino__register_users: false
+domino__create_microca: false
+domino__enable_dkim: false
+domino__dkim_selector: ''
+domino__restart_after_setup: false
+
+# Custom input files
+domino__input_data_location: ~/domino
+domino__cert_id: '{{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/ids/cert.id'
+domino__server_id: '{{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/ids/server-{{ domino__server_name | lower }}.id'
+domino__admin_id: '{{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/ids/admin.id'
+
+domino__input_data_users: ''
+domino__custom_login_db: ''
+domino__custom_login_form: ''
+
+# Domino server integration
+domino__sametime_server: ''
+domino__connections_server: ''

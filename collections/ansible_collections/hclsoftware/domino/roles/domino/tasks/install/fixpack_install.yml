@@ -1,0 +1,23 @@
+---
+- name: Stop the Domino server
+  ansible.builtin.import_tasks: manage/domino_stop.yml
+
+- name: Edit script file for unattended installation
+  ansible.builtin.lineinfile:
+    path: '{{ domino__fixpack_install }}/linux64/domino/script.dat'
+    regexp: 'installation_type ='
+    line: 'installation_type = 2'
+
+- name: Install Domino FixPack
+  become: true
+  args:
+    chdir: '{{ domino__fixpack_install }}/linux64/domino'
+  ansible.builtin.shell:
+    cmd: './install -script script.dat'
+  register: fixpack_install_result
+  changed_when:
+    - fixpack_install_result.changed
+    - fixpack_install_result.rc == 0
+
+- name: Start the Domino server
+  ansible.builtin.import_tasks: manage/domino_start.yml

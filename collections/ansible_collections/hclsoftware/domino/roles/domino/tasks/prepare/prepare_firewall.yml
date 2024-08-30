@@ -1,0 +1,31 @@
+---
+- name: Copy Domino service definition for firewalld (unix name = lotusnote)
+  become: true
+  ansible.builtin.template:
+    src: 'files/lotusnote.xml'
+    dest: '/usr/lib/firewalld/services'
+    mode: u=rw,g=r,o=r
+  register: lotusnote_result
+
+- name: Reload firewalld to acknowledge new 'lotusnote' definition
+  become: true
+  ansible.builtin.service:
+    name: firewalld
+    state: reloaded
+  when:
+    - lotusnote_result.changed
+
+- name: Enable Domino services in the default zone
+  become: true
+  ansible.posix.firewalld:
+    service: '{{ item }}'
+    permanent: true
+    immediate: true
+    state: enabled
+  loop: '{{ domino__enable_fw_services }}'
+  # check ports with command: sudo firewall-cmd --list-all
+
+- name: Print info about firewalld
+  become: true
+  ansible.posix.firewalld_info:
+    active_zones: true

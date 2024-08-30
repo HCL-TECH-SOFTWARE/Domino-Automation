@@ -1,0 +1,56 @@
+INPUT VALUES FOR INSTALLATION
+=============================
+
+DOMINO - PRODUCTS TO INSTALL
+  Domino:                     {{ domino__install_domino }}
+  Domino FixPack:             {{ domino__install_fp }}
+  Verse:                      {{ domino__install_verse }}
+  Nomad:                      {{ domino__install_nomad }}
+  Traveler:                   {{ domino__install_traveler }}
+  Domino Leap:                {{ domino__install_leap }}
+  OnTime Group Calendar:      {{ domino__install_ontime }}
+  Startup Script:             {{ domino__install_startup_script }}
+
+DOMINO - PRODUCT VERSIONS
+{% for product in product_info | sort(attribute='name') %}
+  {%- set installer = product.installer | split(",") | first  %}
+  {%- set installed = "(some version already installed)" if product.installed else ""  %}
+  {{ "%-10s"|format(product.name) }} {{ "%-16s"|format(product.version) }} {{ "%-50s"|format(installer) }} {{ installed }}
+{% endfor %}
+
+DOMINO - SETUP
+  Server name:                {{ domino__server_name }}
+  Server hostname:            {{ domino__domino_hostname }}
+  Domino domain:              {{ domino__domino_domain }}
+  Organization name:          /{{ domino__org_name }}
+  Certifier password:         {{ domino__certifier_password }}
+  Admin password:             {{ domino__admin_password }}
+
+  Create MicroCA:             {{ domino__create_microca }}
+  Enable DKIM:                {{ domino__enable_dkim }}
+  DKIM selector:              {{ domino__dkim_selector }}
+
+  Restart Domino after setup: {{ domino__restart_after_setup }}
+
+LOCAL - CUSTOM FILES
+  Installer directory:        {{ domino__software_dir }}
+  Custom files directory:     {{ domino__input_data_location }}
+  Use existing cert ID:       {{ domino__use_existing_certifier_id }}
+  Use existing server ID:     {{ domino__use_existing_server_id }}
+  Use existing admin ID:      {{ domino__use_existing_admin_id }}
+  Certificate ID file:        {{ domino__cert_id }}
+  Server ID file:             {{ domino__server_id }}
+  Admin ID file:              {{ domino__admin_id }}
+
+  Register users:             {{ domino__register_users }}
+  Users input CSV file:       {{ domino__input_data_users }}
+  Custom web login database:  {{ domino__custom_login_db }}
+  Custom web login form:      {{ domino__custom_login_form }}
+
+SERVER
+  Installer path:             {{ domino__install_path }}
+  Configure firewall rules:   {{ domino__setup_firewalld }}
+
+INTEGRATION
+  HCL Sametime server hostname      {{ domino__sametime_server }}
+  HCL Connections server hostname:  {{ domino__connections_server }}

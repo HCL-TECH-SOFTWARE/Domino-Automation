@@ -1,0 +1,121 @@
+---
+- name: Create Domino directories
+  become: true
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: directory
+    owner: notes
+    group: notes
+    mode: '0755'
+  loop: '{{ domino__directories }}'
+
+- name: Copy certifier ID file
+  become: true
+  ansible.builtin.copy:
+    src: '{{ domino__cert_id }}'
+    dest: '/local/notesdata/cert.id'
+    force: false
+    mode: u=rw,g=r,o=r
+    owner: notes
+    group: notes
+  when: domino__use_existing_certifier_id
+
+- name: Copy server ID file
+  become: true
+  ansible.builtin.copy:
+    src: '{{ domino__server_id }}'
+    dest: '/local/notesdata/server-{{ domino__server_name | lower }}.id'
+    force: false
+    mode: u=rw,g=r,o=r
+    owner: notes
+    group: notes
+  when: domino__use_existing_server_id
+
+- name: Copy admin ID file
+  become: true
+  ansible.builtin.copy:
+    src: '{{ domino__admin_id }}'
+    dest: '/local/notesdata/admin.id'
+    force: false
+    mode: u=rw,g=r,o=r
+    owner: notes
+    group: notes
+  when: domino__use_existing_admin_id
+
+- name: Create directories to store the install files
+  become: true
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: directory
+    owner: '{{ ansible_effective_user_id }}'
+    group: '{{ ansible_effective_group_id }}'
+    mode: '0755'
+  loop:
+    - '{{ domino__installers_dir }}'
+    - '{{ domino__install_path }}'
+    - '{{ domino__domino_install }}'
+    - '{{ domino__fixpack_install }}'
+    - '{{ domino__traveler_install }}'
+    - '{{ domino__verse_install }}'
+    - '{{ domino__nomad_install }}'
+    - '{{ domino__leap_install }}'
+
+- name: Copy database with a custom login form (optional)
+  become: true
+  ansible.builtin.copy:
+    src: '{{ domino__input_data_location }}/{{ domino__custom_login_db }}'
+    dest: '/local/notesdata/{{ domino__custom_login_db }}'
+    force: false
+    mode: u=rw,g=r,o=r
+    owner: notes
+    group: notes
+  when: domino__custom_login_db | trim | length > 0
+
+- name: Copy installer packages to the remote server
+  ansible.builtin.copy:
+    src: '{{ domino__software_dir }}/{{ product.installer }}'
+    dest: '{{ domino__installers_dir }}'
+    mode: u=rw,g=r,o=r
+  loop: '{{ product_info }}'
+  loop_control:
+    loop_var: product
+    label: '{{ product.name }}'
+
+- name: Unpack installer packages
+  ansible.builtin.unarchive:
+    remote_src: true
+    src: '{{ domino__installers_dir }}/{{ product.installer }}'
+    dest: '{{ domino__install_path }}/{{ product.name }}'
+  loop: '{{ product_info }}'
+  loop_control:
+    loop_var: product
+    label: '{{ product.name }}'
+
+
+# ----- CUSTOMIZE INSTALL FILES
+
+- name: Calculate list of modules to install
+  ansible.builtin.set_fact:
+    modules_to_install: >-
+      Domino,
+      {{ domino__install_nomad | ternary("Nomad,", "") }}
+      {{ domino__install_ontime | ternary("OnTime,", "") }}
+      {{ domino__install_verse | ternary("Verse,", "") }}Help
+
+- name: Modify Domino response file [CHOSEN_FEATURE_LIST]
+  ansible.builtin.lineinfile:
+    path: '{{ domino__domino_install }}/linux64/responseFile/installer.properties'
+    regexp: '^CHOSEN_FEATURE_LIST='
+    line: 'CHOSEN_FEATURE_LIST={{ modules_to_install }}'
+
+- name: Modify Domino response file [CHOSEN_INSTALL_FEATURE_LIST]
+  ansible.builtin.lineinfile:
+    path: '{{ domino__domino_install }}/linux64/responseFile/installer.properties'
+    regexp: '^CHOSEN_INSTALL_FEATURE_LIST='
+    line: 'CHOSEN_INSTALL_FEATURE_LIST={{ modules_to_install }}'
+
+- name: Modify Domino response file [CHOSEN_INSTALL_SET]
+  ansible.builtin.lineinfile:
+    path: '{{ domino__domino_install }}/linux64/responseFile/installer.properties'
+    regexp: '^CHOSEN_INSTALL_SET='
+    line: 'CHOSEN_INSTALL_SET={{ (domino__install_nomad or domino__install_ontime) | ternary("", "Enterprise") }}'

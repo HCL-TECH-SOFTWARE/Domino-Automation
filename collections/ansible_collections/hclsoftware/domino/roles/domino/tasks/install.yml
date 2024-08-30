@@ -1,0 +1,36 @@
+---
+- name: Do pre-flight checks
+  ansible.builtin.import_tasks:
+    file: preflight/main.yml
+  tags:
+    - check
+    - always
+
+- name: Prepare the installation
+  ansible.builtin.import_tasks:
+    file: prepare/main.yml
+  tags:
+    - prepare
+
+- name: Install the Domino server
+  ansible.builtin.import_tasks:
+    file: install/main.yml
+  tags:
+    - install
+
+- name: Configure the Domino server
+  ansible.builtin.import_tasks:
+    file: configure/main.yml
+  tags:
+    - configure
+
+- name: Set the integration parameters
+  ansible.builtin.import_tasks:
+    file: integrate/main.yml
+  tags:
+    - integrate
+
+# - name: Check that everything is installed correctly
+#   ansible.builtin.import_tasks: validate/main.yml
+#   tags:
+#     - validate

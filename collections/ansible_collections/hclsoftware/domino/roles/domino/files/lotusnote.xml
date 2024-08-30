@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<service>
+  <short>Domino</short>
+  <description>HCL Domino server</description>
+  <port protocol="tcp" port="1352"/>
+  <protocol value="tcp"/>
+</service>

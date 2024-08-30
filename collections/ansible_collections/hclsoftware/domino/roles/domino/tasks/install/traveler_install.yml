@@ -1,0 +1,24 @@
+---
+- name: Stop the Domino server
+  ansible.builtin.import_tasks: manage/domino_stop.yml
+
+- name: Set server hostname in the Traveler properties file
+  ansible.builtin.lineinfile:
+    path: '{{ domino__traveler_install }}/installer.properties'
+    regexp: 'NTS_SET_EXTERNAL_URL='
+    line: 'NTS_SET_EXTERNAL_URL=https://{{ domino__domino_hostname }}/traveler'
+    backrefs: true
+
+- name: Install Traveler binaries
+  become: true
+  args:
+    chdir: '{{ domino__traveler_install }}'
+  ansible.builtin.shell:
+    cmd: './silentInstall'
+  register: traveler_result
+  changed_when:
+    - traveler_result.changed
+    - traveler_result.rc == 0
+
+- name: Start the Domino server
+  ansible.builtin.import_tasks: manage/domino_start.yml

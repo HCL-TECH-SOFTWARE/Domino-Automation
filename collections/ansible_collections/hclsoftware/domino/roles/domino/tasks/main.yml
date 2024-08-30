@@ -1,0 +1,18 @@
+---
+- name: Install a Domino server
+  ansible.builtin.import_tasks:
+    file: install.yml
+  when:
+    - domino__action == domino__action_switch['install']
+
+- name: Start a Domino server
+  ansible.builtin.import_tasks:
+    file: manage/domino_start.yml
+  when:
+    - domino__action == domino__action_switch['start']
+
+- name: Stop a Domino server
+  ansible.builtin.import_tasks:
+    file: manage/domino_stop.yml
+  when:
+    - domino__action == domino__action_switch['stop']

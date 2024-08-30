@@ -1,0 +1,30 @@
+---
+- name: Set ulimit -n
+  become: true
+  community.general.pam_limits:
+    domain: notes
+    limit_type: soft
+    limit_item: nofile
+    value: 80000
+
+- name: Set ulimit -n
+  become: true
+  community.general.pam_limits:
+    domain: notes
+    limit_type: hard
+    limit_item: nofile
+    value: 80000
+
+- name: Create group 'notes'
+  become: true
+  ansible.builtin.group:
+    name: notes
+    state: present
+
+- name: Create user 'notes'
+  become: true
+  ansible.builtin.user:
+    name: notes
+    comment: HCL Domino
+    group: notes
+    state: present

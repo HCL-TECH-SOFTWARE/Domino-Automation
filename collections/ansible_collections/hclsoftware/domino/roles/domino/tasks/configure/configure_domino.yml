@@ -1,0 +1,13 @@
+---
+- name: Create robots.txt file
+  become: true
+  vars:
+    robots: |
+      User-agent: *
+      Disallow: /
+  ansible.builtin.copy:
+    content: '{{ robots }}'
+    dest: '/local/notesdata/domino/html/robots.txt'
+    owner: notes
+    group: notes
+    mode: u=rw,g=r,o=r

@@ -1,0 +1,48 @@
+---
+- name: Install Domino Startup script
+  ansible.builtin.import_tasks:
+    file: install/install_startup_script.yml
+  when:
+    - domino__install_startup_script
+
+- name: Install Domino
+  ansible.builtin.import_tasks:
+    file: install/domino_install.yml
+  when:
+    - domino__install_domino
+    - not domino_is_installed
+
+- name: Install Domino FixPack
+  ansible.builtin.import_tasks:
+    file: install/fixpack_install.yml
+  when:
+    - domino__install_fp
+    - not fp_is_installed
+
+- name: Install Traveler server
+  ansible.builtin.import_tasks:
+    file: install/traveler_install.yml
+  when:
+    - domino__install_traveler
+    - not traveler_is_installed
+
+- name: Install Verse
+  ansible.builtin.import_tasks:
+    file: install/verse_install.yml
+  when:
+    - domino__install_verse
+    - not verse_is_installed
+
+- name: Install Domino Leap
+  ansible.builtin.import_tasks:
+    file: install/leap_install.yml
+  when:
+    - domino__install_leap
+    - not leap_is_installed
+
+- name: Install Nomad
+  ansible.builtin.import_tasks:
+    file: install/nomad_install.yml
+  when:
+    - domino__install_nomad
+    - not nomad_is_installed

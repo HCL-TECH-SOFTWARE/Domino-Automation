@@ -1,0 +1,33 @@
+---
+
+# ---------- CHECK WHETHER VERSE IS ALREADY INSTALLED
+
+- name: Check if Verse binary file file exists
+  ansible.builtin.stat:
+    path: /local/notesdata/domino/workspace/applications/eclipse/plugins/core-3.2.2-0.0-347.jar
+  register: verse_installed_result
+
+- name: Mark Verse as installed (single variable)
+  ansible.builtin.set_fact:
+    verse_is_installed: true
+  when:
+    - verse_installed_result.stat.exists
+
+- name: Mark Verse as installed (sw dictionary)
+  vars:
+    index: '{{ product_info | ansible.utils.index_of("eq", "verse", "name") }}'
+  ansible.utils.update_fact:
+    updates:
+      - path: 'product_info.{{ index }}.installed'
+        value: true
+  when:
+    - verse_installed_result.stat.exists
+    - domino__install_verse
+  register: product_info_updated_result
+
+- name: Store the updated value into the master fact
+  ansible.builtin.set_fact:
+    product_info: '{{ product_info_updated_result.product_info }}'
+  when:
+    - verse_installed_result.stat.exists
+    - domino__install_verse

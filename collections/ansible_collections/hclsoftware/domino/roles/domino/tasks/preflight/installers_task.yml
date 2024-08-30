@@ -1,0 +1,12 @@
+---
+# When there are multiple filenames in the "installer" field, use the first one
+- name: Store installer full file name – {{ product.name }}
+  ansible.builtin.set_fact:
+    installer_filename: '{{ domino__software_dir + "/" + product.installer }}'
+
+- name: Check that the installer exists in a local directory – {{ product.installer }}
+  vars:
+    common__file_name: installer_filename
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: assert_file

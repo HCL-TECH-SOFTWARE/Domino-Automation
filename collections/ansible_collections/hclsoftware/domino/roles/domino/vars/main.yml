@@ -1,0 +1,72 @@
+domino__action_switch: {
+  install: install,
+  uninstall: uninstall,
+  start: start,
+  stop: stop
+}
+
+domino__supported_os:
+  - redhat
+
+domino__enable_fw_services:
+  - https
+  - http
+  - lotusnote
+  - ldap
+  - imap
+
+domino__all_products:
+  - domino
+  - verse
+  - nomad
+  - traveler
+  - leap
+
+domino__software_repo: https://raw.githubusercontent.com/HCL-TECH-SOFTWARE/domino-container
+domino__software_repo_branch: develop      # options: main, develop
+domino__software_file_url: '{{ domino__software_repo }}/{{ domino__software_repo_branch }}/software/software.txt'
+domino__software_latest_file_url: '{{ domino__software_repo }}/{{ domino__software_repo_branch }}/software/current_version.txt'
+domino__software_directory: '{{ role_path }}/software'
+domino__software_file: software.txt
+domino__software_latest_file: current_version.txt
+
+domino__users_file: users.csv
+
+domino__directories:
+  - /local/notesdata
+  - /local/translog
+  - /local/daos
+  - /local/nif
+  - /local/ft
+  - /local/backup
+  - /local/backup/nsf
+  - /local/backup/translog
+  - /local/backup/log
+
+domino__installer_subdirectory: installers
+domino__installers_dir: '{{ domino__install_path }}/{{ domino__installer_subdirectory }}'
+
+domino__domino_install_subdir: domino
+domino__domino_install: '{{ domino__install_path }}/{{ domino__domino_install_subdir }}'
+
+domino__fixpack_install_subdir: fp
+domino__fixpack_install: '{{ domino__install_path }}/{{ domino__fixpack_install_subdir }}'
+
+domino__traveler_install_subdir: traveler
+domino__traveler_install: '{{ domino__install_path }}/{{ domino__traveler_install_subdir }}'
+
+domino__verse_install_subdir: verse
+domino__verse_install: '{{ domino__install_path }}/{{ domino__verse_install_subdir }}'
+
+domino__nomad_install_subdir: nomad
+domino__nomad_install: '{{ domino__install_path }}/{{ domino__nomad_install_subdir }}'
+
+domino__leap_install_subdir: leap
+domino__leap_install: '{{ domino__install_path }}/{{ domino__leap_install_subdir }}'
+
+domino__response_file: '{{ domino__domino_install }}/installer.properties'
+
+domino__nek: credstorekey
+domino__credstore: credstore
+
+domino__dkim_info: dkim-info.txt

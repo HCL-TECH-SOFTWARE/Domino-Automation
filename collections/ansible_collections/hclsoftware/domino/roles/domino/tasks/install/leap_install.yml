@@ -1,0 +1,23 @@
+---
+- name: Stop the Domino server
+  ansible.builtin.import_tasks: manage/domino_stop.yml
+
+- name: Set installer file as executable
+  ansible.builtin.file:
+    path: '{{ domino__leap_install }}/linux/install'
+    mode: u+x
+
+- name: Install Domino Leap
+  become: true
+  args:
+    chdir: '{{ domino__leap_install }}/linux'
+  ansible.builtin.shell:
+    cmd: './install silent'
+    creates: /local/notesdata/volt
+  register: leap_install_result
+  changed_when:
+    - leap_install_result.changed
+    - leap_install_result.rc == 0
+
+- name: Start the Domino server
+  ansible.builtin.import_tasks: manage/domino_start.yml

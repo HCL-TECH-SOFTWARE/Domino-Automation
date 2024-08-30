@@ -1,0 +1,35 @@
+---
+- name: Download the file with the info about the latest startup script version
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/nashcom/domino-startscript/main/latest.txt
+    dest: /tmp/latest.txt
+    mode: 'u=rwx,g=rx,o=rx'
+
+- name: Store the URL into a value
+  ansible.builtin.command:
+    cmd: cat /tmp/latest.txt
+  changed_when: false
+  register: version_result
+
+- name: Download and unarchive the startup script
+  ansible.builtin.unarchive:
+    src: '{{ version_result.stdout }}'
+    dest: /tmp
+    remote_src: true
+    creates: /tmp/domino-startscript-3.8.0/install_script
+
+- name: Update install_script file to enable domino systemd service on deployment inside a container
+  become: true
+  ansible.builtin.lineinfile:
+    path: /tmp/domino-startscript-3.8.0/install_script
+    regexp: 'detect_container_env$'
+    line: '# detect_container_env'
+    backrefs: true
+  when: '"molecule-notest" in ansible_skip_tags'
+
+- name: Install the startup script
+  become: true
+  ansible.builtin.command:
+    chdir: /tmp/domino-startscript-3.8.0
+    cmd: ./install_script
+    creates: /opt/nashcom/startscript/rc_domino_script

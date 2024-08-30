@@ -1,0 +1,89 @@
+---
+- name: 'Enable Sametime integration in notes.ini [iNotes_WA_SametimeProxyServerSSL]'
+  become: true
+  become_user: notes
+  ansible.builtin.shell:
+    chdir: '/local/notesdata'
+    cmd: '/opt/hcl/domino/bin/server -c "set conf iNotes_WA_SametimeProxyServerSSL=https://{{ domino__sametime_server }}" 2>&1 &'
+  register: sametime_result
+  changed_when:
+    - sametime_result.changed
+    - sametime_result.rc == 0
+
+- name: 'Enable Sametime integration in notes.ini [VOP_GK_sametime]'
+  become: true
+  become_user: notes
+  ansible.builtin.shell:
+    chdir: '/local/notesdata'
+    cmd: '/opt/hcl/domino/bin/server -c "set conf VOP_GK_sametime=1" 2>&1 &'
+  register: sametime_vop_result
+  changed_when:
+    - sametime_vop_result.changed
+    - sametime_vop_result.rc == 0
+
+- name: 'Enable Sametime integration in notes.ini [VOP_GK_sametime_rich_client]'
+  become: true
+  become_user: notes
+  ansible.builtin.shell:
+    chdir: '/local/notesdata'
+    cmd: '/opt/hcl/domino/bin/server -c "set conf VOP_GK_sametime_rich_client=1" 2>&1 &'
+  register: sametime_client_result
+  changed_when:
+    - sametime_client_result.changed
+    - sametime_client_result.rc == 0
+
+- name: 'Enable Sametime integration in notes.ini [VOP_DOMI_ST_ROOTURL]'
+  become: true
+  become_user: notes
+  ansible.builtin.shell:
+    chdir: '/local/notesdata'
+    cmd: '/opt/hcl/domino/bin/server -c "set conf VOP_DOMI_ST_ROOTURL=https://{{ domino__sametime_server }}" 2>&1 &'
+  register: sametime_domi_result
+  changed_when:
+    - sametime_domi_result.changed
+    - sametime_domi_result.rc == 0
+
+
+# ---------- IMPORT SAMETIME CERTIFICATE
+
+- name: Get certificate from Sametime server
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail && echo |
+      openssl s_client -connect {{ domino__sametime_server }}:443 2>&1 |
+      sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'
+      > {{ domino__domino_install }}/{{ domino__sametime_server }}.cer
+    creates: '{{ domino__domino_install }}/{{ domino__sametime_server }}.cer'
+  register: sametime_certificate
+  changed_when:
+    - sametime_certificate.changed
+    - sametime_certificate.rc == 0
+
+- name: Import certificate Sametime server certificate into cacerts
+  become: true
+  ansible.builtin.shell:
+    chdir: '/opt/hcl/domino/notes/latest/linux/jvm/bin'
+    cmd: >-
+      ./keytool -import -storepass changeit
+      -cacerts
+      -noprompt -trustcacerts
+      -alias {{ domino__sametime_server }}
+      -file /local/install/domino/{{ domino__sametime_server }}.cer
+  register: cacerts_sametime_import_result
+  failed_when:
+    - cacerts_sametime_import_result.changed
+    - cacerts_sametime_import_result.rc != 0
+    - '"already exists" not in cacerts_sametime_import_result.stdout'
+  changed_when:
+    - cacerts_sametime_import_result.changed
+    - cacerts_sametime_import_result.rc == 0
+
+- name: Print certificates stored in cacerts
+  ansible.builtin.shell:
+    chdir: '/opt/hcl/domino/notes/latest/linux/jvm/bin'
+    cmd: './keytool -list -storepass changeit -cacerts'
+  register: cacerts_list_result
+  changed_when:
+    - cacerts_list_result.changed
+    - cacerts_list_result.rc == 0
+    - '"Your keystore contains" not in cacerts_list_result.stdout'

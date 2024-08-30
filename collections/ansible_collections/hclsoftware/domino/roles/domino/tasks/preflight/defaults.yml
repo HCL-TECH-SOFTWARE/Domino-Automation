@@ -1,0 +1,51 @@
+---
+- name: Set default value for Domino server name, if not set in values
+  ansible.builtin.set_fact:
+    domino__server_name: '{{ inventory_hostname | capitalize }}'
+  when: domino__server_name | length == 0
+
+- name: Set default value for Domino hostname, if not set in values
+  ansible.builtin.set_fact:
+    # domino__domino_hostname: '{{ ansible_host }}'
+    domino__domino_hostname: '{{ ansible_nodename }}'
+  when: domino__domino_hostname | length == 0
+
+- name: Set default value for Domino domain, if not set in values
+  ansible.builtin.set_fact:
+    domino__domino_domain: '{{ domino__org_name }}'
+  when: domino__domino_domain | length == 0
+
+- name: Set directory to store temporary files
+  ansible.builtin.set_fact:
+    tmp_dir: '{{ lookup("env", "TMPDIR") | default("/tmp") }}'
+
+- name: Set default value for user CSV file location, if not set in values
+  ansible.builtin.set_fact:
+    domino__input_data_users: '{{ domino__input_data_location | realpath }}/{{ domino__domino_domain | lower }}/{{ domino__users_file }}'
+  when:
+    - domino__register_users
+    - domino__input_data_users | length == 0
+
+
+- name: Assign values to variables so they could be asserted
+  ansible.builtin.set_fact:
+    domino__input_data_location: '{{ domino__input_data_location | realpath }}'
+    domino__input_data_users: '{{ domino__input_data_users | realpath }}'
+
+# Initiallly set to False, unless explicitely specified in the vars.
+# The value changes to True if a product is in domino__install_products parameter.
+- name: Initially set all products to NOT install.
+  ansible.builtin.set_fact:
+    'domino__install_{{ product }}': '{{ vars["domino__install_" + product] | default(false) }}'
+  loop: '{{ domino__all_products + ["fp"] }}'
+  loop_control:
+    loop_var: product
+
+# Initiallly set to False, unless explicitely specified in the vars.
+# The value changes to True if a product is later inspected as installed.
+- name: Initially set all products as not installed on the server.
+  ansible.builtin.set_fact:
+    '{{ product }}_is_installed': '{{ vars[product + "_is_installed"] | default(false) }}'
+  loop: '{{ domino__all_products + ["fp"] }}'
+  loop_control:
+    loop_var: product

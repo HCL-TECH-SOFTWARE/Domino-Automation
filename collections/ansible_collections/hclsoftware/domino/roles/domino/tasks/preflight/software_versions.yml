@@ -1,0 +1,105 @@
+---
+# ---------- Software CSV file processing
+
+- name: Check whether Software CSV file is accessible via the URL
+  ansible.builtin.uri:
+    url: '{{ domino__software_file_url }}'
+  failed_when: sw_file_result.status is undefined or sw_file_result.status <= 0
+  register: sw_file_result
+
+- name: Download Software CSV file
+  ansible.builtin.get_url:
+    url: '{{ domino__software_file_url }}'
+    dest: '{{ tmp_dir }}/{{ domino__software_file }}'
+    mode: u=rw,g=r,o=r
+    force: true
+  when:
+    - sw_file_result.status == 200
+
+- name: Select which Software CSV file to use (just downloaded vs. included)
+  vars:
+    downloaded_file: '{{ tmp_dir }}/{{ domino__software_file }}'
+    included_file: '{{ domino__software_directory }}/{{ domino__software_file }}'
+  ansible.builtin.set_fact:
+    sw_path: '{{ ((sw_file_result.status == 200 and not domino__software_use_local_file) | ternary(downloaded_file, included_file)) | realpath }}'
+
+- name: Check if the CSV file with all software releases exists - {{ sw_path }}
+  ansible.builtin.stat:
+    path: '{{ sw_path }}'
+  register: sw_file_result
+
+- name: The CSV file with all software releases must exists - {{ sw_path }}
+  ansible.builtin.assert:
+    that: sw_file_result.stat.exists
+    fail_msg: |
+      CSV file with the software versions could not be found on this location:
+      {{ sw_path }}
+    success_msg: |
+      CSV file with the software versions is present on this location:
+      {{ sw_path }}
+
+- name: Read software releases from the CSV file - {{ sw_path }}
+  community.general.read_csv:
+    path: '{{ sw_path }}'
+    fieldnames: product,version,filename,hotfix,checksum
+    delimiter: '|'
+    skipinitialspace: true
+  register: software_result
+
+
+# ---------- Software-latest CSV file processing
+
+- name: Check whether Software-latest CSV file is accessible via the URL
+  ansible.builtin.uri:
+    url: '{{ domino__software_latest_file_url }}'
+  failed_when: sw_latest_file_result.status is undefined or sw_latest_file_result.status <= 0
+  register: sw_latest_file_result
+
+- name: Download Software-latest releases CSV file
+  ansible.builtin.get_url:
+    url: '{{ domino__software_latest_file_url }}'
+    dest: '{{ tmp_dir }}/{{ domino__software_latest_file }}'
+    mode: u=rw,g=r,o=r
+    force: true
+  when:
+    - sw_latest_file_result.status == 200
+
+- name: Select which Software-latesxt CSV file to use (just downloaded vs. included)
+  vars:
+    downloaded_file: '{{ tmp_dir }}/{{ domino__software_latest_file }}'
+    included_file: '{{ domino__software_directory }}/{{ domino__software_latest_file }}'
+  ansible.builtin.set_fact:
+    sw_path: '{{ ((sw_latest_file_result.status == 200 and not domino__software_use_local_file) | ternary(downloaded_file, included_file)) | realpath }}'
+
+- name: Check if the CSV file with the latest software releases exists - {{ sw_path }}
+  ansible.builtin.stat:
+    path: '{{ sw_path }}'
+  register: sw_latest_file_result
+
+- name: The CSV file with the latest software releases must exists - {{ sw_path }}
+  ansible.builtin.assert:
+    that: sw_latest_file_result.stat.exists
+    fail_msg: |
+      CSV file with the latest software versions could not be found on this location:
+      {{ sw_path }}
+    success_msg: |
+      CSV file with the latest software versions is present on this location:
+      {{ sw_path }}
+
+- name: Read the latest software releases from the CSV file - {{ sw_path }}
+  community.general.read_csv:
+    path: '{{ sw_path }}'
+    fieldnames: product,version,fixpack
+    delimiter: '|'
+    skipinitialspace: true
+  register: software_latest_result
+
+
+# ---------- Calculate the correct versions for selected products
+
+- name: Get the correct version for a given product
+  ansible.builtin.include_tasks:
+    file: preflight/software_versions_task.yml
+  loop: '{{ domino__install_products }}'
+  loop_control:
+    loop_var: product

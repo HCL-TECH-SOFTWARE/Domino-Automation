@@ -1,0 +1,33 @@
+---
+
+# ---------- CHECK WHETHER DOMINO LEAP IS ALREADY INSTALLED
+
+- name: Check if Domino Leap directory exists
+  ansible.builtin.stat:
+    path: /local/notesdata/volt
+  register: leap_installed_result
+
+- name: Mark Leap as installed (single variable)
+  ansible.builtin.set_fact:
+    leap_is_installed: true
+  when:
+    - leap_installed_result.stat.exists
+
+- name: Mark Leap as installed (sw dictionary)
+  vars:
+    index: '{{ product_info | ansible.utils.index_of("eq", "leap", "name") }}'
+  ansible.utils.update_fact:
+    updates:
+      - path: 'product_info.{{ index }}.installed'
+        value: true
+  when:
+    - leap_installed_result.stat.exists
+    - domino__install_leap
+  register: product_info_updated_result
+
+- name: Store the updated value into the master fact
+  ansible.builtin.set_fact:
+    product_info: '{{ product_info_updated_result.product_info }}'
+  when:
+    - leap_installed_result.stat.exists
+    - domino__install_leap
