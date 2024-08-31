@@ -23,6 +23,7 @@
   when:
     - leap_installed_result.stat.exists
     - domino__install_leap
+  changed_when: false
   register: product_info_updated_result
 
 - name: Store the updated value into the master fact
