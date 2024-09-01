@@ -34,6 +34,7 @@ domino__use_existing_certifier_id: false
 domino__use_existing_server_id: false
 domino__use_existing_admin_id: false
 domino__register_users: false
+domino__use_custom_login: false
 domino__create_microca: false
 domino__enable_dkim: false
 domino__dkim_selector: ''
@@ -45,7 +46,7 @@ domino__cert_id: '{{ domino__input_data_location }}/{{ domino__domino_domain | l
 domino__server_id: '{{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/ids/server-{{ domino__server_name | lower }}.id'
 domino__admin_id: '{{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/ids/admin.id'
 
-domino__input_data_users: ''
+domino__input_data_users: ''      # default value: users.csv
 domino__custom_login_db: ''
 domino__custom_login_form: ''
 

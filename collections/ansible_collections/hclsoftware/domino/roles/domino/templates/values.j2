@@ -43,9 +43,14 @@ LOCAL - CUSTOM FILES
   Admin ID file:              {{ domino__admin_id }}
 
   Register users:             {{ domino__register_users }}
+{% if domino__register_users %}
   Users input CSV file:       {{ domino__input_data_users }}
+{% endif %}
+  Use custom login form:      {{ domino__use_custom_login }}
+{% if domino__use_custom_login %}
   Custom web login database:  {{ domino__custom_login_db }}
   Custom web login form:      {{ domino__custom_login_form }}
+{% endif %}
 
 SERVER
   Installer path:             {{ domino__install_path }}

@@ -27,6 +27,13 @@
     - domino__input_data_users | length == 0
 
 
+- name: Set the full path value for custom login form database, if not set in values
+  ansible.builtin.set_fact:
+    domino__custom_login_db: '{{ domino__input_data_location | realpath }}/{{ domino__domino_domain | lower }}/{{ domino__custom_login_db }}'
+  when:
+    - domino__custom_login_db[0] != '/'
+
+
 - name: Assign values to variables so they could be asserted
   ansible.builtin.set_fact:
     domino__input_data_location: '{{ domino__input_data_location | realpath }}'

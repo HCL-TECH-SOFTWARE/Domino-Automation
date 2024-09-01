@@ -42,15 +42,6 @@
     success_msg: '"domino__use_existing_certifier_id" is defined correctly: {{ domino__use_existing_certifier_id }}'
   when: domino__use_existing_admin_id
 
-- name: Check user CSV file
-  vars:
-    common__file_name: domino__input_data_users
-  ansible.builtin.include_role:
-    name: hclsoftware.domino.common
-    tasks_from: assert_file
-  when:
-    - domino__register_users
-
 - name: Check certifier ID file [{{ domino__cert_id }}]
   vars:
     common__file_name: domino__cert_id
@@ -77,6 +68,24 @@
     tasks_from: assert_file
   when:
     - domino__use_existing_admin_id
+
+- name: Check user CSV file
+  vars:
+    common__file_name: domino__input_data_users
+  ansible.builtin.include_role:
+    name: hclsoftware.domino.common
+    tasks_from: assert_file
+  when:
+    - domino__register_users
+
+- name: Check custom login form database file [{{ domino__custom_login_db }}]
+  vars:
+    common__file_name: domino__custom_login_db
+  ansible.builtin.include_role:
+    name: hclsoftware.domino.common
+    tasks_from: assert_file
+  when:
+    - domino__use_custom_login
 
 
 # ---------- CHECK VARIABLE VALUES
