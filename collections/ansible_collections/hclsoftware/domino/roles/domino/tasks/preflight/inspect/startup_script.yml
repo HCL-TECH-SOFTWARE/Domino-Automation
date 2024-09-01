@@ -1,0 +1,12 @@
+---
+
+# ---------- CHECK WHETHER DOMINO STARTUP SCRIPT IS ALREADY INSTALLED
+
+- name: Check if Domino startup script file file exists
+  ansible.builtin.stat:
+    path: /opt/nashcom/startscript/rc_domino_script
+  register: script_installed_result
+
+- name: Mark Domino startup script installation status
+  ansible.builtin.set_fact:
+    startup_script_is_installed: '{{ script_installed_result.stat.exists }}'

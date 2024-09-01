@@ -1,4 +1,8 @@
 ---
+- name: Check the Domino startup script installed on the server
+  ansible.builtin.import_tasks:
+    file: preflight/inspect/startup_script.yml
+
 - name: Check the Domino version installed on the server
   ansible.builtin.import_tasks:
     file: preflight/inspect/domino.yml

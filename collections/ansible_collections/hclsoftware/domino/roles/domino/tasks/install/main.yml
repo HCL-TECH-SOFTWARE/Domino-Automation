@@ -4,6 +4,7 @@
     file: install/install_startup_script.yml
   when:
     - domino__install_startup_script
+    - not startup_script_is_installed
 
 - name: Install Domino
   ansible.builtin.import_tasks:
