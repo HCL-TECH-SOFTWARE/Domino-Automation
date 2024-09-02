@@ -99,7 +99,7 @@
         "certificateExpirationMonths": 24
       },
       "users": [
-      {% for user in users.list %}
+      {% for user in users %}
   {% set userShortName = (user['firstName'].0 | lower) + (user['lastName'] | lower) -%}
         {
           "firstName": "{{ user['firstName'] }}",

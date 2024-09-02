@@ -16,19 +16,6 @@
 
 # ----- PREPARE DOMINO SETUP FILES
 
-- name: Read user names from the CSV file
-  community.general.read_csv:
-    path: '{{ domino__input_data_users }}'
-  register: users
-  delegate_to: localhost
-  run_once: true
-  when:
-    - domino__register_users
-
-- name: Print installation paramters
-  ansible.builtin.debug:
-    msg: "{{ lookup('ansible.builtin.template', 'server_install_parameters.j2') }}"
-
 - name: Copy and customize One-touch Setup config file
   ansible.builtin.template:
     src: auto_config_domino14.json.j2

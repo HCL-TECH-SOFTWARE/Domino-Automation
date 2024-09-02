@@ -42,10 +42,7 @@ LOCAL - CUSTOM FILES
   Server ID file:             {{ domino__server_id }}
   Admin ID file:              {{ domino__admin_id }}
 
-  Register users:             {{ domino__register_users }}
-{% if domino__register_users %}
-  Users input CSV file:       {{ domino__input_data_users }}
-{% endif %}
+
   Use custom login form:      {{ domino__use_custom_login }}
 {% if domino__use_custom_login %}
   Custom web login database:  {{ domino__custom_login_db }}
@@ -59,3 +56,13 @@ SERVER
 INTEGRATION
   HCL Sametime server hostname:     {{ domino__sametime_server }}
   HCL Connections server hostname:  {{ domino__connections_server }}
+
+USERS
+  Register users:             {{ domino__register_users }}
+{% if domino__register_users %}
+  Users input CSV file:       {{ domino__input_data_users }}
+  Users records in CSV:
+{% for user in users %}
+                              {{ "%-12s"|format(user.firstName) }} {{ user.lastName }}
+{% endfor %}
+{% endif %}

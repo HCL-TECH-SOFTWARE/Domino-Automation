@@ -23,6 +23,10 @@
   ansible.builtin.import_tasks:
     file: preflight/inspect/main.yml
 
+- name: Read users from the CSV file
+  ansible.builtin.import_tasks:
+    file: preflight/users.yml
+
 - name: Print preflight report
   ansible.builtin.import_tasks:
     file: preflight/report.yml

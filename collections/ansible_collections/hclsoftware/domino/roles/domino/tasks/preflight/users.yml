@@ -1,0 +1,13 @@
+---
+- name: Read user names from the CSV file
+  community.general.read_csv:
+    path: '{{ domino__input_data_users }}'
+  register: users
+  delegate_to: localhost
+  run_once: true
+  when:
+    - domino__register_users
+
+- name: Store user names
+  ansible.builtin.set_fact:
+    users: '{{ users.list }}'

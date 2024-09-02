@@ -47,7 +47,7 @@
     - name: Download exported DKIM file to local machine
       ansible.builtin.fetch:
         src: '/local/notesdata/{{ dkim_filename }}'
-        dest: '{{ domino__input_data_location }}/'
+        dest: '{{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/'
         flat: true
 
     - name: Enable DKIM signing

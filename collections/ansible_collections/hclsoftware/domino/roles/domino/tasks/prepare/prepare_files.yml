@@ -63,8 +63,8 @@
 - name: Copy database with a custom login form (optional)
   become: true
   ansible.builtin.copy:
-    src: '{{ domino__input_data_location }}/{{ domino__custom_login_db }}'
-    dest: '/local/notesdata/{{ domino__custom_login_db }}'
+    src: '{{ domino__custom_login_db }}'
+    dest: '/local/notesdata/{{ domino__custom_login_db | basename }}'
     force: false
     mode: u=rw,g=r,o=r
     owner: notes
