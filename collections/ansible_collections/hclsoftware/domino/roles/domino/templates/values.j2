@@ -41,7 +41,10 @@ LOCAL - CUSTOM FILES
   Certificate ID file:        {{ domino__cert_id }}
   Server ID file:             {{ domino__server_id }}
   Admin ID file:              {{ domino__admin_id }}
-
+  Save reports:               {{ domino__save_reports }}
+{% if domino__save_reports %}
+  Reports directory:          {{ domino__reports_dir }}
+{% endif %}
 
   Use custom login form:      {{ domino__use_custom_login }}
 {% if domino__use_custom_login %}
@@ -63,6 +66,6 @@ USERS
   Users input CSV file:       {{ domino__input_data_users }}
   Users records in CSV:
 {% for user in users %}
-                              {{ "%-12s"|format(user.firstName) }} {{ user.lastName }}
+                              {{ "%-12s"|format(user.firstName) }} {{ "%-12s"|format(user.lastName) }} {{ user.password }}
 {% endfor %}
 {% endif %}

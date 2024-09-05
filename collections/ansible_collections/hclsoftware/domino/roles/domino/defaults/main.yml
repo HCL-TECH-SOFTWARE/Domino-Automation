@@ -50,6 +50,10 @@ domino__input_data_users: ''      # default value: users.csv
 domino__custom_login_db: ''
 domino__custom_login_form: ''
 
+# Reports
+domino__save_reports: true
+domino__reports_dir: '{{ domino__input_data_location }}/reports/{{ domino__domino_domain | lower }}'
+
 # Domino server integration
 domino__sametime_server: ''
 domino__connections_server: ''

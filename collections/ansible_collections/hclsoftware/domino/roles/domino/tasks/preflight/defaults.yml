@@ -56,3 +56,13 @@
   loop: '{{ domino__all_products + ["fp"] }}'
   loop_control:
     loop_var: product
+
+
+# Make sure the directory for storing reports exists
+- name: Create reports directory '{{ domino__reports_dir }}'
+  ansible.builtin.file:
+    path: '{{ domino__reports_dir }}'
+    state: directory
+    mode: u=rwx,g=rx,o=rx
+  when: domino__save_reports
+  delegate_to: localhost

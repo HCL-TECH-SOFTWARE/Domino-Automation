@@ -21,6 +21,14 @@
   loop_control:
     loop_var: dir
 
+- name: Check reports directory
+  vars:
+    common__dir_name: domino__reports_dir
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: assert_directory
+  when: domino__save_reports
+
 
 # ---------- CHECK THE CUSTOM FILES EXIST
 
