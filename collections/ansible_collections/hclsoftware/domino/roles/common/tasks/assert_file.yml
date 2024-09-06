@@ -6,6 +6,7 @@
 - name: Check that the local file exists [{{ common__file_name }}]
   ansible.builtin.stat:
     path: '{{ tested_value }}'
+    checksum_algorithm: sha256
   delegate_to: localhost
   register: file_result
 
@@ -15,3 +16,12 @@
       - file_result.stat.exists
     fail_msg: '"{{ common__file_name }}" must exists on the local workstation: {{ tested_value }}'
     success_msg: '"{{ common__file_name }}" is defined correctly, the file exists on the local workstation: {{ tested_value }}'
+
+- name: Check that the checksum matches (when provided) [{{ tested_value }}]
+  ansible.builtin.assert:
+    that:
+      - file_result.stat.checksum == common__file_checksum
+    fail_msg: '"{{ tested_value }}" must has the following checksum: {{ common__file_checksum }}'
+    success_msg: '"{{ tested_value }}" has correct checkum: {{ common__file_checksum }}'
+  when:
+    - common__file_checksum is defined

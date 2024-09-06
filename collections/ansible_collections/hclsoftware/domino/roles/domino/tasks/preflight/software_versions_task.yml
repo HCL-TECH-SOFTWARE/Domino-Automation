@@ -32,10 +32,15 @@
           {{ (software_result.list | selectattr("product", "equalto", product)
                                    | selectattr("version", "equalto", version_to_install)
                                    | list | first).filename | split(",") | first }}
+        checksum: >-
+          {{ (software_result.list | selectattr("product", "equalto", product)
+                                  | selectattr("version", "equalto", version_to_install)
+                                  | list | first).checksum }}
         fixpack_item: {
           "name": "fp",
           "version": "{{ version_to_install }}",
           "installer": "{{ installer }}",
+          "checksum": "{{ checksum }}",
           "installed": false
         }
       ansible.builtin.set_fact:
@@ -76,10 +81,15 @@
       {{ (software_result.list | selectattr("product", "equalto", product)
                                | selectattr("version", "equalto", version_to_install)
                                | list | first).filename }}
+    checksum: >-
+      {{ (software_result.list | selectattr("product", "equalto", product)
+                               | selectattr("version", "equalto", version_to_install)
+                               | list | first).checksum }}
     new_item: {
       "name": "{{ product }}",
       "version": "{{ version_to_install }}",
       "installer": "{{ installer }}",
+      "checksum": "{{ checksum }}",
       "installed": false
     }
   ansible.builtin.set_fact:

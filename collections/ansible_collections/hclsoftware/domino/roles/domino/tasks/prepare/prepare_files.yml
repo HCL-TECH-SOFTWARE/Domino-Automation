@@ -71,21 +71,9 @@
     group: notes
   when: domino__custom_login_db | trim | length > 0
 
-- name: Copy installer packages to the remote server
-  ansible.builtin.copy:
-    src: '{{ domino__software_dir }}/{{ product.installer }}'
-    dest: '{{ domino__installers_dir }}'
-    mode: u=rw,g=r,o=r
-  loop: '{{ product_info }}'
-  loop_control:
-    loop_var: product
-    label: '{{ product.name }}'
-
-- name: Unpack installer packages
-  ansible.builtin.unarchive:
-    remote_src: true
-    src: '{{ domino__installers_dir }}/{{ product.installer }}'
-    dest: '{{ domino__install_path }}/{{ product.name }}'
+- name: Copy and validate installer packages to the remote server
+  ansible.builtin.include_tasks:
+    file: prepare/prepare_files_task.yml
   loop: '{{ product_info }}'
   loop_control:
     loop_var: product
