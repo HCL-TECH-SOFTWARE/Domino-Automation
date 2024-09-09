@@ -90,20 +90,31 @@
       {{ domino__install_ontime | ternary("OnTime,", "") }}
       {{ domino__install_verse | ternary("Verse,", "") }}Help
 
+- name: Copy a default response file to the installer directory
+  become: true
+  ansible.builtin.copy:
+    src: '{{ domino__domino_install }}/linux64/responseFile/installer.properties'
+    dest: '{{ domino__response_file }}'
+    force: false
+    owner: notes
+    group: notes
+    mode: u=rw,g=r,o=r
+    remote_src: true
+
 - name: Modify Domino response file [CHOSEN_FEATURE_LIST]
   ansible.builtin.lineinfile:
-    path: '{{ domino__domino_install }}/linux64/responseFile/installer.properties'
+    path: '{{ domino__response_file }}'
     regexp: '^CHOSEN_FEATURE_LIST='
     line: 'CHOSEN_FEATURE_LIST={{ modules_to_install }}'
 
 - name: Modify Domino response file [CHOSEN_INSTALL_FEATURE_LIST]
   ansible.builtin.lineinfile:
-    path: '{{ domino__domino_install }}/linux64/responseFile/installer.properties'
+    path: '{{ domino__response_file }}'
     regexp: '^CHOSEN_INSTALL_FEATURE_LIST='
     line: 'CHOSEN_INSTALL_FEATURE_LIST={{ modules_to_install }}'
 
 - name: Modify Domino response file [CHOSEN_INSTALL_SET]
   ansible.builtin.lineinfile:
-    path: '{{ domino__domino_install }}/linux64/responseFile/installer.properties'
+    path: '{{ domino__response_file }}'
     regexp: '^CHOSEN_INSTALL_SET='
     line: 'CHOSEN_INSTALL_SET={{ (domino__install_nomad or domino__install_ontime) | ternary("", "Enterprise") }}'

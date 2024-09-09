@@ -64,7 +64,7 @@ domino__nomad_install: '{{ domino__install_path }}/{{ domino__nomad_install_subd
 domino__leap_install_subdir: leap
 domino__leap_install: '{{ domino__install_path }}/{{ domino__leap_install_subdir }}'
 
-domino__response_file: '{{ domino__domino_install }}/installer.properties'
+domino__response_file: '{{ domino__install_path }}/installer.properties'
 
 domino__nek: credstorekey
 domino__credstore: credstore

@@ -4,10 +4,6 @@
     src: '{{ domino__software_dir }}/{{ product.installer }}'
     dest: '{{ domino__installers_dir }}'
     mode: u=rw,g=r,o=r
-  loop: '{{ product_info }}'
-  loop_control:
-    loop_var: product
-    label: '{{ product.name }}'
 
 - name: Get installer checksum
   ansible.builtin.stat:

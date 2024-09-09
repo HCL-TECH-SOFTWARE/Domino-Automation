@@ -52,8 +52,8 @@
       set -o pipefail && echo |
       openssl s_client -connect {{ domino__sametime_server }}:443 2>&1 |
       sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'
-      > {{ domino__domino_install }}/{{ domino__sametime_server }}.cer
-    creates: '{{ domino__domino_install }}/{{ domino__sametime_server }}.cer'
+      > {{ domino__install_path }}/{{ domino__sametime_server }}.cer
+    creates: '{{ domino__install_path }}/{{ domino__sametime_server }}.cer'
   register: sametime_certificate
   changed_when:
     - sametime_certificate.changed
@@ -68,7 +68,7 @@
       -cacerts
       -noprompt -trustcacerts
       -alias {{ domino__sametime_server }}
-      -file /local/install/domino/{{ domino__sametime_server }}.cer
+      -file {{ domino__install_path }}/{{ domino__sametime_server }}.cer
   register: cacerts_sametime_import_result
   failed_when:
     - cacerts_sametime_import_result.changed

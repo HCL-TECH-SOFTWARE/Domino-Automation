@@ -7,7 +7,7 @@
   args:
     chdir: '{{ domino__domino_install }}/linux64/'
   ansible.builtin.shell:
-    cmd: './install -f responseFile/installer.properties -i silent'
+    cmd: './install -f {{ domino__response_file }} -i silent'
   register: install_result
   changed_when:
     - install_result.changed
@@ -19,7 +19,7 @@
 - name: Copy and customize One-touch Setup config file
   ansible.builtin.template:
     src: auto_config_domino14.json.j2
-    dest: '{{ domino__domino_install }}/auto_config_domino14.json'
+    dest: '{{ domino__install_path }}/auto_config_domino14.json'
     mode: u=rw,g=r,o=r
 
 - name: Check One-touch Setup JSON file
@@ -29,7 +29,7 @@
     LD_LIBRARY_PATH: /opt/hcl/domino/notes/latest/linux
   ansible.builtin.shell:
     chdir: '/local/notesdata'
-    cmd: '/opt/hcl/domino/notes/latest/linux/validjson {{ domino__domino_install }}/auto_config_domino14.json -default'
+    cmd: '/opt/hcl/domino/notes/latest/linux/validjson {{ domino__install_path }}/auto_config_domino14.json -default'
   register: json_result
   changed_when:
     - json_result.stderr != ''
@@ -44,7 +44,7 @@
   become_user: notes
   ansible.builtin.shell:
     chdir: '/local/notesdata'
-    cmd: '/opt/hcl/domino/bin/server -autoconf {{ domino__domino_install }}/auto_config_domino14.json 2>&1 &'
+    cmd: '/opt/hcl/domino/bin/server -autoconf {{ domino__install_path }}/auto_config_domino14.json 2>&1 &'
   register: setup_result
   changed_when:
     - setup_result.changed
