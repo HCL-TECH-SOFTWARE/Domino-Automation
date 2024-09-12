@@ -1,144 +1,145 @@
 ---
-- name: Validate parameter - number [{{ common__param_name }}]
+
+# ---------- COMMON VALIDATIONS
+
+- name: Validate that parameter is defined [{{ common__param_name }}]
   ansible.builtin.assert:
     that:
       - common__param_name is defined
-      - '{{ common__param_name }} is number'
-    fail_msg: '"{{ common__param_name }}" must be a number: {{ vars[common__param_name] }}'
-    success_msg: '"{{ common__param_name }}" is defined correctly: {{ vars[common__param_name] }}'
+    fail_msg: '"{{ common__param_name }}" must be defined.'
+    success_msg: '"{{ common__param_name }}" is defined.'
+
+- name: Store the value of the parameter [{{ common__param_name }}]
+  ansible.builtin.set_fact:
+    param_value: '{{ vars[common__param_name] }}'
+
+
+# ---------- VALIDATIONS FOR EACH VARIABLE TYPE
+
+- name: Validate parameter - number [{{ common__param_name }}]
+  ansible.builtin.assert:
+    that:
+      - param_value is number
+    fail_msg: '"{{ common__param_name }}" must be a number: {{ param_value }}'
+    success_msg: '"{{ common__param_name }}" is defined correctly: {{ param_value }}'
   when: common__param_type == 'number'
 
 - name: Validate parameter - string [{{ common__param_name }}]
   ansible.builtin.assert:
     that:
-      - common__param_name is defined
-      - common__param_name | trim | length >= 3
-    fail_msg: '"{{ common__param_name }}" must have at least three characters alphanumeric: {{ vars[common__param_name] }}'
-    success_msg: '"{{ common__param_name }}" is defined correctly: {{ vars[common__param_name] }}'
+      - param_value | trim | length >= 3
+    fail_msg: '"{{ common__param_name }}" must have at least three characters alphanumeric: {{ param_value }}'
+    success_msg: '"{{ common__param_name }}" is defined correctly: {{ param_value }}'
   when: common__param_type == 'string'
 
 - name: Validate parameter - alphanumeric string [{{ common__param_name }}]
   ansible.builtin.assert:
     that:
-      - common__param_name is defined
-      - common__param_name | trim | length >= 3
-      - '{{ common__param_name }} is match("^[a-zA-Z0-9]*$")'                 # alphanumeric
-    fail_msg: '"{{ common__param_name }}" must have at least three characters alphanumeric: {{ vars[common__param_name] }}'
-    success_msg: '"{{ common__param_name }}" is defined correctly: {{ vars[common__param_name] }}'
+      - param_value | trim | length >= 3
+      - param_value is match('^[a-zA-Z0-9]*$')                 # alphanumeric
+    fail_msg: '"{{ common__param_name }}" must have at least three characters alphanumeric: {{ param_value }}'
+    success_msg: '"{{ common__param_name }}" is defined correctly: {{ param_value }}'
   when: common__param_type == 'alphanumeric'
 
 - name: Validate parameter - alphanumeric string (incl -, _, space) [{{ common__param_name }}]
   ansible.builtin.assert:
     that:
-      - common__param_name is defined
-      - common__param_name | trim | length >= 3
-      - '{{ common__param_name }} is match("^[a-zA-Z0-9_\-. ]*$")'            # alphanumeric _ . - <space>
-    fail_msg: '"{{ common__param_name }}" must have at least three characters alphanumeric: {{ vars[common__param_name] }}'
-    success_msg: '"{{ common__param_name }}" is defined correctly: {{ vars[common__param_name] }}'
+      - param_value | trim | length >= 3
+      - param_value is match("^[a-zA-Z0-9_\-. ]*$")            # alphanumeric _ . - <space>
+    fail_msg: '"{{ common__param_name }}" must have at least three characters alphanumeric: {{ param_value }}'
+    success_msg: '"{{ common__param_name }}" is defined correctly: {{ param_value }}'
   when: common__param_type == 'alphanumeric-ext'
 
 - name: Validate parameter - timezone (alphanumeric, incl _, /) [{{ common__param_name }}]
   ansible.builtin.assert:
     that:
-      - common__param_name is defined
-      - common__param_name | trim | length >= 3
-      - '{{ common__param_name }} is match("^[a-zA-Z0-9_/]*$")'              # alphanumeric _ /
-    fail_msg: '"{{ common__param_name }}" must be a correct timezone: {{ vars[common__param_name] }}'
-    success_msg: '"{{ common__param_name }}" is defined correctly: {{ vars[common__param_name] }}'
+      - param_value | trim | length >= 3
+      - param_value is match("^[a-zA-Z0-9_/]*$")              # alphanumeric _ /
+    fail_msg: '"{{ common__param_name }}" must be a correct timezone: {{ param_value }}'
+    success_msg: '"{{ common__param_name }}" is defined correctly: {{ param_value }}'
   when: common__param_type == 'timezone'
 
 - name: Validate parameter - filename (alphanumeric, incl -, /, _, .) [{{ common__param_name }}]
   ansible.builtin.assert:
     that:
-      - common__param_name is defined
-      - common__param_name | trim | length >= 3
-      - '{{ common__param_name }} is match("^[a-zA-Z0-9_\/\-.]*$")'              # alphanumeric _ / . -
-    fail_msg: '"{{ common__param_name }}" must be a valid filename (with or without a full path): {{ vars[common__param_name] }}'
-    success_msg: '"{{ common__param_name }}" is defined correctly: {{ vars[common__param_name] }}'
+      - param_value | trim | length >= 3
+      - param_value is match("^[a-zA-Z0-9_\/\-.]*$")              # alphanumeric _ / . -
+    fail_msg: '"{{ common__param_name }}" must be a valid filename (with or without a full path): {{ param_value }}'
+    success_msg: '"{{ common__param_name }}" is defined correctly: {{ param_value }}'
   when: common__param_type == 'filename'
 
 - name: Validate parameter - path [{{ common__param_name }}]
   ansible.builtin.assert:
     that:
-      - common__param_name is defined
-      - common__param_name | trim | length >= 3
-      - '{{ common__param_name }} is match("^(([\/~]+[a-zA-Z0-9-_.]+)+|\/)$")'        # path starting with / or ~
-    fail_msg: '"{{ common__param_name }}" must be a valid path, without a trailing slash "/": {{ vars[common__param_name] }}'
-    success_msg: '"{{ common__param_name }}" is defined correctly: {{ vars[common__param_name] }}'
+      - param_value | trim | length >= 3
+      - param_value is match("^(([\/~]+[a-zA-Z0-9-_.]+)+|\/)$")        # path starting with / or ~
+    fail_msg: '"{{ common__param_name }}" must be a valid path, without a trailing slash "/": {{ param_value }}'
+    success_msg: '"{{ common__param_name }}" is defined correctly: {{ param_value }}'
   when: common__param_type == 'path'
 
 - name: Validate parameter - hostname [{{ common__param_name }}]
   ansible.builtin.assert:
     that:
-      - common__param_name is defined
-      # - '{{ common__param_name }} is match("(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)")'    # FQDN
-      - '{{ common__param_name }} is match("((?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$))?")'    # FQDN or empty
-    fail_msg: '"{{ common__param_name }}" must be a hostname: {{ vars[common__param_name] }}'
-    success_msg: '"{{ common__param_name }}" is defined correctly: {{ vars[common__param_name] }}'
+      - param_value is match("((?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$))?")    # FQDN or empty
+    fail_msg: '"{{ common__param_name }}" must be a hostname: {{ param_value }}'
+    success_msg: '"{{ common__param_name }}" is defined correctly: {{ param_value }}'
   when: common__param_type == 'hostname'
 
 - name: Validate parameter - IP address [{{ common__param_name }}]
   ansible.builtin.assert:
     that:
-      - common__param_name is defined
-      - '{{ common__param_name }} is ansible.utils.ipv4'
-    fail_msg: '"{{ common__param_name }}" must be either empty or contain an IP address: {{ vars[common__param_name] }}'
-    success_msg: '"{{ common__param_name }}" is defined correctly: {{ vars[common__param_name] }}'
+      - param_value is ansible.utils.ipv4
+    fail_msg: '"{{ common__param_name }}" must be either empty or contain an IP address: {{ param_value }}'
+    success_msg: '"{{ common__param_name }}" is defined correctly: {{ param_value }}'
   when: common__param_type == 'ip'
 
 - name: Validate parameter - port [{{ common__param_name }}]
   ansible.builtin.assert:
     that:
-      - common__param_name is defined
-      - '{{ common__param_name }} is number'
-      - '{{ common__param_name }} > 0'
-      - '{{ common__param_name }} <= 65535'
-    fail_msg: '"{{ common__param_name }}" must be a number lower than 65535: {{ vars[common__param_name] }}'
-    success_msg: '"{{ common__param_name }}" is defined correctly: {{ vars[common__param_name] }}'
+      - param_value is number
+      - param_value > 0
+      - param_value <= 65535
+    fail_msg: '"{{ common__param_name }}" must be a number lower than 65535: {{ param_value }}'
+    success_msg: '"{{ common__param_name }}" is defined correctly: {{ param_value }}'
   when: common__param_type == 'port'
 
 - name: Validate parameter - boolean [{{ common__param_name }}]
   ansible.builtin.assert:
     that:
-      - common__param_name is defined
-      - '{{ common__param_name }} is boolean'
-    fail_msg: '"{{ common__param_name }}" must be set to either true or false: {{ vars[common__param_name] }}'
-    success_msg: '"{{ common__param_name }}" is defined correctly: {{ vars[common__param_name] }}'
+      - param_value is boolean
+    fail_msg: '"{{ common__param_name }}" must be set to either true or false: {{ param_value }}'
+    success_msg: '"{{ common__param_name }}" is defined correctly: {{ param_value }}'
   when: common__param_type == 'boolean'
 
 - name: Validate parameter - Y/N [{{ common__param_name }}]
   ansible.builtin.assert:
     that:
-      - common__param_name is defined
-      - '{{ common__param_name }} is match("[YN]")'
-    fail_msg: '"{{ common__param_name }}" must be set to either true or false: {{ vars[common__param_name] }}'
-    success_msg: '"{{ common__param_name }}" is defined correctly: {{ vars[common__param_name] }}'
+      - param_value is match("[YN]")
+    fail_msg: '"{{ common__param_name }}" must be set to either true or false: {{ param_value }}'
+    success_msg: '"{{ common__param_name }}" is defined correctly: {{ param_value }}'
   when: common__param_type == 'yn'
 
 - name: Validate parameter - email [{{ common__param_name }}]
   ansible.builtin.assert:
     that:
-      - common__param_name is defined
-      - common__param_name | trim | length >= 3
-      - '{{ common__param_name }} is match("^[a-zA-Z0-9_\-.@]*$")'              # alphanumeric _ . - @
-    fail_msg: '"{{ common__param_name }}" must be set to either true or false: {{ vars[common__param_name] }}'
-    success_msg: '"{{ common__param_name }}" is defined correctly: {{ vars[common__param_name] }}'
+      - param_value | trim | length >= 3
+      - param_value is match("^[a-zA-Z0-9_\-.@]*$")              # alphanumeric _ . - @
+    fail_msg: '"{{ common__param_name }}" must be set to either true or false: {{ param_value }}'
+    success_msg: '"{{ common__param_name }}" is defined correctly: {{ param_value }}'
   when: common__param_type == 'email'
 
 - name: Validate parameter - list [{{ common__param_name }}]
   ansible.builtin.assert:
     that:
-      - common__param_name is defined
-      - '{{ common__param_name }} | type_debug == "list"'
-    fail_msg: '"{{ common__param_name }}" must be a list: {{ vars[common__param_name] | to_nice_json }}'
-    success_msg: '"{{ common__param_name }}" is defined correctly: {{ vars[common__param_name] | to_nice_json }}'
+      - param_value | type_debug == "list"
+    fail_msg: '"{{ common__param_name }}" must be a list: {{ param_value | to_nice_json }}'
+    success_msg: '"{{ common__param_name }}" is defined correctly: {{ param_value | to_nice_json }}'
   when: common__param_type == 'list'
 
 - name: Validate parameter - dictionary [{{ common__param_name }}]
   ansible.builtin.assert:
     that:
-      - common__param_name is defined
-      - '{{ common__param_name }} is not string and {{ common__param_name }} is iterable and {{ common__param_name }} is mapping'
-    fail_msg: '"{{ common__param_name }}" must be a dictionary: {{ vars[common__param_name] | to_nice_json }}'
-    success_msg: '"{{ common__param_name }}" is defined correctly: {{ vars[common__param_name] | to_nice_json }}'
+      - param_value is not string and param_value is iterable and param_value is mapping'
+    fail_msg: '"{{ common__param_name }}" must be a dictionary: {{ param_value | to_nice_json }}'
+    success_msg: '"{{ common__param_name }}" is defined correctly: {{ param_value | to_nice_json }}'
   when: common__param_type == 'dictionary'
