@@ -1,11 +1,11 @@
 ---
-- name: Copy installer package to the remote server
+- name: Copy installer package to the remote server [{{ product.name }}]
   ansible.builtin.copy:
     src: '{{ domino__software_dir }}/{{ product.installer }}'
     dest: '{{ domino__installers_dir }}'
     mode: u=rw,g=r,o=r
 
-- name: Get installer checksum
+- name: Get installer checksum [{{ product.installer }}]
   ansible.builtin.stat:
     path: '{{ domino__installers_dir }}/{{ product.installer }}'
     checksum_algorithm: sha256
@@ -18,7 +18,7 @@
     fail_msg: '"{{ product.installer }}" must has the following checksum: {{ product.checksum }}'
     success_msg: '"{{ product.installer }}" has correct checkum: {{ product.checksum }}'
 
-- name: Unpack installer package
+- name: Unpack installer package [{{ product.installer }}]
   ansible.builtin.unarchive:
     remote_src: true
     src: '{{ domino__installers_dir }}/{{ product.installer }}'

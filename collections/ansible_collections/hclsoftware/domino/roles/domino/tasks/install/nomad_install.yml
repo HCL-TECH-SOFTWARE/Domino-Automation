@@ -13,20 +13,15 @@
 - name: Stop the Domino server
   ansible.builtin.import_tasks: manage/domino_stop.yml
 
-- name: Copy 'nomad' binary files to Domino bineries directory
+- name: Copy Nomad binary files to Domino binaries directory
   become: true
   ansible.builtin.copy:
-    src: '{{ domino__nomad_install }}/{{ nomad_binary }}'
-    dest: /opt/hcl/domino/notes/latest/linux
+    src: '{{ domino__nomad_install }}/'
+    dest: /opt/hcl/domino/notes/latest/linux/
     remote_src: true
     owner: root
     group: root
     mode: u=rwx,g=rx,o=rx
-  loop:
-    - nomad
-    - nwsp-linux
-    - nomad-files
-    - nomad-server-version.txt
   loop_control:
     loop_var: nomad_binary
 

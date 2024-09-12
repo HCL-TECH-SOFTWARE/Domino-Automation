@@ -70,10 +70,13 @@
         version_to_install: '{{ domino_main_version }}'
 
 
+# Before Nomad version 1.0.13, it was distributed in two Domino versions (V12/V14)
 - name: Perform a special task necessary just for Nomad – change version to {{ version_to_install }}-{{ domino_main_version }}
   ansible.builtin.set_fact:
     version_to_install: '{{ version_to_install }}-{{ domino_main_version }}'
-  when: product == 'nomad'
+  when:
+    - product == 'nomad'
+    - 'version_to_install is version("1.0.13", "<", version_type="semver")'
 
 - name: Add the software info to the dictionary - {{ product }} {{ version_to_install }}
   vars:

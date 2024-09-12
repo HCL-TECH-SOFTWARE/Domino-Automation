@@ -17,7 +17,7 @@
 
 - name: Set directory to store temporary files
   ansible.builtin.set_fact:
-    tmp_dir: '{{ lookup("env", "TMPDIR") | default("/tmp") }}'
+    tmp_dir: '{{ lookup("env", "TMPDIR") | default("/tmp", true) }}'
 
 - name: Set default value for user CSV file location, if not set in values
   ansible.builtin.set_fact:
