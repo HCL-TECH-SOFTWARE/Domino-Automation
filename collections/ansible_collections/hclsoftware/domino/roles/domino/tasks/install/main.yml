@@ -20,6 +20,13 @@
     - domino__install_fp
     - not fp_is_installed
 
+- name: Install Domino Interim fix
+  ansible.builtin.import_tasks:
+    file: install/interim_fix_install.yml
+  when:
+    - domino__install_if
+    - not if_is_installed
+
 - name: Install Traveler server
   ansible.builtin.import_tasks:
     file: install/traveler_install.yml

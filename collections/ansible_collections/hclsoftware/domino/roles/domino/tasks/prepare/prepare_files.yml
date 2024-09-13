@@ -55,6 +55,7 @@
     - '{{ domino__install_path }}'
     - '{{ domino__domino_install }}'
     - '{{ domino__fixpack_install }}'
+    - '{{ domino__if_install }}'
     - '{{ domino__traveler_install }}'
     - '{{ domino__verse_install }}'
     - '{{ domino__nomad_install }}'

@@ -53,10 +53,9 @@
 - name: Initially set all products as not installed on the server.
   ansible.builtin.set_fact:
     '{{ product }}_is_installed': '{{ vars[product + "_is_installed"] | default(false) }}'
-  loop: '{{ domino__all_products + ["fp"] }}'
+  loop: '{{ domino__all_products + ["fp"] + ["if"] }}'
   loop_control:
     loop_var: product
-
 
 # Make sure the directory for storing reports exists
 - name: Create reports directory '{{ domino__reports_dir }}'

@@ -7,8 +7,9 @@
   vars:
     version: '{{ (software_latest_result.list | selectattr("product", "equalto", product) | list | first).version }}'
     fixpack: '{{ (software_latest_result.list | selectattr("product", "equalto", product) | list | first).fixpack }}'
+    interim: '{{ (software_latest_result.list | selectattr("product", "equalto", product) | list | first).interim }}'
   ansible.builtin.set_fact:
-    latest_version: '{{ version | trim }}{{ fixpack | trim }}'
+    latest_version: '{{ version | trim }}{{ fixpack | trim }}{{ interim | trim }}'
 
 - name: Use a special version (instead of the latest one), if it is specified in parameters
   vars:
@@ -19,26 +20,31 @@
 - name: Perform special tasks necessary just for Domino
   when: product == 'domino'
   block:
-    - name: 'Strip main version and FixPack version from the version string: {{ version_to_install }}'
+    - name: 'Strip main version, FixPack version and Interim Fix version from the version string: {{ version_to_install }}'
       vars:
-        tmp_fixpack: '{{ (version_to_install | upper).split("FP").1 | default("") }}'
+        tmp_interim: '{{ (version_to_install | upper).split("IF").1 | default("") }}'
+        tmp_domino_fp: '{{ (version_to_install | upper).split("IF").0 | default("") }}'
+        tmp_fixpack: '{{ (tmp_domino_fp | upper).split("FP").1 | default("") }}'
       ansible.builtin.set_fact:
-        domino_main_version: '{{ (version_to_install | upper).split("FP").0 }}'
+        domino_main_version: '{{ (tmp_domino_fp | upper).split("FP").0 | default("") }}'
         domino_fixpack: '{{ (tmp_fixpack | trim | length > 0) | ternary("FP" + tmp_fixpack, "") }}'
+        domino_interim: '{{ (tmp_interim | trim | length > 0) | ternary("IF" + tmp_interim, "") }}'
 
+    # Process FixPack, if present
     - name: Add FixPack to the list of products and to the products info – {{ domino_fixpack }}
       vars:
+        tmp_fp_version: '{{ domino_main_version }}{{ domino_fixpack }}'
         installer: >-
           {{ (software_result.list | selectattr("product", "equalto", product)
-                                   | selectattr("version", "equalto", version_to_install)
+                                   | selectattr("version", "equalto", tmp_fp_version)
                                    | list | first).filename | split(",") | first }}
         checksum: >-
           {{ (software_result.list | selectattr("product", "equalto", product)
-                                  | selectattr("version", "equalto", version_to_install)
+                                  | selectattr("version", "equalto", tmp_fp_version)
                                   | list | first).checksum }}
         fixpack_item: {
           "name": "fp",
-          "version": "{{ version_to_install }}",
+          "version": "{{ tmp_fp_version }}",
           "installer": "{{ installer }}",
           "checksum": "{{ checksum }}",
           "installed": false
@@ -57,7 +63,7 @@
     - name: When the FixPack version is incorrectly specified, fail with a warning
       ansible.builtin.fail:
         msg: |
-          Domino FixPack version specified incorrectly: {{ version_to_install }}
+          Domino FixPack version specified incorrectly: {{ domino_main_version }}{{ domino_fixpack }}
 
           Please check and specify the correct version, or remove the version number completely.
           When no version is specified, the latest one is used.
@@ -65,7 +71,49 @@
           {{ domino__software_directory }}
       when: insert_fixpack_result is failed
 
-    - name: Rewrite the Domino version (remove FixPack)
+    # Process Interim fix, if present
+    - name: Add Interim fix to the list of products and to the products info – {{ domino_interim }}
+      vars:
+        tmp_if_version: '{{ domino_main_version }}{{ domino_fixpack }}{{ domino_interim }}'
+        installer: >-
+          {{ (software_result.list | selectattr("product", "equalto", product)
+                                   | selectattr("version", "equalto", tmp_if_version)
+                                   | list | first).filename | split(",") | first }}
+        checksum: >-
+          {{ (software_result.list | selectattr("product", "equalto", product)
+                                  | selectattr("version", "equalto", tmp_if_version)
+                                  | list | first).checksum }}
+        interim_item: {
+          "name": "if",
+          "version": "{{ tmp_if_version }}",
+          "installer": "{{ installer }}",
+          "checksum": "{{ checksum }}",
+          "installed": false
+        }
+      ansible.builtin.set_fact:
+        product_info: '{{ (product_info | default([])) + [interim_item] }}'
+      register: insert_interim_result
+      ignore_errors: true
+      when: domino_interim | trim | length > 0
+
+    - name: Set the flag to install Interim fix
+      ansible.builtin.set_fact:
+        domino__install_if: true
+      when: domino_interim | trim | length > 0
+
+    - name: When the Interim fix version is incorrectly specified, fail with a warning
+      ansible.builtin.fail:
+        msg: |
+          Domino Interim fix version specified incorrectly: {{ domino_main_version }}{{ domino_fixpack }}{{ domino_interim }}
+
+          Please check and specify the correct version, or remove the version number completely.
+          When no version is specified, the latest one is used.
+          You can find the list of correct prodcut versions in this subdirectory:
+          {{ domino__software_directory }}
+      when: insert_interim_result is failed
+
+
+    - name: Rewrite the Domino version (keep only mail version, without FP and IF)
       ansible.builtin.set_fact:
         version_to_install: '{{ domino_main_version }}'
 
@@ -77,6 +125,7 @@
   when:
     - product == 'nomad'
     - 'version_to_install is version("1.0.13", "<", version_type="semver")'
+
 
 - name: Add the software info to the dictionary - {{ product }} {{ version_to_install }}
   vars:

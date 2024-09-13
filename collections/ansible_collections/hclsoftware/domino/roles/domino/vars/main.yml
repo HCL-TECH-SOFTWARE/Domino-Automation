@@ -52,6 +52,9 @@ domino__domino_install: '{{ domino__install_path }}/{{ domino__domino_install_su
 domino__fixpack_install_subdir: fp
 domino__fixpack_install: '{{ domino__install_path }}/{{ domino__fixpack_install_subdir }}'
 
+domino__if_install_subdir: if
+domino__if_install: '{{ domino__install_path }}/{{ domino__if_install_subdir }}'
+
 domino__traveler_install_subdir: traveler
 domino__traveler_install: '{{ domino__install_path }}/{{ domino__traveler_install_subdir }}'
 
