@@ -1,4 +1,12 @@
 ---
+- name: Calculate defaults
+  ansible.builtin.import_tasks:
+    file: defaults.yml
+  delegate_to: localhost
+  tags:
+    - check
+    - always
+
 - name: Check mandatory parameters
   ansible.builtin.import_tasks:
     file: assert.yml
