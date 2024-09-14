@@ -11,3 +11,5 @@
 - name: Store user names
   ansible.builtin.set_fact:
     users: '{{ users.list }}'
+  when:
+    - domino__register_users

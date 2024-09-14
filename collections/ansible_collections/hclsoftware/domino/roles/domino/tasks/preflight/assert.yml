@@ -9,6 +9,81 @@
       Only RedHat-like OS is supported as of now.
 
 
+# ---------- CHECK PARAMETER VALUES
+
+- name: Check parameters
+  vars:
+    common__param_name: '{{ param.name }}'
+    common__param_type: '{{ param.type }}'
+  ansible.builtin.include_role:
+    name: hclsoftware.domino.common
+    tasks_from: assert_parameter
+  loop:
+    - { name: domino__server_name, type: alphanumeric }
+    - { name: domino__install_path, type: path }
+    - { name: domino__software_dir, type: path }
+    - { name: domino__install_products, type: list }
+    - { name: domino__install_startup_script, type: boolean }
+    - { name: domino__install_ontime, type: boolean }
+    - { name: domino__input_data_location, type: path }
+    - { name: domino__server_name, type: alphanumeric-ext }
+    - { name: domino__domino_hostname, type: hostname }
+    - { name: domino__domino_domain, type: alphanumeric }
+    - { name: domino__org_name, type: alphanumeric }
+    - { name: domino__certifier_password, type: alphanumeric-ext }
+    - { name: domino__admin_password, type: alphanumeric-ext }
+    - { name: domino__use_existing_server_id, type: boolean }
+    - { name: domino__use_existing_certifier_id, type: boolean }
+    - { name: domino__use_existing_admin_id, type: boolean }
+    - { name: domino__register_users, type: boolean }
+    - { name: domino__input_data_users, type: filename }
+    - { name: domino__create_microca, type: boolean }
+    - { name: domino__enable_dkim, type: boolean }
+    - { name: domino__enable_dkim, type: alphanumeric-ext }
+    - { name: domino__restart_after_setup, type: boolean }
+    - { name: domino__sametime_server, type: hostname }
+    - { name: domino__connections_server, type: hostname }
+  loop_control:
+    loop_var: param
+
+- name: Check Custom login form parameters
+  vars:
+    common__param_name: '{{ param.name }}'
+    common__param_type: '{{ param.type }}'
+  ansible.builtin.include_role:
+    name: hclsoftware.domino.common
+    tasks_from: assert_parameter
+  loop:
+    - { name: domino__custom_login_db, type: filename }
+    - { name: domino__custom_login_form, type: alphanumeric-ext }
+  loop_control:
+    loop_var: param
+  when:
+    - domino__use_custom_login
+
+# ---------- CHECK THE SPECIAL PARAMETERS COMBINATION
+
+- name: Check that cert.id is selected together with server.id
+  ansible.builtin.assert:
+    that:
+      - domino__use_existing_certifier_id is defined
+      - domino__use_existing_certifier_id
+    fail_msg: '"domino__use_existing_certifier_id" must be set as true when you enabled "domino__use_existing_server_id"'
+    success_msg: '"domino__use_existing_certifier_id" is defined correctly: {{ domino__use_existing_certifier_id }}'
+  when: domino__use_existing_server_id
+
+- name: Check that cert.id is selected together with admin.id
+  ansible.builtin.assert:
+    that:
+      - domino__use_existing_certifier_id is defined
+      - domino__use_existing_certifier_id
+    fail_msg: '"domino__use_existing_certifier_id" must be set as true when you enabled "domino__use_existing_admin_id"'
+    success_msg: '"domino__use_existing_certifier_id" is defined correctly: {{ domino__use_existing_certifier_id }}'
+  when: domino__use_existing_admin_id
+
+
+# ---------- CHECK FILES AND DIRECTORIES EXIST
+
 - name: Check directories
   vars:
     common__dir_name: '{{ dir }}'
@@ -28,27 +103,6 @@
     name: common
     tasks_from: assert_directory
   when: domino__save_reports
-
-
-# ---------- CHECK THE CUSTOM FILES EXIST
-
-- name: Check that cert.id is selected together with server.id
-  ansible.builtin.assert:
-    that:
-      - domino__use_existing_certifier_id is defined
-      - domino__use_existing_certifier_id
-    fail_msg: '"domino__use_existing_certifier_id" must be set as true when you enabled "domino__use_existing_server_id"'
-    success_msg: '"domino__use_existing_certifier_id" is defined correctly: {{ domino__use_existing_certifier_id }}'
-  when: domino__use_existing_server_id
-
-- name: Check that cert.id is selected together with admin.id
-  ansible.builtin.assert:
-    that:
-      - domino__use_existing_certifier_id is defined
-      - domino__use_existing_certifier_id
-    fail_msg: '"domino__use_existing_certifier_id" must be set as true when you enabled "domino__use_existing_admin_id"'
-    success_msg: '"domino__use_existing_certifier_id" is defined correctly: {{ domino__use_existing_certifier_id }}'
-  when: domino__use_existing_admin_id
 
 - name: Check certifier ID file [{{ domino__cert_id }}]
   vars:
@@ -94,43 +148,3 @@
     tasks_from: assert_file
   when:
     - domino__use_custom_login
-
-
-# ---------- CHECK VARIABLE VALUES
-
-- name: Check parameters
-  vars:
-    common__param_name: '{{ param.name }}'
-    common__param_type: '{{ param.type }}'
-  ansible.builtin.include_role:
-    name: hclsoftware.domino.common
-    tasks_from: assert_parameter
-  loop:
-    - { name: domino__server_name, type: alphanumeric }
-    - { name: domino__install_path, type: path }
-    - { name: domino__software_dir, type: path }
-    - { name: domino__install_products, type: list }
-    - { name: domino__install_startup_script, type: boolean }
-    - { name: domino__install_ontime, type: boolean }
-    - { name: domino__input_data_location, type: path }
-    - { name: domino__custom_login_db, type: filename }
-    - { name: domino__custom_login_form, type: alphanumeric-ext }
-    - { name: domino__server_name, type: alphanumeric-ext }
-    - { name: domino__domino_hostname, type: hostname }
-    - { name: domino__domino_domain, type: alphanumeric }
-    - { name: domino__org_name, type: alphanumeric }
-    - { name: domino__certifier_password, type: alphanumeric-ext }
-    - { name: domino__admin_password, type: alphanumeric-ext }
-    - { name: domino__use_existing_server_id, type: boolean }
-    - { name: domino__use_existing_certifier_id, type: boolean }
-    - { name: domino__use_existing_admin_id, type: boolean }
-    - { name: domino__register_users, type: boolean }
-    - { name: domino__input_data_users, type: filename }
-    - { name: domino__create_microca, type: boolean }
-    - { name: domino__enable_dkim, type: boolean }
-    - { name: domino__enable_dkim, type: alphanumeric-ext }
-    - { name: domino__restart_after_setup, type: boolean }
-    - { name: domino__sametime_server, type: hostname }
-    - { name: domino__connections_server, type: hostname }
-  loop_control:
-    loop_var: param

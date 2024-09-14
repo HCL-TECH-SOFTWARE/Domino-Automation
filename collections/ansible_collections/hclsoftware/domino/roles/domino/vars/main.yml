@@ -71,5 +71,7 @@ domino__response_file: '{{ domino__install_path }}/installer.properties'
 
 domino__nek: credstorekey
 domino__credstore: credstore
+domino__default_login_db: domcfg.nsf
+domino__default_login_form: $$LoginUserForm
 
 domino__dkim_info: dkim-info.txt

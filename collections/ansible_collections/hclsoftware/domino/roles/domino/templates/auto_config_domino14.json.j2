@@ -53,11 +53,13 @@
       "ADMIN_IGNORE_NEW_SERVERNAMING_CONVENTION": "1",
       "LOG_REPLICATION": "0",
       "LOG_SESSIONS": "0",
-      "HTTPPublicURLs": "/iwaredir.nsf/*:/robots.txt:/gtwcustomloginform.nsf/*:/.well-known*",
+      "HTTPPublicURLs": "{{ ots_httppublicurls }}",
       "ENABLE_SNI": "1",
       "HTTPEnableMethods": "GET,POST,PUT,DELETE,HEAD",
       "HTTPJVMMaxHeapSizeSet": "1",
       "HTTPJVMMaxHeapSize": "2048M",
+      "HTTP_LOG_ACCESS_XFORWARDED_FOR": "1",
+      "HTTPEnableConnectorHeaders": "0",
       "ADMIN_CLIENT_SKIP_DOMINO": "1",
       "COMPRESS_LZ1_CREATE": "1",
       "CREATE_NIFNSF_DATABASES": "1",
@@ -81,6 +83,7 @@
       "VOP_GK_FEATURE_230": "1",
       "iNotes_WA_Security_NonceCheck": "0",
       "iNotes_WA_Security_RefererCheck": "0",
+      "DOMINO_FORCE401_WITH_HTML_LOGIN_PAGE": "1",
       {% endif -%}
       {% if domino__install_nomad -%}
       "NOMAD_WEB_HOST": "{{ domino__domino_hostname }}",
@@ -348,8 +351,8 @@
             "action": "create",
             "items": {
               "Form": "LoginMap",
-              "LF_LoginForm": "CustomLoginForm",
-              "LF_LoginFormDB": "domcfg.nsf",
+              "LF_LoginForm": "{{ ots_lf_loginformform }}",
+              "LF_LoginFormDB": "{{ ots_lf_loginformdb }}",
               "LF_ServerType": "0",
               "LF_IP": "",
               "$PublicAccess": "1"
