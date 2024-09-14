@@ -1,5 +1,5 @@
 ---
-- name: Do pre-flight checks
+- name: Do preflight checks
   ansible.builtin.import_tasks:
     file: preflight/main.yml
   tags:

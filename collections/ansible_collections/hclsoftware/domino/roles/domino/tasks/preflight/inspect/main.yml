@@ -7,9 +7,13 @@
   ansible.builtin.import_tasks:
     file: preflight/inspect/domino.yml
 
-- name: Check the Domino Fixpack version installed on the server
+- name: Check the Domino FixPack version installed on the server
   ansible.builtin.import_tasks:
     file: preflight/inspect/fp.yml
+
+- name: Check the Domino Interim fix version installed on the server
+  ansible.builtin.import_tasks:
+    file: preflight/inspect/if.yml
 
 - name: Check the Verse version installed on the server
   ansible.builtin.import_tasks:

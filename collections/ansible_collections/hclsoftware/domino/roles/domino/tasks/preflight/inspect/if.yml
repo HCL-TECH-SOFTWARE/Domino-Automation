@@ -1,0 +1,34 @@
+---
+
+# ---------- CHECK WHETHER DOMINO INTERIM FIX IS ALREADY INSTALLED
+
+- name: Check if Interim fix directory exists
+  ansible.builtin.stat:
+    path: /opt/hcl/domino/notes/latest/linux/140FP2HF8
+  register: if_installed_result
+
+- name: Mark Domino Interim fix as installed (single variable)
+  ansible.builtin.set_fact:
+    if_is_installed: true
+  when:
+    - if_installed_result.stat.exists
+
+- name: Mark Domino Interim fix as installed (sw dictionary)
+  vars:
+    index: '{{ product_info | ansible.utils.index_of("eq", "if", "name") }}'
+  ansible.utils.update_fact:
+    updates:
+      - path: 'product_info.{{ index }}.installed'
+        value: true
+  when:
+    - if_installed_result.stat.exists
+    - domino__install_if
+  changed_when: false
+  register: product_info_updated_result
+
+- name: Store the updated value into the master fact
+  ansible.builtin.set_fact:
+    product_info: '{{ product_info_updated_result.product_info }}'
+  when:
+    - if_installed_result.stat.exists
+    - domino__install_if
