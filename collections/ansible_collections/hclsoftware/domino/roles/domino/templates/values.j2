@@ -33,15 +33,33 @@ DOMINO - SETUP
 
   Restart Domino after setup: {{ domino__restart_after_setup }}
 
+DOMINO - ADDITIONAL SERVERS
+  Register addt’l. servers:   {{ domino__setup_additional_servers }}
+{% if domino__setup_additional_servers %}
+  Additional servers:         {{ domino__additional_servers }}
+  Servers ID location:        {{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/ids
+{% endif %}
+  Install as addt’l. server:  {{ domino__install_as_additional }}
+{% if domino__install_as_additional %}
+  Existing server name:       {{ domino__existing_server_name }}
+  Existing server address:    {{ domino__existing_server_address }}
+{% endif %}
+
 LOCAL - CUSTOM FILES
   Installer directory:        {{ domino__software_dir }}
   Custom files directory:     {{ domino__input_data_location }}
   Use existing cert ID:       {{ domino__use_existing_certifier_id }}
   Use existing server ID:     {{ domino__use_existing_server_id }}
   Use existing admin ID:      {{ domino__use_existing_admin_id }}
+{% if domino__use_existing_certifier_id %}
   Certificate ID file:        {{ domino__cert_id }}
+{% endif %}
+{% if domino__use_existing_server_id %}
   Server ID file:             {{ domino__server_id }}
+{% endif %}
+{% if domino__use_existing_admin_id %}
   Admin ID file:              {{ domino__admin_id }}
+{% endif %}
   Save reports:               {{ domino__save_reports }}
 {% if domino__save_reports %}
   Reports directory:          {{ domino__reports_dir }}

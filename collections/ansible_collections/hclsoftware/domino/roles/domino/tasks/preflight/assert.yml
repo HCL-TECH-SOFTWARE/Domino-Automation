@@ -9,9 +9,9 @@
       Only RedHat-like OS is supported as of now.
 
 
-# ---------- CHECK PARAMETER VALUES
+# ---------- CHECK MANDATORY PARAMETER VALUES
 
-- name: Check parameters
+- name: Check mandatory parameters
   vars:
     common__param_name: '{{ param.name }}'
     common__param_type: '{{ param.type }}'
@@ -41,10 +41,16 @@
     - { name: domino__enable_dkim, type: boolean }
     - { name: domino__enable_dkim, type: alphanumeric-ext }
     - { name: domino__restart_after_setup, type: boolean }
+    - { name: domino__wait_mins_after_restart, type: number }
+    - { name: domino__setup_additional_servers, type: boolean }
+    - { name: domino__install_as_additional, type: boolean }
     - { name: domino__sametime_server, type: hostname }
     - { name: domino__connections_server, type: hostname }
   loop_control:
     loop_var: param
+
+
+# ---------- CHECK OPTIONAL PARAMETER VALUES
 
 - name: Check Custom login form parameters
   vars:
@@ -60,6 +66,36 @@
     loop_var: param
   when:
     - domino__use_custom_login
+
+- name: Check Register additional servers parameter
+  vars:
+    common__param_name: '{{ param.name }}'
+    common__param_type: '{{ param.type }}'
+  ansible.builtin.include_role:
+    name: hclsoftware.domino.common
+    tasks_from: assert_parameter
+  loop:
+    - { name: domino__additional_servers, type: list }
+  loop_control:
+    loop_var: param
+  when:
+    - domino__setup_additional_servers
+
+- name: Check Install as additional server parameter
+  vars:
+    common__param_name: '{{ param.name }}'
+    common__param_type: '{{ param.type }}'
+  ansible.builtin.include_role:
+    name: hclsoftware.domino.common
+    tasks_from: assert_parameter
+  loop:
+    - { name: domino__existing_server_name, type: string }
+    - { name: domino__existing_server_address, type: string }
+  loop_control:
+    loop_var: param
+  when:
+    - domino__install_as_additional
+
 
 # ---------- CHECK THE SPECIAL PARAMETERS COMBINATION
 
@@ -81,8 +117,26 @@
     success_msg: '"domino__use_existing_certifier_id" is defined correctly: {{ domino__use_existing_certifier_id }}'
   when: domino__use_existing_admin_id
 
+- name: Check that only one parameter is selected for additional servers
+  ansible.builtin.fail:
+    msg: |
+      Both "domino__setup_additional_servers" and "domino__install_as_additional"
+      parameters are set as True.
+      Only one can be set as True, or both set as False.
+  when:
+    - domino__setup_additional_servers
+    - domino__install_as_additional
 
-# ---------- CHECK FILES AND DIRECTORIES EXIST
+- name: Check that at least one additional server is specified
+  ansible.builtin.assert:
+    that:
+      - domino__additional_servers | length > 0
+    fail_msg: '"domino__additional_servers" must contain at least one server name "{{ domino__additional_servers }}"'
+    success_msg: '"domino__additional_servers" is defined correctly: {{ domino__additional_servers }}'
+  when: domino__setup_additional_servers
+
+
+# ---------- CHECK THAT FILES AND DIRECTORIES EXIST
 
 - name: Check directories
   vars:

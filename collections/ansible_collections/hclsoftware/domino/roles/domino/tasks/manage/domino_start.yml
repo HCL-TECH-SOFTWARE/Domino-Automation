@@ -5,9 +5,9 @@
     name: domino
     state: started
 
-- name: Wait for 1 minute to finish the start
+- name: Wait for {{ domino__wait_mins_after_restart }} minute(s) to finish the start
   ansible.builtin.pause:
-    minutes: 1
+    minutes: '{{ domino__wait_mins_after_restart }}'
 
 - name: Wait until HTTP task is logged in the console.log file
   become: true

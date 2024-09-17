@@ -1,4 +1,9 @@
 {
+  "autoConfigPreferences": {
+    "consoleLogOutput": {
+      "show": "all"
+    }
+  },
   "serverSetup": {
     "server": {
       "type": "first",
@@ -91,6 +96,20 @@
       "FTG_USE_SYS_MEMORY": "1",
       "DEBUG_THREADID": "0"
     },
+
+    {% if domino__setup_additional_servers -%}
+    "autoRegister": {
+      "IDPath": "/local/notesdata",
+      "serverNames" : {{ domino__additional_servers | to_json }}
+    },
+    {% endif -%}
+
+    {% if domino__install_as_additional -%}
+    "existingServer": {
+      "CN": "{{ domino__existing_server_name }}",
+      "hostNameOrIP": "{{ domino__existing_server_address }}"
+    },
+    {% endif -%}
 
     {% if domino__register_users -%}
     "registerUsers": {
@@ -364,4 +383,3 @@
     ]
   }
 }
-

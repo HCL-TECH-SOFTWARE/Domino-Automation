@@ -44,7 +44,7 @@
 - name: Initially set all products to NOT install.
   ansible.builtin.set_fact:
     'domino__install_{{ product }}': '{{ vars["domino__install_" + product] | default(false) }}'
-  loop: '{{ domino__all_products + ["fp"] }}'
+  loop: '{{ domino__all_products + ["fp"] + ["if"] }}'
   loop_control:
     loop_var: product
 

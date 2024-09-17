@@ -5,9 +5,9 @@
     name: domino
     state: stopped
 
-- name: Wait for 1 minute to finish server stop
+- name: Wait for {{ domino__wait_mins_after_restart }} minute(s) to finish server stop
   ansible.builtin.pause:
-    minutes: 1
+    minutes: '{{ domino__wait_mins_after_restart }}'
 
 - name: Wait until the Domino server is fully stopped
   become: true

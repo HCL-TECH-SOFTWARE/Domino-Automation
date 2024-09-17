@@ -38,7 +38,17 @@ domino__use_custom_login: false
 domino__create_microca: false
 domino__enable_dkim: false
 domino__dkim_selector: ''
+
+# Restarts
 domino__restart_after_setup: false
+domino__wait_mins_after_restart: 1
+
+# Additional servers
+domino__setup_additional_servers: false
+domino__additional_servers: []
+domino__install_as_additional: false
+domino__existing_server_name: ''
+domino__existing_server_address: ''
 
 # Custom input files
 domino__input_data_location: local
