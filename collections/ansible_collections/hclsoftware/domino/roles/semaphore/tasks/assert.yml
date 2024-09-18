@@ -35,7 +35,7 @@
     - { name: semaphore__username, type: alphanumeric }
     - { name: semaphore__password, type: string }
     - { name: semaphore__hostname, type: string }
-    - { name: semaphore__port, type: number }
+    - { name: semaphore__port, type: port }
     - { name: semaphore__project, type: alphanumeric-ext }
     - { name: semaphore__repository, type: alphanumeric-ext }
     - { name: semaphore__repository_path, type: path }
