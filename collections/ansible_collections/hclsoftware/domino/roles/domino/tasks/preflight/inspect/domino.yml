@@ -4,31 +4,103 @@
 
 - name: Check if Domino log file file exists
   ansible.builtin.stat:
-    path: /local/notesdata/log.nsf
+    path: /local/notesdata/notes.ini
   register: domino_installed_result
 
-- name: Mark Domino as installed (single variable)
-  ansible.builtin.set_fact:
-    domino_is_installed: true
-  when:
-    - domino_installed_result.stat.exists
+- name: Perform tasks when Domino server is already installed
+  when: domino_installed_result.stat.exists
+  block:
+    # Example of the line in notes.ini: FaultRecovery_Build=Release 14.0FP2
+    # The command cuts away characters right to the space
+    - name: Get Traveler version from a file
+      ansible.builtin.shell:
+        chdir: /local/notesdata
+        cmd: set -o pipefail && grep "FaultRecovery_Build" notes.ini | cut -d ' ' -f 2
+      changed_when: false
+      register: domino_version_result
 
-- name: Mark Domino as installed (sw dictionary)
-  vars:
-    index: '{{ product_info | ansible.utils.index_of("eq", "domino", "name") }}'
-  ansible.utils.update_fact:
-    updates:
-      - path: 'product_info.{{ index }}.installed'
-        value: true
-  when:
-    - domino_installed_result.stat.exists
-    - domino__install_domino
-  changed_when: false
-  register: product_info_updated_result
+# --- Split version string into mail version, fixpack, interim fix
 
-- name: Store the updated value into the master fact
-  ansible.builtin.set_fact:
-    product_info: '{{ product_info_updated_result.product_info }}'
-  when:
-    - domino_installed_result.stat.exists
-    - domino__install_domino
+    - name: 'Strip main version, FixPack version and Interim Fix version from the version string: {{ version_to_install }}'
+      vars:
+        tmp_interim: '{{ (domino_version_result.stdout | upper).split("IF").1 | default("") }}'
+        tmp_domino_fp: '{{ (domino_version_result.stdout | upper).split("IF").0 | default("") }}'
+        tmp_fixpack: '{{ (domino_version_result.stdout | upper).split("FP").1 | default("") }}'
+      ansible.builtin.set_fact:
+        domino_main_version: '{{ (tmp_domino_fp | upper).split("FP").0 | default("") }}'
+        fixpack_version: '{{ (tmp_fixpack | trim | length > 0) | ternary("FP" + tmp_fixpack, "") }}'
+        interim_version: '{{ (tmp_interim | trim | length > 0) | ternary("IF" + tmp_interim, "") }}'
+
+    # --- Process Domino version
+
+    - name: Process Domino version - {{ domino_main_version }}
+      block:
+        - name: Mark Domino as installed (single variable)
+          ansible.builtin.set_fact:
+            domino_is_installed: true
+
+        - name: Mark Domino as installed (sw dictionary)
+          vars:
+            index: '{{ product_info | ansible.utils.index_of("eq", "domino", "name") }}'
+          ansible.utils.update_fact:
+            updates:
+              - path: 'product_info.{{ index }}.installed'
+                value: true
+              - path: 'product_info.{{ index }}.installed_version'
+                value: '{{ domino_main_version }}'
+          changed_when: false
+          register: domino_version_updated_result
+
+        - name: Store the updated value into the master fact
+          ansible.builtin.set_fact:
+            product_info: '{{ domino_version_updated_result.product_info }}'
+
+    # --- Process FixPack version
+
+    - name: Process FixPack version - {{ domino_main_version }}{{ fixpack_version }}
+      when: fixpack_version | trim | length > 0
+      block:
+        - name: Mark FixPack as installed (single variable)
+          ansible.builtin.set_fact:
+            fp_is_installed: true
+
+        - name: Mark FixPack as installed (sw dictionary)
+          vars:
+            index: '{{ product_info | ansible.utils.index_of("eq", "fp", "name") }}'
+          ansible.utils.update_fact:
+            updates:
+              - path: 'product_info.{{ index }}.installed'
+                value: true
+              - path: 'product_info.{{ index }}.installed_version'
+                value: '{{ domino_main_version }}{{ fixpack_version }}'
+          changed_when: false
+          register: fixpack_version_updated_result
+
+        - name: Store the updated value into the master fact
+          ansible.builtin.set_fact:
+            product_info: '{{ fixpack_version_updated_result.product_info }}'
+
+    # --- Process Interim fix version
+
+    - name: Process Interim fix version - {{ domino_main_version }}{{ fixpack_version }}{{ interim_version }}
+      when: interim_version | trim | length > 0
+      block:
+        - name: Mark Interim fix as installed (single variable)
+          ansible.builtin.set_fact:
+            if_is_installed: true
+
+        - name: Mark Interim fix as installed (sw dictionary)
+          vars:
+            index: '{{ product_info | ansible.utils.index_of("eq", "if", "name") }}'
+          ansible.utils.update_fact:
+            updates:
+              - path: 'product_info.{{ index }}.installed'
+                value: true
+              - path: 'product_info.{{ index }}.installed_version'
+                value: '{{ domino_main_version }}{{ fixpack_version }}{{ interim_version }}'
+          changed_when: false
+          register: interim_version_updated_result
+
+        - name: Store the updated value into the master fact
+          ansible.builtin.set_fact:
+            product_info: '{{ interim_version_updated_result.product_info }}'

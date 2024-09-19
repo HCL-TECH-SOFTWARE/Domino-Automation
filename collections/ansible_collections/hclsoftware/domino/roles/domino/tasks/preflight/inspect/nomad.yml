@@ -2,33 +2,43 @@
 
 # ---------- CHECK WHETHER NOMAD IS ALREADY INSTALLED
 
-- name: Check if Domino log file file exists
+- name: Check if Nomad version file file exists
   ansible.builtin.stat:
-    path: /local/notesdata/log.nsf
+    path: /opt/hcl/domino/notes/latest/linux/nomad-files/nomad-web-version.txt
   register: nomad_installed_result
 
-- name: Mark Nomad as installed (single variable)
-  ansible.builtin.set_fact:
-    nomad_is_installed: true
-  when:
-    - nomad_installed_result.stat.exists
+- name: Perform tasks when Nomad server is already installed
+  when: nomad_installed_result.stat.exists
+  block:
+    # Example of the Nomad version written in the file: 1.0.12.43-35
+    # The command cuts away characters right to the last dot
+    - name: Get Nomad version from a file
+      ansible.builtin.shell:
+        chdir: /opt/hcl/domino/notes/latest/linux/nomad-files
+        cmd: set -o pipefail && cat nomad-web-version.txt | sed 's|\(.*\)\..*|\1|'
+      changed_when: false
+      register: nomad_version_result
 
-- name: Mark Nomad as installed (sw dictionary)
-  vars:
-    index: '{{ product_info | ansible.utils.index_of("eq", "nomad", "name") }}'
-  ansible.utils.update_fact:
-    updates:
-      - path: 'product_info.{{ index }}.installed'
-        value: true
-  when:
-    - nomad_installed_result.stat.exists
-    - domino__install_nomad
-  changed_when: false
-  register: product_info_updated_result
+    - name: Store installed Nomad version
+      ansible.builtin.set_fact:
+        nomad_version: '{{ nomad_version_result.stdout }}'
 
-- name: Store the updated value into the master fact
-  ansible.builtin.set_fact:
-    product_info: '{{ product_info_updated_result.product_info }}'
-  when:
-    - nomad_installed_result.stat.exists
-    - domino__install_nomad
+    - name: Mark Nomad as installed (single variable)
+      ansible.builtin.set_fact:
+        nomad_is_installed: true
+
+    - name: Mark Nomad as installed (sw dictionary)
+      vars:
+        index: '{{ product_info | ansible.utils.index_of("eq", "nomad", "name") }}'
+      ansible.utils.update_fact:
+        updates:
+          - path: 'product_info.{{ index }}.installed'
+            value: true
+          - path: 'product_info.{{ index }}.installed_version'
+            value: '{{ nomad_version }}'
+      changed_when: false
+      register: product_info_updated_result
+
+    - name: Store the updated value into the master fact
+      ansible.builtin.set_fact:
+        product_info: '{{ product_info_updated_result.product_info }}'

@@ -15,7 +15,7 @@ DOMINO - PRODUCTS TO INSTALL
 DOMINO - PRODUCT VERSIONS
 {% for product in product_info | sort(attribute='name') | json_query("[?install]") %}
   {%- set installer = product.installer %}
-  {%- set installed = "(some version already installed)" if product.installed else ""  %}
+  {%- set installed = "// already installed " ~ product.installed_version if product.installed else ""  %}
   {{ "%-10s"|format(product.name) }} {{ "%-16s"|format(product.version) }} {{ "%-50s"|format(installer) }} {{ installed }}
 {% endfor %}
 

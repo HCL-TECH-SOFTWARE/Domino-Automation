@@ -7,28 +7,36 @@
     path: /opt/hcl/domino/notes/latest/linux/traveler
   register: traveler_installed_result
 
-- name: Mark Traveler as installed (single variable)
-  ansible.builtin.set_fact:
-    traveler_is_installed: true
-  when:
-    - traveler_installed_result.stat.exists
+- name: Perform tasks when Traveler server is already installed
+  when: traveler_installed_result.stat.exists
+  block:
+    - name: Get Traveler version from a file
+      ansible.builtin.shell:
+        chdir: /opt/hcl/domino/notes/latest/linux/Traveler/license
+        cmd: set -o pipefail && grep "HCL Traveler" notices.txt | cut -d ' ' -f 3
+      changed_when: false
+      register: traveler_version_result
 
-- name: Mark Traveler as installed (sw dictionary)
-  vars:
-    index: '{{ product_info | ansible.utils.index_of("eq", "traveler", "name") }}'
-  ansible.utils.update_fact:
-    updates:
-      - path: 'product_info.{{ index }}.installed'
-        value: true
-  when:
-    - traveler_installed_result.stat.exists
-    - domino__install_traveler
-  changed_when: false
-  register: product_info_updated_result
+    - name: Store installed Traveler version
+      ansible.builtin.set_fact:
+        traveler_version: '{{ traveler_version_result.stdout }}'
 
-- name: Store the updated value into the master fact
-  ansible.builtin.set_fact:
-    product_info: '{{ product_info_updated_result.product_info }}'
-  when:
-    - traveler_installed_result.stat.exists
-    - domino__install_traveler
+    - name: Mark Traveler as installed (single variable)
+      ansible.builtin.set_fact:
+        traveler_is_installed: true
+
+    - name: Mark Traveler as installed (sw dictionary)
+      vars:
+        index: '{{ product_info | ansible.utils.index_of("eq", "traveler", "name") }}'
+      ansible.utils.update_fact:
+        updates:
+          - path: 'product_info.{{ index }}.installed'
+            value: true
+          - path: 'product_info.{{ index }}.installed_version'
+            value: '{{ traveler_version }}'
+      changed_when: false
+      register: product_info_updated_result
+
+    - name: Store the updated value into the master fact
+      ansible.builtin.set_fact:
+        product_info: '{{ product_info_updated_result.product_info }}'

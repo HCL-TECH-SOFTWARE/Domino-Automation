@@ -46,7 +46,8 @@
     new_item: {
       "name": "{{ product }}",
       "install": false,
-      "installed": false
+      "installed": false,
+      "installed_version": ""
     }
   ansible.builtin.set_fact:
     'domino__install_{{ product }}': '{{ vars["domino__install_" + product] | default(false) }}'
