@@ -13,8 +13,8 @@ DOMINO - PRODUCTS TO INSTALL
   Startup Script:             {{ domino__install_startup_script }}
 
 DOMINO - PRODUCT VERSIONS
-{% for product in product_info | sort(attribute='name') %}
-  {%- set installer = product.installer | split(",") | first  %}
+{% for product in product_info | sort(attribute='name') | json_query("[?install]") %}
+  {%- set installer = product.installer %}
   {%- set installed = "(some version already installed)" if product.installed else ""  %}
   {{ "%-10s"|format(product.name) }} {{ "%-16s"|format(product.version) }} {{ "%-50s"|format(installer) }} {{ installed }}
 {% endfor %}

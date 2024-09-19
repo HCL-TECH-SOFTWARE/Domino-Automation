@@ -33,32 +33,45 @@
     # Process FixPack, if present
     - name: Add FixPack to the list of products and to the products info – {{ domino_fixpack }}
       vars:
+        index: '{{ product_info | ansible.utils.index_of("eq", "fp", "name") }}'
         tmp_fp_version: '{{ domino_main_version }}{{ domino_fixpack }}'
         installer: >-
           {{ (software_result.list | selectattr("product", "equalto", product)
-                                   | selectattr("version", "equalto", tmp_fp_version)
-                                   | list | first).filename | split(",") | first }}
+                                  | selectattr("version", "equalto", tmp_fp_version)
+                                  | list | first).filename }}
+        first_installer: '{{ installer.split(",").0 }}'
         checksum: >-
           {{ (software_result.list | selectattr("product", "equalto", product)
                                   | selectattr("version", "equalto", tmp_fp_version)
                                   | list | first).checksum }}
-        fixpack_item: {
-          "name": "fp",
-          "version": "{{ tmp_fp_version }}",
-          "installer": "{{ installer }}",
-          "checksum": "{{ checksum }}",
-          "installed": false
-        }
-      ansible.builtin.set_fact:
-        product_info: '{{ (product_info | default([])) + [fixpack_item] }}'
-      register: insert_fixpack_result
+      ansible.utils.update_fact:
+        updates:
+          - path: 'product_info.{{ index }}.version'
+            value: '{{ tmp_fp_version }}'
+          - path: 'product_info.{{ index }}.installer'
+            value: '{{ first_installer }}'
+          - path: 'product_info.{{ index }}.checksum'
+            value: '{{ checksum }}'
+          - path: 'product_info.{{ index }}.install'
+            value: true
+      changed_when: false
       ignore_errors: true
-      when: domino_fixpack | trim | length > 0
+      register: fp_info_updated_result
+      when:
+        - domino_fixpack | trim | length > 0
+
+    - name: Store the FixPack updated value into the master fact
+      ansible.builtin.set_fact:
+        product_info: '{{ fp_info_updated_result.product_info }}'
+      when:
+        - domino_fixpack | trim | length > 0
+        - fp_info_updated_result is not failed
 
     - name: Set the flag to install FixPack
       ansible.builtin.set_fact:
         domino__install_fp: true
-      when: domino_fixpack | trim | length > 0
+      when:
+        - domino_fixpack | trim | length > 0
 
     - name: When the FixPack version is incorrectly specified, fail with a warning
       ansible.builtin.fail:
@@ -69,37 +82,51 @@
           When no version is specified, the latest one is used.
           You can find the list of correct prodcut versions in this subdirectory:
           {{ domino__software_directory }}
-      when: insert_fixpack_result is failed
+      when:
+        - domino_fixpack | trim | length > 0
+        - fp_info_updated_result is failed
 
     # Process Interim fix, if present
     - name: Add Interim fix to the list of products and to the products info – {{ domino_interim }}
       vars:
+        index: '{{ product_info | ansible.utils.index_of("eq", "if", "name") }}'
         tmp_if_version: '{{ domino_main_version }}{{ domino_fixpack }}{{ domino_interim }}'
         installer: >-
           {{ (software_result.list | selectattr("product", "equalto", product)
-                                   | selectattr("version", "equalto", tmp_if_version)
-                                   | list | first).filename | split(",") | first }}
+                                  | selectattr("version", "equalto", tmp_if_version)
+                                  | list | first).filename }}
         checksum: >-
           {{ (software_result.list | selectattr("product", "equalto", product)
                                   | selectattr("version", "equalto", tmp_if_version)
                                   | list | first).checksum }}
-        interim_item: {
-          "name": "if",
-          "version": "{{ tmp_if_version }}",
-          "installer": "{{ installer }}",
-          "checksum": "{{ checksum }}",
-          "installed": false
-        }
-      ansible.builtin.set_fact:
-        product_info: '{{ (product_info | default([])) + [interim_item] }}'
-      register: insert_interim_result
+      ansible.utils.update_fact:
+        updates:
+          - path: 'product_info.{{ index }}.version'
+            value: '{{ tmp_if_version }}'
+          - path: 'product_info.{{ index }}.installer'
+            value: '{{ installer }}'
+          - path: 'product_info.{{ index }}.checksum'
+            value: '{{ checksum }}'
+          - path: 'product_info.{{ index }}.install'
+            value: true
+      changed_when: false
       ignore_errors: true
-      when: domino_interim | trim | length > 0
+      register: if_info_updated_result
+      when:
+        - domino_interim | trim | length > 0
+
+    - name: Store the Interim fix updated value into the master fact
+      ansible.builtin.set_fact:
+        product_info: '{{ if_info_updated_result.product_info }}'
+      when:
+        - domino_interim | trim | length > 0
+        - if_info_updated_result is not failed
 
     - name: Set the flag to install Interim fix
       ansible.builtin.set_fact:
         domino__install_if: true
-      when: domino_interim | trim | length > 0
+      when:
+        - domino_interim | trim | length > 0
 
     - name: When the Interim fix version is incorrectly specified, fail with a warning
       ansible.builtin.fail:
@@ -110,7 +137,9 @@
           When no version is specified, the latest one is used.
           You can find the list of correct prodcut versions in this subdirectory:
           {{ domino__software_directory }}
-      when: insert_interim_result is failed
+      when:
+        - domino_interim | trim | length > 0
+        - if_info_updated_result is failed
 
 
     - name: Rewrite the Domino version (keep only mail version, without FP and IF)
@@ -127,8 +156,9 @@
     - 'version_to_install is version("1.0.13", "<", version_type="semver")'
 
 
-- name: Add the software info to the dictionary - {{ product }} {{ version_to_install }}
+- name: Update the software info in the dictionary - {{ product }} {{ version_to_install }}
   vars:
+    index: '{{ product_info | ansible.utils.index_of("eq", product, "name") }}'
     installer: >-
       {{ (software_result.list | selectattr("product", "equalto", product)
                                | selectattr("version", "equalto", version_to_install)
@@ -137,17 +167,25 @@
       {{ (software_result.list | selectattr("product", "equalto", product)
                                | selectattr("version", "equalto", version_to_install)
                                | list | first).checksum }}
-    new_item: {
-      "name": "{{ product }}",
-      "version": "{{ version_to_install }}",
-      "installer": "{{ installer }}",
-      "checksum": "{{ checksum }}",
-      "installed": false
-    }
-  ansible.builtin.set_fact:
-    product_info: '{{ (product_info | default([])) + [new_item] }}'
-  register: insert_fixpack_result
+  ansible.utils.update_fact:
+    updates:
+      - path: 'product_info.{{ index }}.version'
+        value: '{{ version_to_install }}'
+      - path: 'product_info.{{ index }}.installer'
+        value: '{{ installer }}'
+      - path: 'product_info.{{ index }}.checksum'
+        value: '{{ checksum }}'
+      - path: 'product_info.{{ index }}.install'
+        value: true
+  # changed_when: false
   ignore_errors: true
+  register: product_info_updated_result
+
+- name: Store the product updated value into the master fact
+  ansible.builtin.set_fact:
+    product_info: '{{ product_info_updated_result.product_info }}'
+  when:
+    - product_info_updated_result is not failed
 
 - name: When the product version is incorrectly specified, fail with a warning
   ansible.builtin.fail:
@@ -158,4 +196,5 @@
       When no version is specified, the latest one is used.
       You can find the list of correct prodcut versions in this subdirectory:
       {{ domino__software_directory }}
-  when: insert_fixpack_result is failed
+  when:
+    - product_info_updated_result is failed

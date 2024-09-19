@@ -67,7 +67,7 @@
 - name: Fetch server IDs for newly created additional servers
   ansible.builtin.fetch:
     src: '/local/notesdata/{{ server_id }}.id'
-    dest: '{{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/ids/server-{{ server_id }}.id'
+    dest: '{{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/ids/server-{{ server_id | lower }}.id'
     flat: true
   loop: '{{ domino__additional_servers }}'
   loop_control:

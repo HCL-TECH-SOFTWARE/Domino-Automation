@@ -40,19 +40,18 @@
 # ---------- Erase information about product installation
 
 # Initiallly set to False, unless explicitely specified in the vars.
-# The value changes to True if a product is in domino__install_products parameter.
-- name: Initially set all products to NOT install.
-  ansible.builtin.set_fact:
-    'domino__install_{{ product }}': '{{ vars["domino__install_" + product] | default(false) }}'
-  loop: '{{ domino__all_products + ["fp"] + ["if"] }}'
-  loop_control:
-    loop_var: product
-
-# Initiallly set to False, unless explicitely specified in the vars.
 # The value changes to True if a product is later inspected as installed.
 - name: Initially set all products as not installed on the server.
+  vars:
+    new_item: {
+      "name": "{{ product }}",
+      "install": false,
+      "installed": false
+    }
   ansible.builtin.set_fact:
+    'domino__install_{{ product }}': '{{ vars["domino__install_" + product] | default(false) }}'
     '{{ product }}_is_installed': '{{ vars[product + "_is_installed"] | default(false) }}'
+    product_info: '{{ (product_info | default([])) + [new_item] }}'
   loop: '{{ domino__all_products + ["fp"] + ["if"] }}'
   loop_control:
     loop_var: product

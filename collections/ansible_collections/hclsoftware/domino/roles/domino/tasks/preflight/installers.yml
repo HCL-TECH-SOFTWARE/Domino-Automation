@@ -2,7 +2,7 @@
 - name: Check that all the product installers are in the local directory
   ansible.builtin.include_tasks:
     file: preflight/installers_task.yml
-  loop: '{{ product_info }}'
+  loop: '{{ product_info | json_query("[?install]") }}'
   loop_control:
     loop_var: product
     label: '{{ product.name }}'
