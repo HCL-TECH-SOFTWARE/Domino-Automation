@@ -1,5 +1,4 @@
 ---
-
 - name: Check that at least one Verse binary file exists
   ansible.builtin.find:
     paths: /local/notesdata/domino/workspace/applications/eclipse/plugins
@@ -13,7 +12,7 @@
   block:
     - name: Get version from the Verse binary filename
       vars:
-        # Soft the list of all core-*.jar files and take the last one (with the highest version)
+        # Sort the list of all core-*.jar files and take the last one (with the highest version)
         verse_filename: '{{ verse_find_result.files | json_query("[*].path") | sort | last | basename }}'
       ansible.builtin.set_fact:
         # Get the version substring from the filename

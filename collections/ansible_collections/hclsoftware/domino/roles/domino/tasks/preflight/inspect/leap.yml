@@ -1,32 +1,43 @@
 ---
+- name: Check that at least one Domino Leap binary file exists
+  ansible.builtin.find:
+    paths: /opt/hcl/domino/notes/latest/linux/osgi/volt/eclipse/plugins
+    patterns: 'dleap-*.jar'
+    file_type: file
+    recurse: false
+  register: leap_find_result
 
-- name: Check if Domino Leap directory exists
-  ansible.builtin.stat:
-    path: /local/notesdata/volt
-  register: leap_installed_result
+- name: Perform tasks when Domino Leap server is already installed
+  when: leap_find_result.matched > 0
+  block:
+    - name: Get version from the Domino Leap binary filename
+      vars:
+        # Sort the list of all dleap-*.jar files and take the last one (with the highest version)
+        # Example of a file name: dleap-1.1.4.3.jar
+        leap_filename: '{{ leap_find_result.files | json_query("[*].path") | sort | last | basename }}'
+        # Remove last 4 chracters (".jar")
+        leap_filename_short: '{{ leap_filename[:-4] }}'
+      ansible.builtin.set_fact:
+        # Keep only chars after dash ("-")
+        leap_version: '{{ leap_filename_short.split("-")[1] }}'
+        sh: '{{ leap_filename_short }}'
 
-- name: Mark Leap as installed (single variable)
-  ansible.builtin.set_fact:
-    leap_is_installed: true
-  when:
-    - leap_installed_result.stat.exists
+    - name: Mark Domino Leap as installed (single variable)
+      ansible.builtin.set_fact:
+        leap_is_installed: true
 
-- name: Mark Leap as installed (sw dictionary)
-  vars:
-    index: '{{ product_info | ansible.utils.index_of("eq", "leap", "name") }}'
-  ansible.utils.update_fact:
-    updates:
-      - path: 'product_info.{{ index }}.installed'
-        value: true
-  when:
-    - leap_installed_result.stat.exists
-    - domino__install_leap
-  changed_when: false
-  register: product_info_updated_result
+    - name: Mark Domino Leap as installed (sw dictionary)
+      vars:
+        index: '{{ product_info | ansible.utils.index_of("eq", "leap", "name") }}'
+      ansible.utils.update_fact:
+        updates:
+          - path: 'product_info.{{ index }}.installed'
+            value: true
+          - path: 'product_info.{{ index }}.installed_version'
+            value: '{{ leap_version }}'
+      changed_when: false
+      register: product_info_updated_result
 
-- name: Store the updated value into the master fact
-  ansible.builtin.set_fact:
-    product_info: '{{ product_info_updated_result.product_info }}'
-  when:
-    - leap_installed_result.stat.exists
-    - domino__install_leap
+    - name: Store the updated value into the master fact
+      ansible.builtin.set_fact:
+        product_info: '{{ product_info_updated_result.product_info }}'

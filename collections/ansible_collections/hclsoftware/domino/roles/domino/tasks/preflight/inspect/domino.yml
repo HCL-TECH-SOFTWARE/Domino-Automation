@@ -1,5 +1,4 @@
 ---
-
 - name: Check if Domino log file file exists
   ansible.builtin.stat:
     path: /local/notesdata/notes.ini

@@ -1,19 +1,20 @@
 ---
-
 - name: Check if Nomad version file file exists
   ansible.builtin.stat:
-    path: /opt/hcl/domino/notes/latest/linux/nomad-files/nomad-web-version.txt
+    # path: /opt/hcl/domino/notes/latest/linux/nomad-files/nomad-web-version.txt
+    path: /opt/hcl/domino/notes/latest/linux/nomad-server-version.txt
   register: nomad_installed_result
 
 - name: Perform tasks when Nomad server is already installed
   when: nomad_installed_result.stat.exists
   block:
-    # Example of the Nomad version written in the file: 1.0.12.43-35
-    # The command cuts away characters right to the last dot
+    # Example of the Nomad version written in the file: 14.0.0-1.0.12
+    # The command keeps characters on the right to the dash (-)
     - name: Get Nomad version from a file
       ansible.builtin.shell:
-        chdir: /opt/hcl/domino/notes/latest/linux/nomad-files
-        cmd: set -o pipefail && cat nomad-web-version.txt | sed 's|\(.*\)\..*|\1|'
+        chdir: /opt/hcl/domino/notes/latest/linux
+        # cmd: set -o pipefail && cat nomad-web-version.txt | sed 's|\(.*\)\..*|\1|'
+        cmd: set -o pipefail && cat nomad-server-version.txt | cut -d '-' -f 2
       changed_when: false
       register: nomad_version_result
 

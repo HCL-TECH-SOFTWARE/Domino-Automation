@@ -1,5 +1,4 @@
 ---
-
 - name: Check if Traveler binary file exists
   ansible.builtin.stat:
     path: /opt/hcl/domino/notes/latest/linux/traveler

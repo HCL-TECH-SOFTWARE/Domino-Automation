@@ -1,5 +1,4 @@
 ---
-
 - name: Check if Domino startup script file file exists
   ansible.builtin.stat:
     path: /opt/nashcom/startscript/rc_domino_script
