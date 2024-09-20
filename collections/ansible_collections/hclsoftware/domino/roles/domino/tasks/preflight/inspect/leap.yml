@@ -1,7 +1,5 @@
 ---
 
-# ---------- CHECK WHETHER DOMINO LEAP IS ALREADY INSTALLED
-
 - name: Check if Domino Leap directory exists
   ansible.builtin.stat:
     path: /local/notesdata/volt

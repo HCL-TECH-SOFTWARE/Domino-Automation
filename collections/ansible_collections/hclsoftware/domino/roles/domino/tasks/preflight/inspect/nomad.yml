@@ -1,7 +1,5 @@
 ---
 
-# ---------- CHECK WHETHER NOMAD IS ALREADY INSTALLED
-
 - name: Check if Nomad version file file exists
   ansible.builtin.stat:
     path: /opt/hcl/domino/notes/latest/linux/nomad-files/nomad-web-version.txt

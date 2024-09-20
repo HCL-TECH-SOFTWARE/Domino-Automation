@@ -1,34 +1,40 @@
 ---
 
-# ---------- CHECK WHETHER VERSE IS ALREADY INSTALLED
+- name: Check that at least one Verse binary file exists
+  ansible.builtin.find:
+    paths: /local/notesdata/domino/workspace/applications/eclipse/plugins
+    patterns: 'core-*.jar'
+    file_type: file
+    recurse: false
+  register: verse_find_result
 
-- name: Check if Verse binary file file exists
-  ansible.builtin.stat:
-    path: /local/notesdata/domino/workspace/applications/eclipse/plugins/core-3.2.2-0.0-347.jar
-  register: verse_installed_result
+- name: Perform tasks when Verse server is already installed
+  when: verse_find_result.matched > 0
+  block:
+    - name: Get version from the Verse binary filename
+      vars:
+        # Soft the list of all core-*.jar files and take the last one (with the highest version)
+        verse_filename: '{{ verse_find_result.files | json_query("[*].path") | sort | last | basename }}'
+      ansible.builtin.set_fact:
+        # Get the version substring from the filename
+        verse_version: '{{ verse_filename.split("-")[1] }}'
 
-- name: Mark Verse as installed (single variable)
-  ansible.builtin.set_fact:
-    verse_is_installed: true
-  when:
-    - verse_installed_result.stat.exists
+    - name: Mark Verse as installed (single variable)
+      ansible.builtin.set_fact:
+        verse_is_installed: true
 
-- name: Mark Verse as installed (sw dictionary)
-  vars:
-    index: '{{ product_info | ansible.utils.index_of("eq", "verse", "name") }}'
-  ansible.utils.update_fact:
-    updates:
-      - path: 'product_info.{{ index }}.installed'
-        value: true
-  when:
-    - verse_installed_result.stat.exists
-    - domino__install_verse
-  changed_when: false
-  register: product_info_updated_result
+    - name: Mark Verse as installed (sw dictionary)
+      vars:
+        index: '{{ product_info | ansible.utils.index_of("eq", "verse", "name") }}'
+      ansible.utils.update_fact:
+        updates:
+          - path: 'product_info.{{ index }}.installed'
+            value: true
+          - path: 'product_info.{{ index }}.installed_version'
+            value: '{{ verse_version }}'
+      changed_when: false
+      register: product_info_updated_result
 
-- name: Store the updated value into the master fact
-  ansible.builtin.set_fact:
-    product_info: '{{ product_info_updated_result.product_info }}'
-  when:
-    - verse_installed_result.stat.exists
-    - domino__install_verse
+    - name: Store the updated value into the master fact
+      ansible.builtin.set_fact:
+        product_info: '{{ product_info_updated_result.product_info }}'
