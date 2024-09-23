@@ -1,0 +1,16 @@
+---
+- name: Check existing installed versions on the server
+  ansible.builtin.import_tasks:
+    file: preflight/inspect/main.yml
+
+- name: Store the version report in a local reports directory
+  ansible.builtin.template:
+    src: versions.j2
+    dest: '{{ domino__reports_dir }}/DOMINO-versions-{{ domino__domino_hostname }}.txt'
+    mode: u=rw,g=r,o=r
+  when: domino__save_reports
+  delegate_to: localhost
+
+- name: Print the version report
+  ansible.builtin.debug:
+    msg: "{{ lookup('template', 'versions.j2') }}"

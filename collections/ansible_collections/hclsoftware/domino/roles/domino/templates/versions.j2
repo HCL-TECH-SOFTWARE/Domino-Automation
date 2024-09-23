@@ -1,0 +1,25 @@
+VERSION REPORT
+==============
+
+DOMINO INFO
+  Server name:                  {{ domino__server_name }}/{{ domino__org_name }}@{{ domino__domino_domain }}
+  Server hostname:              {{ domino__domino_hostname }}
+
+PRODUCTS INSTALLED
+  Domino:                       {{ domino__install_domino }}
+  Domino FixPack:               {{ domino__install_fp }}
+  Domino Interim fix:           {{ domino__install_if }}
+  Verse:                        {{ domino__install_verse }}
+  Nomad:                        {{ domino__install_nomad }}
+  Traveler:                     {{ domino__install_traveler }}
+  Domino Leap:                  {{ domino__install_leap }}
+  OnTime Group Calendar:        {{ domino__install_ontime }}
+  Startup Script:               {{ domino__install_startup_script }}
+
+PRODUCT VERSIONS ON THE SERVER
+  {{ "%-10s"|format("Product") }} {{ "%-18s"|format("Planned version") }} Version on the server
+  -------    ---------------    ---------------------
+{% for product in product_info | sort(attribute='name') | json_query("[?install]") %}
+  {%- set installed = product.installed_version if product.installed else ""  %}
+  {{ "%-10s"|format(product.name) }} {{ "%-18s"|format(product.version) }} {{ installed }}
+{% endfor %}

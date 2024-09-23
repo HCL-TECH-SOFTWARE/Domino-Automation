@@ -54,3 +54,7 @@
   when:
     - domino__install_nomad
     - not nomad_is_installed
+
+- name: Generate Install Report
+  ansible.builtin.import_tasks:
+    file: install/report.yml
