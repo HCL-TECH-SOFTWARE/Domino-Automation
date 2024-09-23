@@ -9,7 +9,7 @@
   block:
     # Example of the line in notes.ini: FaultRecovery_Build=Release 14.0FP2
     # The command cuts away characters right to the space
-    - name: Get Traveler version from a file
+    - name: Get Domino version from a file
       ansible.builtin.shell:
         chdir: /local/notesdata
         cmd: set -o pipefail && grep "FaultRecovery_Build" notes.ini | cut -d ' ' -f 2
@@ -18,15 +18,22 @@
 
 # --- Split version string into mail version, fixpack, interim fix
 
-    - name: 'Strip main version, FixPack version and Interim Fix version from the version string: {{ version_to_install }}'
+    - name: Check the string used for Interim Fix ("IF" or "HF")
+      set_fact:
+        interim_string: '{{ ("HF" in domino_version_result.stdout) | ternary("HF", "IF") }}'
+
+    - name: Strip main version, FixPack version and Interim Fix version from the version string - {{ domino_version_result.stdout }}
       vars:
-        tmp_interim: '{{ (domino_version_result.stdout | upper).split("IF").1 | default("") }}'
-        tmp_domino_fp: '{{ (domino_version_result.stdout | upper).split("IF").0 | default("") }}'
-        tmp_fixpack: '{{ (domino_version_result.stdout | upper).split("FP").1 | default("") }}'
+        tmp_interim: '{{ (domino_version_result.stdout | upper).split(interim_string).1 | default("") }}'
+        tmp_domino_fp: '{{ (domino_version_result.stdout | upper).split(interim_string).0 | default("") }}'
+        tmp_fixpack: '{{ (tmp_domino_fp | upper).split("FP").1 | default("") }}'
       ansible.builtin.set_fact:
+        t_interim: '{{ tmp_interim }}'
+        t_domino_fp: '{{ tmp_domino_fp }}'
+        t_fixpack: '{{ tmp_fixpack }}'
         domino_main_version: '{{ (tmp_domino_fp | upper).split("FP").0 | default("") }}'
         fixpack_version: '{{ (tmp_fixpack | trim | length > 0) | ternary("FP" + tmp_fixpack, "") }}'
-        interim_version: '{{ (tmp_interim | trim | length > 0) | ternary("IF" + tmp_interim, "") }}'
+        interim_version: '{{ (tmp_interim | trim | length > 0) | ternary(interim_string + tmp_interim, "") }}'
 
     # --- Process Domino version
 
