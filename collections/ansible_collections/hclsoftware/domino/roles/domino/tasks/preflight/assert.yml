@@ -31,6 +31,8 @@
     - { name: domino__domino_domain, type: alphanumeric }
     - { name: domino__org_name, type: alphanumeric }
     - { name: domino__certifier_password, type: alphanumeric-ext }
+    - { name: domino__admin_first_name, type: alphanumeric }
+    - { name: domino__admin_last_name, type: alphanumeric }
     - { name: domino__admin_password, type: alphanumeric-ext }
     - { name: domino__use_existing_server_id, type: boolean }
     - { name: domino__use_existing_certifier_id, type: boolean }

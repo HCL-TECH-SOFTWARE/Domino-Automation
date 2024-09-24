@@ -29,6 +29,8 @@ domino__domino_hostname: omega.example.com
 domino__domino_domain: Example
 domino__org_name: Example
 domino__certifier_password: SecretPassw0rd
+domino__admin_first_name: Super
+domino__admin_last_name: Admin
 domino__admin_password: SecretPassw0rd
 domino__use_existing_certifier_id: false
 domino__use_existing_server_id: false
