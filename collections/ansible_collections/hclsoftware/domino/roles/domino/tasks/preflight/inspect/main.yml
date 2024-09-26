@@ -22,3 +22,7 @@
 - name: Check the Domino Leap version installed on the server
   ansible.builtin.import_tasks:
     file: preflight/inspect/leap.yml
+
+- name: Check the requirements for the product versions
+  ansible.builtin.import_tasks:
+    file: preflight/inspect/assert.yml

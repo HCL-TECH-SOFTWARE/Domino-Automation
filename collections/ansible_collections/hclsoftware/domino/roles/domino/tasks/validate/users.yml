@@ -1,0 +1,41 @@
+---
+- name: Check if the CSV file with user definitions exists
+  ansible.builtin.stat:
+    path: '{{ domino__input_data_users }}'
+  register: check_users_file_result
+
+- name: Process CSV users validation file
+  block:
+    - name: Read user names from the CSV file
+      community.general.read_csv:
+        path: '{{ domino__input_data_users }}'
+      register: check_users_result
+      when:
+        - check_users_file_result.stat.exists
+
+    - name: Retrieve user info from LDAP
+      vars:
+      community.general.ldap_search:
+        dn: 'CN={{ user.firstName }} {{ user.lastName }},O={{ domino__org_name }}'
+        attrs:
+          - mail
+          - photourl
+        server_uri: 'ldap://{{ inventory_hostname }}'
+        bind_dn: '{{ user.firstName }} {{ user.lastName }}'
+        bind_pw: '{{ user.password }}'
+      register: ldap_search_result
+      loop: '{{ check_users_result.list }}'
+      loop_control:
+        loop_var: user
+        label: '{{ user.firstName }} {{ user.lastName }}'
+
+    - name: Print LDAP users
+      ansible.builtin.debug:
+        msg: |
+          - {{ user.dn }}
+          - {{ user.mail }}
+          - {{ user.photourl | default ("N/A") }}
+      loop: '{{ ldap_search_result.results | json_query("[*].results[0]") }}'
+      loop_control:
+        loop_var: user
+        label: '{{ user.dn }}'

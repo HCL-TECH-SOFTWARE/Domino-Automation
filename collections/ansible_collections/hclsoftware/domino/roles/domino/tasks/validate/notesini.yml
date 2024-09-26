@@ -1,0 +1,66 @@
+---
+- name: Copy notes.ini to a local temp directory
+  ansible.builtin.fetch:
+    src: /local/notesdata/notes.ini
+    dest: '{{ domino__reports_dir }}/{{ inventory_hostname }}-notes.ini'
+    flat: true
+
+- name: Store parameters from notes.ini to an array
+  vars:
+    server_domain: '{{ (inventory_hostname | split(".", 1))[1] }}'
+    inifile: '{{ domino__reports_dir }}/{{ inventory_hostname }}-notes.ini'
+    new_entry:
+      - key: '{{ param }}'
+        value: '{{ lookup("ansible.builtin.ini", param, section="Notes", file=inifile) }}'
+  ansible.builtin.set_fact:
+    notesini: '{{ (notesini | default({})) | ansible.builtin.combine(new_entry | items2dict) }}'
+  loop:
+    - Domain
+    - ServerTasks
+    - VOP_EXTENSIBILITY_DATA_PROVIDER_NAME
+    - VOP_Extensibility_Applications_Json_FilePath
+    - VOP_LLN2_BSSUIServer_URL
+    - iNotes_WA_Security_NonceCheck
+    - iNotes_WA_Security_RefererCheck
+    - RouterDKIMSigning
+    - DKIM_KEY_{{ server_domain }}
+    - iNotes_WA_SametimeProxyServerSSL
+    - VOP_GK_sametime
+    - VOP_GK_sametime_rich_client
+    - VOP_DOMI_ST_ROOTURL
+    - NOMAD_WEB_HOST
+  loop_control:
+    loop_var: param
+
+
+# ---------------- ASSERT NOTES.INI VALUES
+
+- name: Validate notes.ini parameters
+  ansible.builtin.assert:
+    that:
+      - notesini[param.name] == param.value
+    fail_msg: |
+      {{ param.name }} should have this value: {{ param.value }}
+      Instead of that it has this value: {{ notesini[param.name] }}
+    success_msg: '"{{ param.name }}" has the correct value: {{ notesini[param.name] }}'
+  loop: '{{ domino__assert_notesini_parameters }}'
+  loop_control:
+    loop_var: param
+    label: '{{ param.name }}'
+  when:
+    - param.condition| default(true)
+
+
+# ---------------- PRINT FINAL REPORT
+
+- name: Store the report in a local reports directory
+  ansible.builtin.template:
+    src: notesini.j2
+    dest: '{{ domino__reports_dir }}/NOTES.INI-{{ domino__domino_hostname }}.txt'
+    mode: u=rw,g=r,o=r
+  when: domino__save_reports
+  delegate_to: localhost
+
+- name: Print test final report for vars
+  ansible.builtin.debug:
+    msg: "{{ lookup('template', './notesini.j2') }}"

@@ -18,85 +18,12 @@
   ansible.builtin.include_role:
     name: hclsoftware.domino.common
     tasks_from: assert_parameter
-  loop:
-    - { name: domino__server_name, type: alphanumeric }
-    - { name: domino__install_path, type: path }
-    - { name: domino__software_dir, type: path }
-    - { name: domino__install_products, type: list }
-    - { name: domino__install_startup_script, type: boolean }
-    - { name: domino__install_ontime, type: boolean }
-    - { name: domino__input_data_location, type: path }
-    - { name: domino__server_name, type: alphanumeric-ext }
-    - { name: domino__domino_hostname, type: hostname }
-    - { name: domino__domino_domain, type: alphanumeric }
-    - { name: domino__org_name, type: alphanumeric }
-    - { name: domino__certifier_password, type: alphanumeric-ext }
-    - { name: domino__admin_first_name, type: alphanumeric }
-    - { name: domino__admin_last_name, type: alphanumeric }
-    - { name: domino__admin_password, type: alphanumeric-ext }
-    - { name: domino__use_existing_server_id, type: boolean }
-    - { name: domino__use_existing_certifier_id, type: boolean }
-    - { name: domino__use_existing_admin_id, type: boolean }
-    - { name: domino__register_users, type: boolean }
-    - { name: domino__input_data_users, type: filename }
-    - { name: domino__create_microca, type: boolean }
-    - { name: domino__enable_dkim, type: boolean }
-    - { name: domino__enable_dkim, type: alphanumeric-ext }
-    - { name: domino__restart_after_setup, type: boolean }
-    - { name: domino__wait_mins_after_restart, type: number }
-    - { name: domino__setup_additional_servers, type: boolean }
-    - { name: domino__install_as_additional, type: boolean }
-    - { name: domino__sametime_server, type: hostname }
-    - { name: domino__connections_server, type: hostname }
+  loop: '{{ domino__assert_values }}'
   loop_control:
     loop_var: param
-
-
-# ---------- CHECK OPTIONAL PARAMETER VALUES
-
-- name: Check Custom login form parameters
-  vars:
-    common__param_name: '{{ param.name }}'
-    common__param_type: '{{ param.type }}'
-  ansible.builtin.include_role:
-    name: hclsoftware.domino.common
-    tasks_from: assert_parameter
-  loop:
-    - { name: domino__custom_login_db, type: filename }
-    - { name: domino__custom_login_form, type: alphanumeric-ext }
-  loop_control:
-    loop_var: param
+    label: '{{ param.name }}'
   when:
-    - domino__use_custom_login
-
-- name: Check Register additional servers parameter
-  vars:
-    common__param_name: '{{ param.name }}'
-    common__param_type: '{{ param.type }}'
-  ansible.builtin.include_role:
-    name: hclsoftware.domino.common
-    tasks_from: assert_parameter
-  loop:
-    - { name: domino__additional_servers, type: list }
-  loop_control:
-    loop_var: param
-  when:
-    - domino__setup_additional_servers
-
-- name: Check Install as additional server parameter
-  vars:
-    common__param_name: '{{ param.name }}'
-    common__param_type: '{{ param.type }}'
-  ansible.builtin.include_role:
-    name: hclsoftware.domino.common
-    tasks_from: assert_parameter
-  loop:
-    - { name: domino__existing_server_name, type: string }
-    - { name: domino__existing_server_address, type: string }
-  loop_control:
-    loop_var: param
-  when:
-    - domino__install_as_additional
+    - param.condition | default(true)
 
 
 # ---------- CHECK THE SPECIAL PARAMETERS COMBINATION
