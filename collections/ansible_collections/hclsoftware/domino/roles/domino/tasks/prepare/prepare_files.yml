@@ -42,7 +42,7 @@
     group: notes
   when: domino__use_existing_admin_id
 
-- name: Create directories to store the install files
+- name: Create directories to store installer files
   become: true
   ansible.builtin.file:
     path: '{{ item }}'
@@ -60,6 +60,7 @@
     - '{{ domino__verse_install }}'
     - '{{ domino__nomad_install }}'
     - '{{ domino__leap_install }}'
+    - '{{ domino__domrestapi_install }}'
 
 - name: Copy database with a custom login form (optional)
   become: true

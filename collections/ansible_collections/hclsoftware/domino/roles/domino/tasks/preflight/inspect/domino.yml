@@ -1,5 +1,5 @@
 ---
-- name: Check if Domino log file file exists
+- name: Check if Domino notes.ini file exists
   ansible.builtin.stat:
     path: /local/notesdata/notes.ini
   register: domino_installed_result
@@ -19,7 +19,7 @@
 # --- Split version string into mail version, fixpack, interim fix
 
     - name: Check the string used for Interim Fix ("IF" or "HF")
-      set_fact:
+      ansible.builtin.set_fact:
         interim_string: '{{ ("HF" in domino_version_result.stdout) | ternary("HF", "IF") }}'
 
     - name: Strip main version, FixPack version and Interim Fix version from the version string - {{ domino_version_result.stdout }}

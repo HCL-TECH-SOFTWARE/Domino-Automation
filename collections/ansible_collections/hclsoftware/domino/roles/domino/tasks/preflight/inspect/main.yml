@@ -23,6 +23,10 @@
   ansible.builtin.import_tasks:
     file: preflight/inspect/leap.yml
 
+- name: Check the Domino REST API version installed on the server
+  ansible.builtin.import_tasks:
+    file: preflight/inspect/drapi.yml
+
 - name: Check the requirements for the product versions
   ansible.builtin.import_tasks:
     file: preflight/inspect/assert.yml

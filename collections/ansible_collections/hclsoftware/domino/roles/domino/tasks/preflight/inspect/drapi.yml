@@ -1,0 +1,41 @@
+---
+- name: Check if DRAPI version file exists
+  ansible.builtin.stat:
+    path: /opt/hcl/restapi/drapi_notices.txt
+  register: drapi_installed_result
+
+- name: Perform tasks when DRAPI server is already installed
+  when: drapi_installed_result.stat.exists
+  block:
+    # Example of the line in notes.ini:
+    # The command splits the line with spaces ("") and takes the fifth element.
+    - name: Get DRAPI version from a file
+      ansible.builtin.shell:
+        chdir: /opt/hcl/restapi/
+        cmd: set -o pipefail && grep "Notices and Information" drapi_notices.txt | cut -d ' ' -f 5
+      changed_when: false
+      register: drapi_version_result
+
+    - name: Store installed DRAPI version
+      ansible.builtin.set_fact:
+        domrestapi_version: '{{ drapi_version_result.stdout }}'
+
+    - name: Mark DRAPI as installed (single variable)
+      ansible.builtin.set_fact:
+        domrestapi_is_installed: true
+
+    - name: Mark DRAPI as installed (sw dictionary)
+      vars:
+        index: '{{ product_info | ansible.utils.index_of("eq", "domrestapi", "name") }}'
+      ansible.utils.update_fact:
+        updates:
+          - path: 'product_info.{{ index }}.installed'
+            value: true
+          - path: 'product_info.{{ index }}.installed_version'
+            value: '{{ domrestapi_version }}'
+      changed_when: false
+      register: product_info_updated_result
+
+    - name: Store the updated value into the master fact
+      ansible.builtin.set_fact:
+        product_info: '{{ product_info_updated_result.product_info }}'
