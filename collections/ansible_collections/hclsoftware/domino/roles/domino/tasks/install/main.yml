@@ -11,49 +11,56 @@
     file: install/domino_install.yml
   when:
     - domino__install_domino
-    - not domino_is_installed
+    - product_info | json_query("[?name==`domino`].do_installation") | first
 
 - name: Install Domino FixPack
   ansible.builtin.import_tasks:
     file: install/fixpack_install.yml
   when:
     - domino__install_fp
-    - not fp_is_installed
+    - product_info | json_query("[?name==`fp`].do_installation") | first
 
 - name: Install Domino Interim fix
   ansible.builtin.import_tasks:
     file: install/interim_fix_install.yml
   when:
     - domino__install_if
-    - not if_is_installed
+    - product_info | json_query("[?name==`if`].do_installation") | first
 
 - name: Install Traveler server
   ansible.builtin.import_tasks:
     file: install/traveler_install.yml
   when:
     - domino__install_traveler
-    - not traveler_is_installed
+    - product_info | json_query("[?name==`traveler`].do_installation") | first
 
 - name: Install Verse
   ansible.builtin.import_tasks:
     file: install/verse_install.yml
   when:
     - domino__install_verse
-    - not verse_is_installed
+    - product_info | json_query("[?name==`verse`].do_installation") | first
 
 - name: Install Domino Leap
   ansible.builtin.import_tasks:
     file: install/leap_install.yml
   when:
     - domino__install_leap
-    - not leap_is_installed
+    - product_info | json_query("[?name==`leap`].do_installation") | first
 
 - name: Install Nomad
   ansible.builtin.import_tasks:
     file: install/nomad_install.yml
   when:
     - domino__install_nomad
-    - not nomad_is_installed
+    - product_info | json_query("[?name==`nomad`].do_installation") | first
+
+# - name: Install Domino REST API
+#   ansible.builtin.import_tasks:
+#     file: install/drapi_install.yml
+#   when:
+#     - domino__install_domrestapi
+#     - not domrestapi_is_installed
 
 - name: Generate Install Report
   ansible.builtin.import_tasks:

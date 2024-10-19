@@ -2,11 +2,14 @@
 - name: Enable DKIM
   ansible.builtin.import_tasks:
     file: configure/enable_dkim.yml
-  when: domino__enable_dkim
+  when:
+    - domino__enable_dkim
 
 - name: Customize Verse
   ansible.builtin.import_tasks:
     file: configure/customize_verse.yml
+  when:
+    - domino__install_verse
 
 - name: Configure Domino
   ansible.builtin.import_tasks:

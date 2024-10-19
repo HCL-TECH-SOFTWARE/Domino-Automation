@@ -22,8 +22,6 @@
     owner: root
     group: root
     mode: u=rwx,g=rx,o=rx
-  loop_control:
-    loop_var: nomad_binary
 
 - name: Start the Domino server
   ansible.builtin.import_tasks: manage/domino_start.yml

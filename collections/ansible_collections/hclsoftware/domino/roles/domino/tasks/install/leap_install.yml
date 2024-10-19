@@ -13,7 +13,6 @@
     chdir: '{{ domino__leap_install }}/linux'
   ansible.builtin.shell:
     cmd: './install silent'
-    creates: /local/notesdata/volt
   register: leap_install_result
   changed_when:
     - leap_install_result.changed
