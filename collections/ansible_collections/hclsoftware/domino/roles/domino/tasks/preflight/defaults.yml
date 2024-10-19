@@ -58,6 +58,22 @@
     loop_var: product
 
 
+# ---------- Initialize Verify stats
+- name: Initially set all verify stats as SKIP
+  vars:
+    new_item: {
+      "name": "{{ task.name }}",
+      "description": "{{ task.description }}",
+      "result": "SKIP"
+    }
+  ansible.builtin.set_fact:
+    verify_info: '{{ (verify_info | default([])) + [new_item] }}'
+  loop: '{{ domino__verify_tasks }}'
+  loop_control:
+    loop_var: task
+    label: '{{ task.name }}'
+
+
 # ---------- Create directories on a local workstation
 
 # Make sure the directory for storing reports exists
@@ -82,8 +98,6 @@
   ansible.builtin.set_fact:
     ots_lf_loginformdb: '{{ domino__use_custom_login | ternary(domino__custom_login_db, domino__default_login_db) }}'
     ots_lf_loginformform: '{{ domino__use_custom_login | ternary(domino__custom_login_form, domino__default_login_form) }}'
-
-# - fail:
 
 
 # ---------- Update parameters values

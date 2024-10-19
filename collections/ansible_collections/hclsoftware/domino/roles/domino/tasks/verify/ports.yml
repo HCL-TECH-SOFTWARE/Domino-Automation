@@ -1,0 +1,46 @@
+---
+- name: Gather facts on listening ports
+  community.general.listen_ports_facts:
+    include_non_listening: false
+
+- name: Check Domino port [NRPC]
+  vars:
+    port_info: {
+      name: NRPC,
+      number: 1352,
+      verify_name: port_nrpc
+    }
+  ansible.builtin.include_tasks:
+    file: verify/ports_task.yml
+
+- name: Check Domino port [HTTP]
+  vars:
+    port_info: {
+      name: HTTP,
+      number: 80,
+      verify_name: port_http
+    }
+  ansible.builtin.include_tasks:
+    file: verify/ports_task.yml
+
+- name: Check Domino port [HTTPS]
+  vars:
+    port_info: {
+      name: HTTPS,
+      number: 443,
+      verify_name: port_https
+    }
+  ansible.builtin.include_tasks:
+    file: verify/ports_task.yml
+  when:
+    - domino__create_microca
+
+- name: Check Domino port [LDAP]
+  vars:
+    port_info: {
+      name: LDAP,
+      number: 389,
+      verify_name: port_ldap
+    }
+  ansible.builtin.include_tasks:
+    file: verify/ports_task.yml

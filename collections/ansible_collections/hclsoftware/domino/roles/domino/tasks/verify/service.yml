@@ -1,0 +1,47 @@
+---
+- name: Populate service facts
+  ansible.builtin.service_facts:
+
+- name: Check Domino service status
+  block:
+    - name: Assert that the Domino service exists
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.services["domino.service"] is defined
+        fail_msg: 'The service "domino.service" must be registered in the OS'
+        success_msg: 'The service "domino.service" is registered in the OS'
+
+    - name: Assert that the Domino service is set to autostart
+      vars:
+        domino_service_status: '{{ ansible_facts.services["domino.service"].status }}'
+      ansible.builtin.assert:
+        that:
+          - domino_service_status == 'enabled'
+        fail_msg: 'The service "domino.service" must have status "enabled"; it has status: {{ domino_service_status }}'
+        success_msg: 'The service "domino.service" has correct status: {{ domino_service_status }}'
+
+    - name: Mark service verification as PASS
+      vars:
+        index: '{{ verify_info | ansible.utils.index_of("eq", "service", "name") }}'
+      ansible.utils.update_fact:
+        updates:
+          - path: 'verify_info.{{ index }}.result'
+            value: 'PASS'
+      changed_when: false
+      register: services_verify_updated_result
+
+  rescue:
+    - name: Mark service verification as FAIL
+      vars:
+        index: '{{ verify_info | ansible.utils.index_of("eq", "service", "name") }}'
+      ansible.utils.update_fact:
+        updates:
+          - path: 'verify_info.{{ index }}.result'
+            value: 'FAIL'
+      changed_when: false
+      register: services_verify_updated_result
+
+  always:
+    - name: Store the updated value into the master fact
+      ansible.builtin.set_fact:
+        verify_info: '{{ services_verify_updated_result.verify_info }}'

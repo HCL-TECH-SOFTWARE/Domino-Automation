@@ -1,0 +1,12 @@
+VALIDATION RESULTS
+
+{% for task in verify_info %}
+  {% if task.result == "PASS" -%}
+    {%- set symbol = "✅" -%}
+  {% elif task.result == "FAIL" -%}
+    {%- set symbol = "❌" -%}
+  {% else -%}
+    {%- set symbol = "  " -%}
+  {% endif %}
+  [{{ task.result }}] {{ symbol }}  {{ task.description}}
+{% endfor %}

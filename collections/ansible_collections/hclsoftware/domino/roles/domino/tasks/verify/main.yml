@@ -1,0 +1,22 @@
+---
+- name: Check Domino service in OS
+  ansible.builtin.import_tasks:
+    file: verify/service.yml
+
+- name: Check ports for Domino services
+  ansible.builtin.import_tasks:
+    file: verify/ports.yml
+
+- name: Check registered users
+  ansible.builtin.import_tasks:
+    file: verify/users.yml
+  when:
+    - domino__register_users
+
+- name: Check Domino notes.ini parameters
+  ansible.builtin.import_tasks:
+    file: verify/notesini.yml
+
+- name: Print final report
+  ansible.builtin.import_tasks:
+    file: verify/report.yml

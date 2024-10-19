@@ -1,0 +1,65 @@
+---
+- name: Assert that the CSV file with user definitions exists
+  ansible.builtin.assert:
+    that:
+      - domino__input_data_users is file
+    fail_msg: '"domino__input_data_users" must exist: {{ domino__input_data_users }}'
+    success_msg: '"domino__input_data_users" exists: {{ domino__input_data_users }}'
+  delegate_to: localhost
+
+- name: Process CSV users validation file
+  block:
+    - name: Read user names from the CSV file
+      community.general.read_csv:
+        path: '{{ domino__input_data_users }}'
+      register: check_users_result
+      delegate_to: localhost
+
+    - name: Retrieve users from LDAP
+      ansible.builtin.shell:
+        cmd: >
+          ldapsearch -H ldap://{{ domino__domino_hostname }}:389
+          -x -D "{{ user.firstName }} {{ user.lastName }}" -w {{ user.password }} -LLL
+          "CN={{ user.firstName }} {{ user.lastName }}" mail photourl
+      loop: '{{ check_users_result.list }}'
+      loop_control:
+        loop_var: user
+        label: '{{ user.firstName }} {{ user.lastName }}'
+      changed_when: false
+      register: ldap_search_result
+
+    - name: Print LDAP users
+      ansible.builtin.debug:
+        msg: |
+          LDAP search result for user: "{{ user.user.firstName }} {{ user.user.lastName }}"
+          {{ user.stdout_lines | to_nice_json }}
+      loop: '{{ ldap_search_result.results }}'
+      loop_control:
+        loop_var: user
+        label: '{{ user.user.firstName }} {{ user.user.lastName }}'
+
+    - name: Mark users verification as PASS
+      vars:
+        index: '{{ verify_info | ansible.utils.index_of("eq", "users", "name") }}'
+      ansible.utils.update_fact:
+        updates:
+          - path: 'verify_info.{{ index }}.result'
+            value: 'PASS'
+      changed_when: false
+      register: users_verify_updated_result
+
+  rescue:
+    - name: Mark users verification as FAIL
+      vars:
+        index: '{{ verify_info | ansible.utils.index_of("eq", "users", "name") }}'
+      ansible.utils.update_fact:
+        updates:
+          - path: 'verify_info.{{ index }}.result'
+            value: 'FAIL'
+      changed_when: false
+      register: users_verify_updated_result
+
+  always:
+    - name: Store the updated value into the master fact
+      ansible.builtin.set_fact:
+        verify_info: '{{ users_verify_updated_result.verify_info }}'

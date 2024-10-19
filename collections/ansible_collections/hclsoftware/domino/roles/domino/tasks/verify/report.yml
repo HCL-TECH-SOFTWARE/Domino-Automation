@@ -1,0 +1,12 @@
+---
+- name: Store the report in a local reports directory
+  ansible.builtin.template:
+    src: verify.j2
+    dest: '{{ domino__reports_dir }}/VERIFY-{{ domino__domino_hostname }}.txt'
+    mode: u=rw,g=r,o=r
+  when: domino__save_reports
+  delegate_to: localhost
+
+- name: Print final parameters for the installation
+  ansible.builtin.debug:
+    msg: "{{ lookup('template', 'verify.j2') }}"

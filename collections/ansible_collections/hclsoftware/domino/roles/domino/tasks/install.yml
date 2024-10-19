@@ -31,6 +31,6 @@
     - integrate
 
 - name: Check that everything is installed correctly
-  ansible.builtin.import_tasks: validate/main.yml
+  ansible.builtin.import_tasks: verify/main.yml
   tags:
-    - validate
+    - verify

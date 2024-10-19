@@ -1,0 +1,8 @@
+Selected paramteres from NOTES.INI:
+-----------------------------------
+
+Domino server: {{ domino__domino_hostname }}
+
+{% for item in notesini %}
+{{ "%-47s"|format(item) + ': ' + notesini[item]|string }}
+{% endfor %}

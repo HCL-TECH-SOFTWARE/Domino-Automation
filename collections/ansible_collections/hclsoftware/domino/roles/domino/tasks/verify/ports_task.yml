@@ -1,0 +1,38 @@
+---
+- name: Check service ports {{ port_info.name }}
+  block:
+    - name: Assert that the Domino listens on port {{ port_info.number }}
+      vars:
+        jq_string: '[?port==`{{ port_info.number }}`]'
+        ldap_port_status: '{{ ansible_facts.tcp_listen | json_query(jq_string) }}'
+      ansible.builtin.assert:
+        that:
+          - ldap_port_status | length > 0
+        fail_msg: 'The server must listen on the {{ port_info.name }} port ({{ port_info.number }})'
+        success_msg: 'The server listens on the {{ port_info.name }} port ({{ port_info.number }})'
+
+    - name: Mark {{ port_info.name }} port verification ({{ port_info.verify_name }}) as PASS
+      vars:
+        index: '{{ verify_info | ansible.utils.index_of("eq", port_info.verify_name, "name") }}'
+      ansible.utils.update_fact:
+        updates:
+          - path: 'verify_info.{{ index }}.result'
+            value: 'PASS'
+      changed_when: false
+      register: port_verify_updated_result
+
+  rescue:
+    - name: Mark {{ port_info.name }} port verification ({{ port_info.verify_name }}) as FAIL
+      vars:
+        index: '{{ verify_info | ansible.utils.index_of("eq", port_info.verify_name, "name") }}'
+      ansible.utils.update_fact:
+        updates:
+          - path: 'verify_info.{{ index }}.result'
+            value: 'FAIL'
+      changed_when: false
+      register: port_verify_updated_result
+
+  always:
+    - name: Store the updated value into the master fact
+      ansible.builtin.set_fact:
+        verify_info: '{{ port_verify_updated_result.verify_info }}'
