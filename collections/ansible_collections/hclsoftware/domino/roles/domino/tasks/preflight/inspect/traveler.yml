@@ -27,12 +27,16 @@
     - name: Mark Traveler as installed (sw dictionary)
       vars:
         index: '{{ product_info | ansible.utils.index_of("eq", "traveler", "name") }}'
+        traveler_target_version: '{{ product_info | json_query("[?name==`traveler`].version") | first  }}'
+        target_version_is_newer: '{{ traveler_version is version(traveler_target_version, "<", version_type="loose") }}'
       ansible.utils.update_fact:
         updates:
           - path: 'product_info.{{ index }}.installed'
             value: true
           - path: 'product_info.{{ index }}.installed_version'
             value: '{{ traveler_version }}'
+          - path: 'product_info.{{ index }}.do_installation'
+            value: '{{ target_version_is_newer }}'
       changed_when: false
       register: product_info_updated_result
 

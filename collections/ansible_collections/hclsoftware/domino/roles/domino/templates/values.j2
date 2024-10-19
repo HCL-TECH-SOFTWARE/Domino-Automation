@@ -1,7 +1,7 @@
 INPUT VALUES FOR INSTALLATION
 =============================
 
-DOMINO - PRODUCTS TO INSTALL
+DOMINO - PRODUCTS REQUESTED TO INSTALL
   Domino:                     {{ domino__install_domino }}
   Domino FixPack:             {{ domino__install_fp }}
   Domino Interim fix:         {{ domino__install_if }}
@@ -9,14 +9,15 @@ DOMINO - PRODUCTS TO INSTALL
   Nomad:                      {{ domino__install_nomad }}
   Traveler:                   {{ domino__install_traveler }}
   Domino Leap:                {{ domino__install_leap }}
+  Domino REST API:            {{ domino__install_domrestapi }}
   OnTime Group Calendar:      {{ domino__install_ontime }}
   Startup Script:             {{ domino__install_startup_script }}
 
 DOMINO - PRODUCT VERSIONS
+  {{ "%-10s"|format("PRODUCT") }} {{ "%-12s"|format("REQUESTED") }} {{ "%-12s"|format("INSTALLED") }} {{ "%-40s"|format("INSTALLER NAME") }} {{ "%-10s"|format("WILL BE INSTALLED?") }}
 {% for product in product_info | sort(attribute='name') | json_query("[?install]") %}
-  {%- set installer = product.installer %}
-  {%- set installed = "// already installed " ~ product.installed_version if product.installed else ""  %}
-  {{ "%-10s"|format(product.name) }} {{ "%-16s"|format(product.version) }} {{ "%-50s"|format(installer) }} {{ installed }}
+  {%- set do_installation = "YES" if product.do_installation else "no" %}
+  {{ "%-10s"|format(product.name) }} {{ "%-12s"|format(product.version) }} {{ "%-12s"|format(product.installed_version) }} {{ "%-40s"|format(product.installer) }} {{ do_installation }}
 {% endfor %}
 
 DOMINO - SETUP
@@ -35,12 +36,12 @@ DOMINO - SETUP
   Restart Domino after setup: {{ domino__restart_after_setup }}
 
 DOMINO - ADDITIONAL SERVERS
-  Register addt’l. servers:   {{ domino__setup_additional_servers }}
+  Register addt'l. servers:   {{ domino__setup_additional_servers }}
 {% if domino__setup_additional_servers %}
   Additional servers:         {{ domino__additional_servers }}
   Servers ID location:        {{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/ids
 {% endif %}
-  Install as addt’l. server:  {{ domino__install_as_additional }}
+  Install as addt'l. server:  {{ domino__install_as_additional }}
 {% if domino__install_as_additional %}
   Existing server name:       {{ domino__existing_server_name }}
   Existing server address:    {{ domino__existing_server_address }}

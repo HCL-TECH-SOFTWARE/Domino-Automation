@@ -10,6 +10,7 @@ domino__install_products:
   # - nomad
   - traveler
   # - leap
+  # - domrestapi
 domino__software_use_local_file: false
 
 # Specify the product version to be installed.
@@ -19,6 +20,7 @@ domino__software_use_local_file: false
 # domino__nomad_version: 1.0.12IF1
 # domino__traveler_version: 14.0FP1
 # domino__leap_version: 1.1.4
+# domino__domrestapi_version: 1.1
 
 domino__install_startup_script: true
 domino__install_ontime: true

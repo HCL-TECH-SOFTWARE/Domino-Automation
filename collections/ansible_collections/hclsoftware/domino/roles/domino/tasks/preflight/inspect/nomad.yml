@@ -9,12 +9,12 @@
   when: nomad_installed_result.stat.exists
   block:
     # Example of the Nomad version written in the file: 14.0.0-1.0.12
-    # The command keeps characters on the right to the dash (-)
+    # The command keeps characters to the right from the first dash (-)
     - name: Get Nomad version from a file
       ansible.builtin.shell:
         chdir: /opt/hcl/domino/notes/latest/linux
         # cmd: set -o pipefail && cat nomad-web-version.txt | sed 's|\(.*\)\..*|\1|'
-        cmd: set -o pipefail && cat nomad-server-version.txt | cut -d '-' -f 2
+        cmd: set -o pipefail && cat nomad-server-version.txt | cut -d '-' -f2- | sed -e 's/-//g'
       changed_when: false
       register: nomad_version_result
 
@@ -29,12 +29,16 @@
     - name: Mark Nomad as installed (sw dictionary)
       vars:
         index: '{{ product_info | ansible.utils.index_of("eq", "nomad", "name") }}'
+        nomad_target_version: '{{ product_info | json_query("[?name==`nomad`].version") | first  }}'
+        target_version_is_newer: '{{ nomad_version is version(nomad_target_version, "<", version_type="loose") }}'
       ansible.utils.update_fact:
         updates:
           - path: 'product_info.{{ index }}.installed'
             value: true
           - path: 'product_info.{{ index }}.installed_version'
             value: '{{ nomad_version }}'
+          - path: 'product_info.{{ index }}.do_installation'
+            value: '{{ target_version_is_newer }}'
       changed_when: false
       register: product_info_updated_result
 

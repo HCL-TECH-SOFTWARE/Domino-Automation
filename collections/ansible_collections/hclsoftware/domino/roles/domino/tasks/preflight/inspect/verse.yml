@@ -25,12 +25,16 @@
     - name: Mark Verse as installed (sw dictionary)
       vars:
         index: '{{ product_info | ansible.utils.index_of("eq", "verse", "name") }}'
+        verse_target_version: '{{ product_info | json_query("[?name==`verse`].version") | first  }}'
+        target_version_is_newer: '{{ verse_version is version(verse_target_version, "<", version_type="loose") }}'
       ansible.utils.update_fact:
         updates:
           - path: 'product_info.{{ index }}.installed'
             value: true
           - path: 'product_info.{{ index }}.installed_version'
             value: '{{ verse_version }}'
+          - path: 'product_info.{{ index }}.do_installation'
+            value: '{{ target_version_is_newer }}'
       changed_when: false
       register: product_info_updated_result
 

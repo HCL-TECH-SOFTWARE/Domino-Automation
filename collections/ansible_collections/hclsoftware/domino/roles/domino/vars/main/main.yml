@@ -21,6 +21,7 @@ domino__all_products:
   - nomad
   - traveler
   - leap
+  - domrestapi
 
 domino__software_repo: https://raw.githubusercontent.com/HCL-TECH-SOFTWARE/domino-container
 domino__software_repo_branch: develop      # options: main, develop
@@ -67,6 +68,9 @@ domino__nomad_install: '{{ domino__install_path }}/{{ domino__nomad_install_subd
 domino__leap_install_subdir: leap
 domino__leap_install: '{{ domino__install_path }}/{{ domino__leap_install_subdir }}'
 
+domino__domrestapi_install_subdir: domrestapi
+domino__domrestapi_install: '{{ domino__install_path }}/{{ domino__domrestapi_install_subdir }}'
+
 domino__response_file: '{{ domino__install_path }}/installer.properties'
 
 domino__nek: credstorekey
@@ -75,3 +79,10 @@ domino__default_login_db: domcfg.nsf
 domino__default_login_form: $$LoginUserForm
 
 domino__dkim_info: dkim-info.txt
+
+domino__verify_tasks:
+  - { name: service, description: 'Domino service registered in the OS' }
+  - { name: port_nrpc, description: 'NRPC port 1352 is listening' }
+  - { name: port_ldap, description: 'LDAP port 389 is listening' }
+  - { name: notesini, description: 'Custom notes.ini parameters validated' }
+  - { name: users, description: 'Initial users created' }

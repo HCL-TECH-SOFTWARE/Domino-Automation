@@ -54,6 +54,8 @@
             value: '{{ checksum }}'
           - path: 'product_info.{{ index }}.install'
             value: true
+          - path: 'product_info.{{ index }}.do_installation'
+            value: true
       changed_when: false
       ignore_errors: true
       register: fp_info_updated_result
@@ -109,6 +111,8 @@
             value: '{{ checksum }}'
           - path: 'product_info.{{ index }}.install'
             value: true
+          - path: 'product_info.{{ index }}.do_installation'
+            value: true
       changed_when: false
       ignore_errors: true
       register: if_info_updated_result
@@ -153,7 +157,7 @@
     version_to_install: '{{ version_to_install }}-{{ domino_main_version }}'
   when:
     - product == 'nomad'
-    - 'version_to_install is version("1.0.13", "<", version_type="semver")'
+    - 'version_to_install is version("1.0.13", "<", version_type="loose")'
 
 - name: Perform a special task necessary just for DRAPI – change version to {{ version_to_install }}-{{ domino_main_version }}
   vars:
@@ -184,6 +188,8 @@
       - path: 'product_info.{{ index }}.checksum'
         value: '{{ checksum }}'
       - path: 'product_info.{{ index }}.install'
+        value: true
+      - path: 'product_info.{{ index }}.do_installation'
         value: true
   # changed_when: false
   ignore_errors: true

@@ -29,12 +29,16 @@
     - name: Mark Domino Leap as installed (sw dictionary)
       vars:
         index: '{{ product_info | ansible.utils.index_of("eq", "leap", "name") }}'
+        leap_target_version: '{{ product_info | json_query("[?name==`leap`].version") | first  }}'
+        target_version_is_newer: '{{ leap_version is version(leap_target_version, "<", version_type="loose") }}'
       ansible.utils.update_fact:
         updates:
           - path: 'product_info.{{ index }}.installed'
             value: true
           - path: 'product_info.{{ index }}.installed_version'
             value: '{{ leap_version }}'
+          - path: 'product_info.{{ index }}.do_installation'
+            value: '{{ target_version_is_newer }}'
       changed_when: false
       register: product_info_updated_result
 
