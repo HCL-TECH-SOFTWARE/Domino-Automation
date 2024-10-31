@@ -4,6 +4,7 @@
     src: '{{ domino__software_dir }}/{{ product.installer }}'
     dest: '{{ domino__installers_dir }}'
     mode: u=rw,g=r,o=r
+  register: installer_upload_result
 
 - name: Get installer checksum [{{ product.installer }}]
   ansible.builtin.stat:
@@ -17,6 +18,21 @@
       - installer_result.stat.checksum == product.checksum
     fail_msg: '"{{ product.installer }}" must has the following checksum: {{ product.checksum }}'
     success_msg: '"{{ product.installer }}" has correct checkum: {{ product.checksum }}'
+
+- name: Delete product installer directory (with old installer files)
+  ansible.builtin.file:
+    path: '{{ domino__install_path }}/{{ product.name }}'
+    state: absent
+  when: installer_upload_result.changed
+
+- name: Recreate empty product installer directory
+  become: true
+  ansible.builtin.file:
+    path: '{{ domino__install_path }}/{{ product.name }}'
+    state: directory
+    owner: '{{ ansible_effective_user_id }}'
+    group: '{{ ansible_effective_group_id }}'
+    mode: '0755'
 
 - name: Unpack installer package [{{ product.installer }}]
   ansible.builtin.unarchive:

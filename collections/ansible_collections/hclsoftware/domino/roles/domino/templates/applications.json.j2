@@ -1,6 +1,5 @@
 [
-  {% if domino__connections_server | trim | length > 0 -%}
- {
+  {
     "name": "Navbar Extension",
     "description": "HCL Verse Navbar extension",
     "title": "Navbar extenstion",
@@ -18,6 +17,7 @@
         "description": "New menu group",
         "title": "Collaboration"
       },
+      {% if domino__sametime_server | trim | length > 0 -%}
       {
         "type": "com.ibm.action.menu.link",
         "path": "CollaborationMenuContainer.a",
@@ -40,6 +40,8 @@
         },
         "title": "Meetings"
       },
+      {% endif -%}
+      {% if domino__connections_server | trim | length > 0 -%}
       {
         "type": "com.ibm.action.menu.link",
         "path": "CollaborationMenuContainer.c",
@@ -62,6 +64,7 @@
         },
         "title": "Files"
       },
+      {% endif -%}
       {
         "type": "com.ibm.action.menu.link",
         "path": "CollaborationMenuContainer.e",
@@ -78,7 +81,6 @@
       "Verse"
     ]
   },
-  {% endif -%}
 
   {% if domino__install_ontime -%}
   {

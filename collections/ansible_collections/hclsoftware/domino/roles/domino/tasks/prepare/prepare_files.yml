@@ -76,7 +76,7 @@
 - name: Copy and validate installer packages to the remote server
   ansible.builtin.include_tasks:
     file: prepare/prepare_files_task.yml
-  loop: '{{ product_info | json_query("[?install]") }}'
+  loop: '{{ product_info | json_query("[?do_installation]") }}'
   loop_control:
     loop_var: product
     label: '{{ product.name }}'
