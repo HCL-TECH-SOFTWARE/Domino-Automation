@@ -22,6 +22,11 @@
       ansible.builtin.set_fact:
         nomad_version: '{{ nomad_version_result.stdout }}'
 
+    - name: Rename installed Nomad version (1.0.13.2 -> 1.0.13IF2)
+      ansible.builtin.set_fact:
+        nomad_version: 1.0.13IF2
+      when: nomad_version == '1.0.13.2'
+
     - name: Mark Nomad as installed (single variable)
       ansible.builtin.set_fact:
         nomad_is_installed: true
