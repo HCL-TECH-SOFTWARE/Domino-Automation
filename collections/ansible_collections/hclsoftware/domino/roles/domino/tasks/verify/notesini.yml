@@ -59,6 +59,8 @@
         updates:
           - path: 'verify_info.{{ index }}.result'
             value: 'PASS'
+          - path: 'verify_info.{{ index }}.note'
+            value: '{{ domino__assert_notesini_parameters | length }} parameters checked.'
       changed_when: false
       register: notesini_verify_updated_result
 

@@ -64,7 +64,8 @@
     new_item: {
       "name": "{{ task.name }}",
       "description": "{{ task.description }}",
-      "result": "SKIP"
+      "result": "SKIP",
+      "note": ""
     }
   ansible.builtin.set_fact:
     verify_info: '{{ (verify_info | default([])) + [new_item] }}'

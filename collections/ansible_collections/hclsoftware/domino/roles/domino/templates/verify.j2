@@ -8,5 +8,5 @@ VALIDATION RESULTS
   {% else -%}
     {%- set symbol = "  " -%}
   {% endif %}
-  [{{ task.result }}] {{ symbol }}  {{ task.description}}
+  [{{ task.result }}] {{ symbol }}  {{ task.description}} {{ task.note}}
 {% endfor %}

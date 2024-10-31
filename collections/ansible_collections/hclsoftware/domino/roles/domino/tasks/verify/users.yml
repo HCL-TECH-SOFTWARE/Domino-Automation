@@ -45,6 +45,8 @@
         updates:
           - path: 'verify_info.{{ index }}.result'
             value: 'PASS'
+          - path: 'verify_info.{{ index }}.note'
+            value: '{{ ldap_search_result.results | length }} LDAP users found.'
       changed_when: false
       register: users_verify_updated_result
 

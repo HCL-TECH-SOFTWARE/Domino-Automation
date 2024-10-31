@@ -81,10 +81,10 @@ domino__default_login_form: $$LoginUserForm
 domino__dkim_info: dkim-info.txt
 
 domino__verify_tasks:
-  - { name: service, description: 'Domino service registered in the OS' }
-  - { name: port_http, description: 'HTTP port 80 is listening' }
-  - { name: port_https, description: 'HTTPS port 443 is listening' }
-  - { name: port_nrpc, description: 'NRPC port 1352 is listening' }
-  - { name: port_ldap, description: 'LDAP port 389 is listening' }
-  - { name: notesini, description: 'Custom notes.ini parameters validated' }
-  - { name: users, description: 'Initial users created' }
+  - { name: service, description: 'Domino service registered in the OS.' }
+  - { name: port_http, description: 'HTTP port 80 is listening.' }
+  - { name: port_https, description: 'HTTPS port 443 is listening.' }
+  - { name: port_nrpc, description: 'NRPC port 1352 is listening.' }
+  - { name: port_ldap, description: 'LDAP port 389 is listening.' }
+  - { name: notesini, description: 'Custom notes.ini parameters validated.' }
+  - { name: users, description: 'Initial users created.' }
