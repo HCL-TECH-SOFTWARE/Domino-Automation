@@ -2,7 +2,9 @@ domino__assert_values:
   - { name: domino__server_name, type: alphanumeric }
   - { name: domino__install_path, type: path }
   - { name: domino__software_dir, type: path }
+  - { name: domino__download_installers, type: boolean }
   - { name: domino__install_products, type: list }
+  - { name: domino__software_use_local_file, type: boolean }
   - { name: domino__install_startup_script, type: boolean }
   - { name: domino__install_ontime, type: boolean }
   - { name: domino__input_data_location, type: path }

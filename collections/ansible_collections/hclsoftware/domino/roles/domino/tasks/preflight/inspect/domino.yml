@@ -37,9 +37,16 @@
         domino_fp_version: '{{ domino_main_version }}{{ fixpack_version }}'
         domino_fp_if_version: '{{ domino_main_version }}{{ fixpack_version }}{{ interim_version }}'
 
+    - name: Print target versions for Domino, FP and IF
+      ansible.builtin.debug:
+        msg: |
+          domino_main_version: {{ domino_main_version }}
+          domino_fixpack: {{ domino_fixpack }}
+          domino_interim: {{ domino_interim }}
+
     # --- Process Domino version
 
-    - name: Process Domino version - {{ domino_main_version }}
+    - name: Process Domino version
       block:
         # - name: Compare existing version and target version
         #   vars:
@@ -50,7 +57,7 @@
         #       - CURRENT: {{ domino_main_version }}
         #       - IS NEW BIGGER: {{ domino_main_version is version(domino_target_version, "<", version_type="loose") }}
 
-        - name: Mark Domino as installed (single variable)
+        - name: Mark Domino as installed (single variable) - {{ domino_main_version }}
           ansible.builtin.set_fact:
             domino_is_installed: true
 
@@ -76,17 +83,17 @@
 
     # --- Process FixPack version
 
-    - name: Process FixPack version - {{ domino_main_version }}{{ fixpack_version }}
+    - name: Process FixPack version
       when: fixpack_version | trim | length > 0
       block:
-        - name: Mark FixPack as installed (single variable)
+        - name: Mark FixPack as installed (single variable) - {{ domino_main_version }}{{ fixpack_version }}
           ansible.builtin.set_fact:
             fp_is_installed: true
 
         - name: Mark FixPack as installed (sw dictionary)
           vars:
             index: '{{ product_info | ansible.utils.index_of("eq", "fp", "name") }}'
-            fp_target_version: '{{ product_info | json_query("[?name==`fp`].version") | first  }}'
+            fp_target_version: '{{ domino_main_version }}{{ domino_fixpack }}'
             target_version_is_newer: '{{ domino_fp_version is version(fp_target_version, "<", version_type="loose") }}'
           ansible.utils.update_fact:
             updates:
@@ -105,17 +112,17 @@
 
     # --- Process Interim fix version
 
-    - name: Process Interim fix version - {{ domino_main_version }}{{ fixpack_version }}{{ interim_version }}
+    - name: Process Interim fix version
       when: interim_version | trim | length > 0
       block:
-        - name: Mark Interim fix as installed (single variable)
+        - name: Mark Interim fix as installed (single variable) - {{ domino_main_version }}{{ fixpack_version }}{{ interim_version }}
           ansible.builtin.set_fact:
             if_is_installed: true
 
         - name: Mark Interim fix as installed (sw dictionary)
           vars:
             index: '{{ product_info | ansible.utils.index_of("eq", "if", "name") }}'
-            if_target_version: '{{ product_info | json_query("[?name==`fp`].version") | first  }}'
+            if_target_version: '{{ domino_main_version }}{{ domino_fixpack }}{{ domino_interim }}'
             target_version_is_newer: '{{ domino_fp_if_version is version(if_target_version, "<", version_type="loose") }}'
           ansible.utils.update_fact:
             updates:

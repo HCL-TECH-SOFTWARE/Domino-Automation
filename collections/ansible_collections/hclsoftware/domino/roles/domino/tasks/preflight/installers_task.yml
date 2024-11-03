@@ -1,13 +1,84 @@
 ---
-# When there are multiple filenames in the "installer" field, use the first one
 - name: Store installer full file name – {{ product.name }}
   ansible.builtin.set_fact:
     installer_filename: '{{ domino__software_dir + "/" + product.installer }}'
 
-- name: Check that the installer exists in a local directory – {{ product.installer }}
-  vars:
-    common__file_name: installer_filename
-    common__file_checksum: '{{ product.checksum }}'
-  ansible.builtin.include_role:
-    name: common
-    tasks_from: assert_file
+- name: Check that the installer exists and download it if missing
+  block:
+    - name: Check that the installer exists in a local directory – {{ product.installer }}
+      vars:
+        common__file_name: installer_filename
+        common__file_checksum: '{{ product.checksum }}'
+      ansible.builtin.include_role:
+        name: common
+        tasks_from: assert_file
+
+  rescue:
+    - name: Print info that installer was not found (download disabled) and stop the script
+      ansible.builtin.fail:
+        msg: |
+          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+          Installer "{{ product.installer }}" was not found in the installers directory "{{ domino__software_dir }}".
+          Automatic download is not enabled so you have to download the installer manually.
+          The installation script stops now.
+          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      when:
+        - not domino__download_installers
+
+    - name: Print info that installer was not found (download enabled)
+      ansible.builtin.debug:
+        msg: |
+          Installer "{{ product.installer }}" was not found in the installers directory "{{ domino__software_dir }}".
+          Automatic download is enabled so I will try to download it from the vendor download server now.
+          Please wait.
+          Download parameters:
+              filename: {{ product.installer }}
+              fileid: {{ product.fileid }}
+              hash: {{ product.checksum }}
+
+    - name: Check whether the domdownload file exists [{{ domino__domdownload_path }}]
+      ansible.builtin.stat:
+        path: '{{ domino__domdownload_path }}'
+      register: domdownload_result
+
+    - name: Assert that domdownload is installed on the admin workstation
+      ansible.builtin.assert:
+        that:
+          - domdownload_result.stat.exists
+        fail_msg: |
+          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+          You specified "domino__download_installers: {{ domino__download_installers }}".
+          This parameter utilizes the "domdownload" tool, which must be installed on your admin workstation:
+            {{ domino__domdownload_path }}
+          Follow the instructions to install the domdownload tool:
+            https://nashcom.github.io/domino-startscript/domdownload/
+
+          Quick instructions:
+            curl https://raw.githubusercontent.com/nashcom/domino-startscript/refs/heads/main/domdownload.sh -o domdownload.sh
+            chmod +x domdownload.sh
+            ./domdownload.sh -install
+          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        success_msg: 'domdownload script is installed on the admin workstation: "{{ domino__domdownload_path }}"'
+
+    - name: Run the domdownload script to download the installer [{{ product.installer }}]
+      vars:
+        cmdline: >
+          domdownload -connect
+          -filename={{ product.installer }}
+          -fileid={{ product.fileid }}
+          -hash={{ product.checksum }}
+          -dir={{ domino__software_dir }}
+      ansible.builtin.shell:
+        cmd: '{{ cmdline }}'
+      register: domdownload_result
+      changed_when:
+        - domdownload_result.changed
+        - domdownload_result.rc == 0
+
+    - name: Check again that the installer now exists in a local directory – {{ product.installer }}
+      vars:
+        common__file_name: installer_filename
+        common__file_checksum: '{{ product.checksum }}'
+      ansible.builtin.include_role:
+        name: common
+        tasks_from: assert_file

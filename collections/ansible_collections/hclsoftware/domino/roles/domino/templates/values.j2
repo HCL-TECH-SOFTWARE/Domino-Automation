@@ -1,19 +1,19 @@
 INPUT VALUES FOR INSTALLATION
 =============================
 
-DOMINO - PRODUCTS REQUESTED TO INSTALL
-  Domino:                     {{ domino__install_domino }}
-  Domino FixPack:             {{ domino__install_fp }}
-  Domino Interim fix:         {{ domino__install_if }}
-  Verse:                      {{ domino__install_verse }}
-  Nomad:                      {{ domino__install_nomad }}
-  Traveler:                   {{ domino__install_traveler }}
-  Domino Leap:                {{ domino__install_leap }}
-  Domino REST API:            {{ domino__install_domrestapi }}
+DOMINO - PRODUCTS REQUESTED TO INSTALL (SOME WITH A SPECIFIC VERSION)
+  Domino:                     {{ domino__install_domino }}   {{ domino_main_version if domino__domino_version is defined }}
+  Domino FixPack:             {{ domino__install_fp }}   {{ domino_fixpack if domino__domino_version is defined }}
+  Domino Interim fix:         {{ domino__install_if }}   {{ domino_interim if domino__domino_version is defined }}
+  Verse:                      {{ domino__install_verse }}   {{ domino__verse_version | default('') }}
+  Nomad:                      {{ domino__install_nomad }}   {{ domino__nomad_version | default('') }}
+  Traveler:                   {{ domino__install_traveler }}   {{ domino__traveler_version | default('') }}
+  Domino Leap:                {{ domino__install_leap }}   {{ domino__leap_version | default('') }}
+  Domino REST API:            {{ domino__install_domrestapi }}   {{ domino__domrestapi_version | default('') }}
   OnTime Group Calendar:      {{ domino__install_ontime }}
   Startup Script:             {{ domino__install_startup_script }}
 
-DOMINO - PRODUCT VERSIONS
+DOMINO - CALCULATED PRODUCT VERSIONS
   {{ "%-10s"|format("PRODUCT") }} {{ "%-12s"|format("REQUESTED") }} {{ "%-12s"|format("INSTALLED") }} {{ "%-40s"|format("INSTALLER NAME") }} {{ "%-10s"|format("WILL BE INSTALLED?") }}
 {% for product in product_info | sort(attribute='name') | json_query("[?install]") %}
   {%- set do_installation = "YES" if product.do_installation else "no" %}

@@ -30,6 +30,7 @@ domino__software_latest_file_url: '{{ domino__software_repo }}/{{ domino__softwa
 domino__software_directory: '{{ role_path }}/software'
 domino__software_file: software.txt
 domino__software_latest_file: current_version.txt
+domino__domdownload_path: /usr/local/bin/domdownload
 
 domino__users_file: users.csv
 

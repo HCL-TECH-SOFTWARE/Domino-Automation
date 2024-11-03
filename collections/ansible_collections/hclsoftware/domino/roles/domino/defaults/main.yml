@@ -4,6 +4,7 @@ domino__setup_firewalld: true
 # Domino installers
 domino__install_path: /local/install
 domino__software_dir: ~/software
+domino__download_installers: false
 domino__install_products:
   - domino
   - verse

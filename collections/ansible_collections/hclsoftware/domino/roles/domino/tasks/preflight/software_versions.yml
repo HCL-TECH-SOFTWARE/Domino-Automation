@@ -41,7 +41,7 @@
 - name: Read software releases from the CSV file - {{ sw_path }}
   community.general.read_csv:
     path: '{{ sw_path }}'
-    fieldnames: product,version,filename,id,checksum
+    fieldnames: product,version,filename,fileid,checksum
     delimiter: '|'
     skipinitialspace: true
   register: software_result
