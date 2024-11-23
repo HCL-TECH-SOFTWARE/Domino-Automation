@@ -37,6 +37,11 @@
         domino_fp_version: '{{ domino_main_version }}{{ fixpack_version }}'
         domino_fp_if_version: '{{ domino_main_version }}{{ fixpack_version }}{{ interim_version }}'
 
+    - name: Rename installed IF version (14.0FP2HF8 -> 14.0FP2IF1)
+      ansible.builtin.set_fact:
+        domino_fp_if_version: 14.0FP2IF1
+      when: domino_fp_if_version == '14.0FP2HF8'
+
     - name: Print target versions for Domino, FP and IF
       ansible.builtin.debug:
         msg: |
@@ -86,7 +91,7 @@
     - name: Process FixPack version
       when: fixpack_version | trim | length > 0
       block:
-        - name: Mark FixPack as installed (single variable) - {{ domino_main_version }}{{ fixpack_version }}
+        - name: Mark FixPack as installed (single variable) - {{ domino_fp_version }}
           ansible.builtin.set_fact:
             fp_is_installed: true
 
@@ -100,7 +105,7 @@
               - path: 'product_info.{{ index }}.installed'
                 value: true
               - path: 'product_info.{{ index }}.installed_version'
-                value: '{{ domino_main_version }}{{ fixpack_version }}'
+                value: '{{ domino_fp_version }}'
               - path: 'product_info.{{ index }}.do_installation'
                 value: '{{ target_version_is_newer }}'
           changed_when: false
@@ -115,7 +120,7 @@
     - name: Process Interim fix version
       when: interim_version | trim | length > 0
       block:
-        - name: Mark Interim fix as installed (single variable) - {{ domino_main_version }}{{ fixpack_version }}{{ interim_version }}
+        - name: Mark Interim fix as installed (single variable) - {{ domino_fp_if_version }}
           ansible.builtin.set_fact:
             if_is_installed: true
 
@@ -129,7 +134,7 @@
               - path: 'product_info.{{ index }}.installed'
                 value: true
               - path: 'product_info.{{ index }}.installed_version'
-                value: '{{ domino_main_version }}{{ fixpack_version }}{{ interim_version }}'
+                value: '{{ domino_fp_if_version }}'
               - path: 'product_info.{{ index }}.do_installation'
                 value: '{{ target_version_is_newer }}'
           changed_when: false

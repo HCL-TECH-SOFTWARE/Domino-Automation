@@ -1,4 +1,12 @@
 ---
+- name: Set sticky bit for tunekrnl
+  become: true
+  ansible.builtin.file:
+    path: /opt/hcl/domino/notes/latest/linux/tunekrnl
+    owner: root
+    group: root
+    mode: '4555'
+
 - name: Create robots.txt file
   become: true
   vars:
@@ -11,3 +19,26 @@
     owner: notes
     group: notes
     mode: u=rw,g=r,o=r
+
+- name: 'Create named encryption key "{{ domino__nek }}" and store it in the server ID file'
+  become: true
+  become_user: notes
+  ansible.builtin.shell:
+    chdir: '/local/notesdata'
+    cmd: '/opt/hcl/domino/bin/server -c "keymgmt create nek {{ domino__nek }}" 2>&1 &'
+  register: nek_result
+  changed_when:
+    - nek_result.changed
+    - nek_result.rc == 0
+
+- name: 'Create the credential store database "{{ domino__credstore }}"'
+  become: true
+  become_user: notes
+  ansible.builtin.shell:
+    chdir: '/local/notesdata'
+    cmd: '/opt/hcl/domino/bin/server -c "keymgmt create {{ domino__credstore }} {{ domino__nek }}" 2>&1 &'
+    creates: '/local/notesdata/IBM_CredStore/{{ domino__credstore }}.nsf'
+  register: credstore_result
+  changed_when:
+    - credstore_result.changed
+    - credstore_result.rc == 0

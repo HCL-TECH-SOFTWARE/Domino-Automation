@@ -1,4 +1,8 @@
 ---
+- name: Configure Domino
+  ansible.builtin.import_tasks:
+    file: configure/configure_domino.yml
+
 - name: Enable DKIM
   ansible.builtin.import_tasks:
     file: configure/enable_dkim.yml
@@ -10,7 +14,3 @@
     file: configure/customize_verse.yml
   when:
     - domino__install_verse
-
-- name: Configure Domino
-  ansible.builtin.import_tasks:
-    file: configure/configure_domino.yml
