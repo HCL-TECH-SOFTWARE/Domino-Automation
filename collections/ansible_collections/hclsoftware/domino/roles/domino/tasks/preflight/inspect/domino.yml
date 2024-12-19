@@ -42,6 +42,16 @@
         domino_fp_if_version: 14.0FP2IF1
       when: domino_fp_if_version == '14.0FP2HF8'
 
+    - name: Rename installed IF version (14.0FP3HF9 -> 14.0FP3IF1)
+      ansible.builtin.set_fact:
+        domino_fp_if_version: 14.0FP3IF1
+      when: domino_fp_if_version == '14.0FP3HF9'
+
+    - name: Rename installed IF version (14.0FP3HF16 -> 14.0FP3IF2)
+      ansible.builtin.set_fact:
+        domino_fp_if_version: 14.0FP3IF2
+      when: domino_fp_if_version == '14.0FP3HF16'
+
     - name: Print target versions for Domino, FP and IF
       ansible.builtin.debug:
         msg: |
@@ -89,11 +99,12 @@
     # --- Process FixPack version
 
     - name: Process FixPack version
-      when: fixpack_version | trim | length > 0
+      when: (fixpack_version | trim | length > 0) or (domino_fixpack | trim | length > 0)
       block:
         - name: Mark FixPack as installed (single variable) - {{ domino_fp_version }}
           ansible.builtin.set_fact:
             fp_is_installed: true
+          when: fixpack_version | trim | length > 0
 
         - name: Mark FixPack as installed (sw dictionary)
           vars:
@@ -103,11 +114,12 @@
           ansible.utils.update_fact:
             updates:
               - path: 'product_info.{{ index }}.installed'
-                value: true
+                # value: true
+                value: '{{ fixpack_version | trim | length > 0 }}'
               - path: 'product_info.{{ index }}.installed_version'
                 value: '{{ domino_fp_version }}'
               - path: 'product_info.{{ index }}.do_installation'
-                value: '{{ target_version_is_newer }}'
+                value: '{{ target_version_is_newer and (domino_fixpack | trim | length > 0) }}'
           changed_when: false
           register: fixpack_version_updated_result
 
@@ -118,11 +130,12 @@
     # --- Process Interim fix version
 
     - name: Process Interim fix version
-      when: interim_version | trim | length > 0
+      when: (interim_version | trim | length > 0) or (domino_interim | trim | length > 0)
       block:
         - name: Mark Interim fix as installed (single variable) - {{ domino_fp_if_version }}
           ansible.builtin.set_fact:
             if_is_installed: true
+          when: interim_version | trim | length > 0
 
         - name: Mark Interim fix as installed (sw dictionary)
           vars:
@@ -132,11 +145,12 @@
           ansible.utils.update_fact:
             updates:
               - path: 'product_info.{{ index }}.installed'
-                value: true
+                # value: true
+                value: '{{ interim_version | trim | length > 0 }}'
               - path: 'product_info.{{ index }}.installed_version'
                 value: '{{ domino_fp_if_version }}'
               - path: 'product_info.{{ index }}.do_installation'
-                value: '{{ target_version_is_newer }}'
+                value: '{{ target_version_is_newer and (domino_interim | trim | length > 0) }}'
           changed_when: false
           register: interim_version_updated_result
 
