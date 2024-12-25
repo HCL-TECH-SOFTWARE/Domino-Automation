@@ -6,6 +6,12 @@
     - check
     - always
 
+- name: Uninstall the Domino server components
+  ansible.builtin.import_tasks:
+    file: uninstall/main.yml
+  tags:
+    - uninstall
+
 - name: Prepare the installation
   ansible.builtin.import_tasks:
     file: prepare/main.yml

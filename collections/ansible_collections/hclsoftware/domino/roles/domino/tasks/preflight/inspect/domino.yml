@@ -157,3 +157,15 @@
         - name: Store the updated value into the master fact
           ansible.builtin.set_fact:
             product_info: '{{ interim_version_updated_result.product_info }}'
+
+        - name: Set the default value for Interim fix uninstall flag (false)
+          ansible.builtin.set_fact:
+            if_uninstall: false
+
+        - name: Change the flag that Interim fix must be uninstalled first before installing any update
+          ansible.builtin.set_fact:
+            if_uninstall: true
+          when:
+            - ('HF' in interim_version)
+            - domino__install_fp or domino__install_if
+            - (product_info | json_query("[?name==`fp`].do_installation") | first) or (product_info | json_query("[?name==`if`].do_installation") | first)

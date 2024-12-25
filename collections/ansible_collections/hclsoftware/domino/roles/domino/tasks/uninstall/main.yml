@@ -1,0 +1,6 @@
+---
+- name: Uninstall Domino Interim fix before installing FixPack or another Iterim fix
+  ansible.builtin.import_tasks:
+    file: uninstall/if_uninstall.yml
+  when:
+    - if_uninstall

@@ -1,0 +1,58 @@
+---
+# ---------- CHECK WHETHER THE IF INSTALLED DIRECTORY STILL CONTAINS THE BINARIES
+
+- name: Check whether the Interim fix directory contains the current IF version
+  block:
+    - name: Check whether the Interim fix directory {{ domino__if_install }} contains the current IF version
+      vars:
+        current_domino_version: '{{ (domino_main_version + fixpack_version + interim_version) | replace(".", "") }}'
+      ansible.builtin.lineinfile:
+        dest: '{{ domino__if_install }}/linux64/README'
+        line: '{{ current_domino_version }}'
+        state: present
+      check_mode: true
+      register: if_version_in_readme_result
+      failed_when: (if_version_in_readme_result is failed) or (if_version_in_readme_result is changed)
+
+  rescue:
+    - name: Print info that Interim fix directory does not contain the correct content
+      vars:
+        current_domino_version: '{{ (domino_main_version + fixpack_version + interim_version) | replace(".", "") }}'
+      ansible.builtin.fail:
+        msg: |
+          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+          The current Domino version has an Interim fix (IF) installed.
+          This IF must be uninstalled first before Domino can be upgraded to a new version.
+          The IF installer directory does not contain the correct content.
+          Please unpack IF installer file into this folder, so IF can be uninstalled.
+              Folder: "{{ domino__if_install }}"
+              Interim fix name: "{{ product_info | json_query("[?name==`if`].installed_version") | first }}"
+              Interim fix file name: "{{ current_domino_version }}"
+          The installation script stops now.
+          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+# ---------- UNINSTALL PREVIOUS INTERIM FIX (BY LAUNCHING THE INSTALLER AGAIN)
+
+- name: Stop the Domino server
+  ansible.builtin.import_tasks: manage/domino_stop.yml
+
+- name: Edit script file for unattended (un)installation
+  ansible.builtin.lineinfile:
+    path: '{{ domino__if_install }}/linux64/script.dat'
+    regexp: 'installation_type ='
+    line: 'installation_type = 2'
+
+- name: Uninstall Domino Interim fix
+  become: true
+  args:
+    chdir: '{{ domino__if_install }}/linux64'
+  ansible.builtin.shell:
+    cmd: './install -script script.dat'
+  register: if_uninstall_result
+  changed_when:
+    - if_uninstall_result.changed
+    - if_uninstall_result.rc == 0
+
+- name: Start the Domino server
+  ansible.builtin.import_tasks: manage/domino_start.yml
