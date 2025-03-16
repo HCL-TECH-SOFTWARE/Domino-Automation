@@ -31,6 +31,7 @@ domino__software_directory: '{{ role_path }}/software'
 domino__software_file: software.txt
 domino__software_latest_file: current_version.txt
 domino__domdownload_path: /usr/local/bin/domdownload
+domino__startup_script_directory: /tmp/domino_startup_script
 
 domino__users_file: users.csv
 

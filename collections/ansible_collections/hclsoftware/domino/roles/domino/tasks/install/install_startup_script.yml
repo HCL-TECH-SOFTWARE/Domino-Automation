@@ -11,17 +11,25 @@
   changed_when: false
   register: version_result
 
+- name: Create a directory for unpacking the startup script
+  ansible.builtin.file:
+    path: '{{ domino__startup_script_directory }}'
+    state: directory
+    owner: '{{ ansible_effective_user_id }}'
+    group: '{{ ansible_effective_group_id }}'
+    mode: '0755'
+
 - name: Download and unarchive the startup script
   ansible.builtin.unarchive:
     src: '{{ version_result.stdout }}'
-    dest: /tmp
+    dest: '{{ domino__startup_script_directory }}'
     remote_src: true
-    creates: /tmp/domino-startscript-3.8.0/install_script
+    creates: '{{ domino__startup_script_directory }}/install_script'
 
 - name: Update install_script file to enable domino systemd service on deployment inside a container
   become: true
   ansible.builtin.lineinfile:
-    path: /tmp/domino-startscript-3.8.0/install_script
+    path: '{{ domino__startup_script_directory }}/install_script'
     regexp: 'detect_container_env$'
     line: '# detect_container_env'
     backrefs: true
@@ -30,6 +38,6 @@
 - name: Install the startup script
   become: true
   ansible.builtin.command:
-    chdir: /tmp/domino-startscript-3.8.0
+    chdir: '{{ domino__startup_script_directory }}'
     cmd: ./install_script
     creates: /opt/nashcom/startscript/rc_domino_script
