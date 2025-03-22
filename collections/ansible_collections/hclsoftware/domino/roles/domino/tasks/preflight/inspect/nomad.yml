@@ -14,7 +14,7 @@
       ansible.builtin.shell:
         chdir: /opt/hcl/domino/notes/latest/linux
         # cmd: set -o pipefail && cat nomad-web-version.txt | sed 's|\(.*\)\..*|\1|'
-        cmd: set -o pipefail && cat nomad-server-version.txt | cut -d '-' -f2- | sed -e 's/-//g'
+        cmd: set -o pipefail && cat nomad-server-version.txt | cut -d '-' -f2- | cut -d '-' -f1  | sed -e 's/-//g'
       changed_when: false
       register: nomad_version_result
 
@@ -26,6 +26,11 @@
       ansible.builtin.set_fact:
         nomad_version: 1.0.13IF2
       when: nomad_version == '1.0.13.2'
+
+    - name: Rename installed Nomad version (1.0.15.1 -> 1.0.15IF1)
+      ansible.builtin.set_fact:
+        nomad_version: 1.0.15IF1
+      when: nomad_version == '1.0.15.1'
 
     - name: Mark Nomad as installed (single variable)
       ansible.builtin.set_fact:
