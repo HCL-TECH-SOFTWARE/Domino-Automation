@@ -7,3 +7,7 @@ domino__certifier_password: password
 domino__admin_password: password
 domino__register_users: true
 domino__input_data_location: '{{ playbook_dir }}/../local'
+domino__install_as_additional: true
+domino__existing_server_name: Alpha
+domino__existing_server_address: alpha.example.com
+domino__wait_mins_after_restart: 0

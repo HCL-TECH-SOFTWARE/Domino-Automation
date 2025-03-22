@@ -1,0 +1,9 @@
+os__disable_firewall: false
+os__selinux: enforcing         # Options: enforcing, permissive, disabled
+os__set_hostname: true
+os__set_etc_hosts: false
+os__hostname: ''
+os__packages_to_install:
+  - perl
+  - cpio
+  - gdb
