@@ -59,6 +59,7 @@
 
 
 # ---------- Initialize Verify stats
+
 - name: Initially set all verify stats as SKIP
   vars:
     new_item: {
@@ -73,6 +74,13 @@
   loop_control:
     loop_var: task
     label: '{{ task.name }}'
+
+
+# ---------- Initialize in_uninstall flag
+
+- name: Set the default value for Interim fix uninstall flag (false)
+  ansible.builtin.set_fact:
+    if_uninstall: false
 
 
 # ---------- Create directories on a local workstation
@@ -109,3 +117,15 @@
   when:
     - domino__use_custom_login
     - domino__custom_login_db[0] != '/'
+
+
+# ---------- Convert relative path to absolute path
+
+- name: Get stats of domino__software_dir directory
+  ansible.builtin.stat:
+    path: '{{ domino__software_dir }}'
+  register: domino__software_dir_info
+
+- name: Update the domino__software_dir with the absolute path
+  ansible.builtin.set_fact:
+    domino__software_dir: '{{ domino__software_dir_info.stat.path }}'

@@ -2,30 +2,44 @@
 - name: Check the Domino startup script installed on the server
   ansible.builtin.import_tasks:
     file: preflight/inspect/startup_script.yml
+  when:
+    - domino__install_startup_script
 
 - name: Check the Domino version installed on the server (incl. FixPack and Interim fix)
   ansible.builtin.import_tasks:
     file: preflight/inspect/domino.yml
+  when:
+    - domino__install_domino
 
 - name: Check the Verse version installed on the server
   ansible.builtin.import_tasks:
     file: preflight/inspect/verse.yml
+  when:
+    - domino__install_verse
 
 - name: Check the Nomad version installed on the server
   ansible.builtin.import_tasks:
     file: preflight/inspect/nomad.yml
+  when:
+    - domino__install_nomad
 
 - name: Check the Traveler version installed on the server
   ansible.builtin.import_tasks:
     file: preflight/inspect/traveler.yml
+  when:
+    - domino__install_traveler
 
 - name: Check the Domino Leap version installed on the server
   ansible.builtin.import_tasks:
     file: preflight/inspect/leap.yml
+  when:
+    - domino__install_leap
 
 - name: Check the Domino REST API version installed on the server
   ansible.builtin.import_tasks:
     file: preflight/inspect/drapi.yml
+  when:
+    - domino__install_domrestapi
 
 - name: Check the requirements for the product versions
   ansible.builtin.import_tasks:

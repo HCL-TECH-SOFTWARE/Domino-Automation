@@ -52,6 +52,11 @@
         domino_fp_if_version: 14.0FP3IF2
       when: domino_fp_if_version == '14.0FP3HF16'
 
+    - name: Rename installed IF version (14.0FP3HF34 -> 14.0FP3IF3)
+      ansible.builtin.set_fact:
+        domino_fp_if_version: 14.0FP3IF3
+      when: domino_fp_if_version == '14.0FP3HF34'
+
     - name: Print target versions for Domino, FP and IF
       ansible.builtin.debug:
         msg: |
@@ -157,10 +162,6 @@
         - name: Store the updated value into the master fact
           ansible.builtin.set_fact:
             product_info: '{{ interim_version_updated_result.product_info }}'
-
-        - name: Set the default value for Interim fix uninstall flag (false)
-          ansible.builtin.set_fact:
-            if_uninstall: false
 
         - name: Change the flag that Interim fix must be uninstalled first before installing any update
           ansible.builtin.set_fact:

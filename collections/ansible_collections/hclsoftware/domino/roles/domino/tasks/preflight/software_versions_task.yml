@@ -200,7 +200,7 @@
       - path: 'product_info.{{ index }}.version'
         value: '{{ version_to_install }}'
       - path: 'product_info.{{ index }}.installer'
-        value: '{{ installer }}'
+        value: '{{ installer.split(",").0 }}'
       - path: 'product_info.{{ index }}.fileid'
         value: '{{ fileid }}'
       - path: 'product_info.{{ index }}.checksum'
