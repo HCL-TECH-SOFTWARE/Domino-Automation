@@ -1,5 +1,5 @@
 ---
-- name: Set the flag to install the product
+- name: Set the flag to install the product "{{ product }}"
   ansible.builtin.set_fact:
     'domino__install_{{ product }}': 'true'
 

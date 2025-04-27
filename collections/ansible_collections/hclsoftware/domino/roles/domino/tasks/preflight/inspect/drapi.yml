@@ -17,8 +17,10 @@
       register: drapi_version_result
 
     - name: Store installed DRAPI version
+      vars:
+        domino_main_version_split: '{{ product_info | json_query("[?name==`domino`].version") | first | split(".") | first }}'
       ansible.builtin.set_fact:
-        domrestapi_version: '{{ drapi_version_result.stdout }}'
+        domrestapi_version: '{{ drapi_version_result.stdout }}-{{ domino_main_version_split }}'
 
     - name: Mark DRAPI as installed (single variable)
       ansible.builtin.set_fact:
@@ -27,12 +29,16 @@
     - name: Mark DRAPI as installed (sw dictionary)
       vars:
         index: '{{ product_info | ansible.utils.index_of("eq", "domrestapi", "name") }}'
+        domrestapi_target_version: '{{ product_info | json_query("[?name==`domrestapi`].version") | first  }}'
+        target_version_is_newer: '{{ domrestapi_version is version(domrestapi_target_version, "<", version_type="loose") }}'
       ansible.utils.update_fact:
         updates:
           - path: 'product_info.{{ index }}.installed'
             value: true
           - path: 'product_info.{{ index }}.installed_version'
             value: '{{ domrestapi_version }}'
+          - path: 'product_info.{{ index }}.do_installation'
+            value: '{{ target_version_is_newer }}'
       changed_when: false
       register: product_info_updated_result
 

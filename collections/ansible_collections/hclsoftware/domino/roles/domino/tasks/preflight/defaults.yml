@@ -108,6 +108,24 @@
     ots_lf_loginformdb: '{{ domino__use_custom_login | ternary(domino__custom_login_db, domino__default_login_db) }}'
     ots_lf_loginformform: '{{ domino__use_custom_login | ternary(domino__custom_login_form, domino__default_login_form) }}'
 
+- name: Set the initial empty value for OTS paramter [additionalServerTasks]
+  ansible.builtin.set_fact:
+    ots_additional_server_tasks_list: []
+
+- name: Add nomad to OTS parameter [additionalServerTasks]
+  ansible.builtin.set_fact:
+    ots_additional_server_tasks_list: '{{ ots_additional_server_tasks_list + ["nomad"] }}'
+  when: '"nomad" in domino__install_products'
+
+- name: Add DRAPI to OTS parameter [additionalServerTasks]
+  ansible.builtin.set_fact:
+    ots_additional_server_tasks_list: '{{ ots_additional_server_tasks_list + ["restapi"] }}'
+  when: '"domrestapi" in domino__install_products'
+
+- name: Convert list to string for OTS parameter [additionalServerTasks]
+  ansible.builtin.set_fact:
+    ots_additional_server_tasks: "{{ ots_additional_server_tasks_list | join(',') }}"
+
 
 # ---------- Update parameters values
 
