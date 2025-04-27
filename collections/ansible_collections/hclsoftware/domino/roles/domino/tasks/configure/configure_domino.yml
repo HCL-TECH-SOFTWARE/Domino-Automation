@@ -7,6 +7,14 @@
     group: root
     mode: '4555'
 
+- name: Set sticky bit for bindsock
+  become: true
+  ansible.builtin.file:
+    path: /opt/hcl/domino/notes/latest/linux/bindsock
+    owner: root
+    group: root
+    mode: '4555'
+
 - name: Create robots.txt file
   become: true
   vars:

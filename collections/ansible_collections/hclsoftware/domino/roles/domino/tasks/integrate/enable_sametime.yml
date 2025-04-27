@@ -43,6 +43,17 @@
     - sametime_domi_result.changed
     - sametime_domi_result.rc == 0
 
+- name: 'Enable Sametime integration in notes.ini [VOP_Logout_Sametime]'
+  become: true
+  become_user: notes
+  ansible.builtin.shell:
+    chdir: '/local/notesdata'
+    cmd: '/opt/hcl/domino/bin/server -c "set conf VOP_Logout_Sametime=1" 2>&1 &'
+  register: sametime_logout_result
+  changed_when:
+    - sametime_logout_result.changed
+    - sametime_logout_result.rc == 0
+
 
 # ---------- IMPORT SAMETIME CERTIFICATE
 

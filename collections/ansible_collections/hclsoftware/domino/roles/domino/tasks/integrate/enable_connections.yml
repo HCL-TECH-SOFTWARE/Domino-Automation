@@ -1,17 +1,17 @@
 ---
-# - name: Get certificate from Connections HTTP server '{{ domino__connections_server }}'
-#   ansible.builtin.shell:
-#     cmd: >-
-#       echo |
-#       openssl s_client -connect {{ domino__connections_server }}:443 2>&1 |
-#       sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'
-#       > {{ domino__input_data_location }}/{{ domino__connections_server }}.cer
-#   delegate_to: localhost
-#   run_once: true
-#   register: connections_certificate
-#   changed_when:
-#     - connections_certificate.changed
-#     - connections_certificate.rc == 0
+- name: Get certificate from Connections HTTP server '{{ domino__connections_server }}'
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail && echo |
+      openssl s_client -connect {{ domino__connections_server }}:443 2>&1 |
+      sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'
+      > {{ domino__input_data_location }}/{{ domino__connections_server }}.cer
+  delegate_to: localhost
+  run_once: true
+  register: connections_certificate
+  changed_when:
+    - connections_certificate.changed
+    - connections_certificate.rc == 0
 
 # ---------
 
