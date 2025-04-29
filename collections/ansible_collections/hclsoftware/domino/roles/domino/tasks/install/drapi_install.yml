@@ -1,0 +1,41 @@
+---
+- name: Stop the Domino server
+  ansible.builtin.import_tasks: manage/domino_stop.yml
+
+- name: Install DRAPI binaries
+  become: true
+  ansible.builtin.shell:
+    chdir: '{{ domino__domrestapi_install }}'
+    cmd: |
+      /opt/hcl/domino/notes/latest/linux/jvm/bin/java -jar restapiInstall-r14.jar \
+        --dataDir=/local/notesdata \
+        --ini=/local/notesdata/notes.ini \
+        --restapiDir=/opt/hcl/restapi \
+        --programDir=/opt/hcl/domino/notes/latest/linux \
+        --accept -u
+  register: drapi_install_result
+  changed_when:
+    - drapi_install_result.changed
+
+- name: Update notes.ini access rights
+  become: true
+  ansible.builtin.file:
+    path: /local/notesdata/notes.ini
+    mode: u=rw,g=r,o=r
+
+- name: Update $PATH and $LD_LIBRARY_PATH for user notes
+  become: true
+  become_user: notes
+  ansible.builtin.lineinfile:
+    path: ~/.bash_profile
+    line: '{{ profile_line }}'
+    create: true
+    mode: u=rw,g=r,o=r
+  loop:
+    - 'PATH=/local/notesdata:/opt/hcl/domino/notes/latest/linux:/opt/hcl/domino/notes/latest/linux/res/C:$PATH'
+    - 'LD_LIBRARY_PATH=/opt/hcl/domino/notes/latest/linux:/opt/hcl/domino/notes/latest/linux/jvm/bin:/opt/hcl/domino/notes/latest/linux/jvm/bin/classic:$LD_LIBRARY_PATH'
+  loop_control:
+    loop_var: profile_line
+
+- name: Start the Domino server
+  ansible.builtin.import_tasks: manage/domino_start.yml

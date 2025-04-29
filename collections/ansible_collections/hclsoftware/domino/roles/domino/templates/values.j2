@@ -14,10 +14,10 @@ DOMINO - PRODUCTS REQUESTED TO INSTALL (SOME WITH A SPECIFIC VERSION)
   Startup Script:             {{ domino__install_startup_script }}
 
 DOMINO - CALCULATED PRODUCT VERSIONS
-  {{ "%-10s"|format("PRODUCT") }} {{ "%-12s"|format("REQUESTED") }} {{ "%-12s"|format("INSTALLED") }} {{ "%-40s"|format("INSTALLER NAME") }} {{ "%-10s"|format("WILL BE INSTALLED?") }}
+  {{ "%-10s"|format("PRODUCT") }} {{ "%-12s"|format("REQUESTED") }} {{ "%-12s"|format("INSTALLED") }} {{ "%-44s"|format("INSTALLER NAME") }} {{ "%-10s"|format("WILL BE INSTALLED?") }}
 {% for product in product_info | sort(attribute='name') | json_query("[?install]") %}
   {%- set do_installation = "YES" if product.do_installation else "no" %}
-  {{ "%-10s"|format(product.name) }} {{ "%-12s"|format(product.version) }} {{ "%-12s"|format(product.installed_version) }} {{ "%-40s"|format(product.installer) }} {{ do_installation }}
+  {{ "%-10s"|format(product.name) }} {{ "%-12s"|format(product.version) }} {{ "%-12s"|format(product.installed_version) }} {{ "%-44s"|format(product.installer) }} {{ do_installation }}
 {% endfor %}
 {% if if_uninstall %}
   * Note: Interim fix {{ domino_fp_if_version }} will be uninstalled first before installing other products.

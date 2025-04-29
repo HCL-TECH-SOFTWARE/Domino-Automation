@@ -1,17 +1,28 @@
 ---
-- name: Set Nomad hostname in notes.ini [NOMAD_WEB_HOST]
-  become: true
-  become_user: notes
-  ansible.builtin.shell:
-    chdir: '/local/notesdata'
-    cmd: '/opt/hcl/domino/bin/server -c "set conf NOMAD_WEB_HOST={{ domino__domino_hostname }}" 2>&1 &'
-  register: nomad_hostname_result
-  changed_when:
-    - nomad_hostname_result.changed
-    - nomad_hostname_result.rc == 0
+# - name: Set Nomad hostname in notes.ini [NOMAD_WEB_HOST]
+#   become: true
+#   become_user: notes
+#   ansible.builtin.shell:
+#     chdir: '/local/notesdata'
+#     cmd: '/opt/hcl/domino/bin/server -c "set conf NOMAD_WEB_HOST={{ domino__domino_hostname }}" 2>&1 &'
+#   register: nomad_hostname_result
+#   changed_when:
+#     - nomad_hostname_result.changed
+#     - nomad_hostname_result.rc == 0
 
 - name: Stop the Domino server
   ansible.builtin.import_tasks: manage/domino_stop.yml
+
+- name: Set Nomad hostname in notes.ini [NOMAD_WEB_HOST]
+  become: true
+  become_user: notes
+  community.general.ini_file:
+    path: /local/notesdata/notes.ini
+    section: Notes
+    option: NOMAD_WEB_HOST
+    value: '{{ domino__domino_hostname }}'
+    create: false
+    backup: false
 
 - name: Copy Nomad binary files to Domino binaries directory
   become: true

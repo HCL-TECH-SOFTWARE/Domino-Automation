@@ -56,7 +56,8 @@ domino__existing_server_name: ''
 domino__existing_server_address: ''
 
 # Custom input files
-domino__input_data_location: local
+# domino__input_data_location: local
+domino__input_data_location: '{{ playbook_dir }}/../local'
 domino__cert_id: '{{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/ids/cert.id'
 domino__server_id: '{{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/ids/server-{{ domino__server_name | lower }}.id'
 domino__admin_id: '{{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/ids/admin.id'
@@ -72,3 +73,6 @@ domino__reports_dir: '{{ domino__input_data_location }}/reports/{{ domino__domin
 # Domino server integration
 domino__sametime_server: ''
 domino__connections_server: ''
+
+# Monitoring components
+domino__install_monitoring: false

@@ -55,12 +55,12 @@
     - domino__install_nomad
     - product_info | json_query("[?name==`nomad`].do_installation") | first
 
-# - name: Install Domino REST API
-#   ansible.builtin.import_tasks:
-#     file: install/drapi_install.yml
-#   when:
-#     - domino__install_domrestapi
-#     - not domrestapi_is_installed
+- name: Install Domino REST API
+  ansible.builtin.import_tasks:
+    file: install/drapi_install.yml
+  when:
+    - domino__install_domrestapi
+    - product_info | json_query("[?name==`domrestapi`].do_installation") | first
 
 - name: Generate Install Report
   ansible.builtin.import_tasks:

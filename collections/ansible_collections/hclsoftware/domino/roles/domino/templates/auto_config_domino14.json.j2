@@ -18,7 +18,7 @@
       "minPasswordLength": 0,
       "serverTasks": "replica,router,update,amgr,adminp,sched,collect,rnrmgr,http",
       {% if domino__install_nomad -%}
-      "additionalServerTasks": "nomad",
+      "additionalServerTasks": "{{ ots_additional_server_tasks }}",
       {% endif -%}
       {% if domino__restart_after_setup -%}
       "restartServer": true
