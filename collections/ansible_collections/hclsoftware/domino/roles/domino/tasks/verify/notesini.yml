@@ -5,32 +5,18 @@
     dest: '{{ domino__reports_dir }}/{{ domino__domino_hostname }}-notes.ini'
     flat: true
 
-- name: Store parameters from notes.ini to an array
+- name: Store selected parameters from notes.ini to an array
   vars:
-    server_domain: '{{ (domino__domino_hostname | split(".", 1))[1] }}'
     inifile: '{{ domino__reports_dir }}/{{ domino__domino_hostname }}-notes.ini'
     new_entry:
-      - key: '{{ param }}'
-        value: '{{ lookup("ansible.builtin.ini", param, section="Notes", file=inifile) }}'
+      - key: '{{ param.name }}'
+        value: '{{ lookup("ansible.builtin.ini", param.name, section="Notes", file=inifile) }}'
   ansible.builtin.set_fact:
     notesini: '{{ (notesini | default({})) | ansible.builtin.combine(new_entry | items2dict) }}'
-  loop:
-    - Domain
-    - ServerTasks
-    - VOP_EXTENSIBILITY_DATA_PROVIDER_NAME
-    - VOP_Extensibility_Applications_Json_FilePath
-    - VOP_LLN2_BSSUIServer_URL
-    - iNotes_WA_Security_NonceCheck
-    - iNotes_WA_Security_RefererCheck
-    - RouterDKIMSigning
-    - DKIM_KEY_{{ server_domain }}
-    - iNotes_WA_SametimeProxyServerSSL
-    - VOP_GK_sametime
-    - VOP_GK_sametime_rich_client
-    - VOP_DOMI_ST_ROOTURL
-    - NOMAD_WEB_HOST
+  loop: '{{ domino__assert_notesini_parameters }}'
   loop_control:
     loop_var: param
+    label: '{{ param.name }}'
 
 
 # ---------------- ASSERT NOTES.INI VALUES

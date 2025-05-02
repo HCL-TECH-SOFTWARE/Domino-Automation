@@ -44,3 +44,27 @@
     }
   ansible.builtin.include_tasks:
     file: verify/ports_task.yml
+
+- name: Check Domino port [Nomad]
+  vars:
+    port_info: {
+      name: Nomad,
+      number: 9443,
+      verify_name: port_nomad
+    }
+  ansible.builtin.include_tasks:
+    file: verify/ports_task.yml
+  when:
+    - domino__install_nomad
+
+- name: Check Domino port [DRAPI]
+  vars:
+    port_info: {
+      name: HTTPS,
+      number: 8880,
+      verify_name: port_drapi
+    }
+  ansible.builtin.include_tasks:
+    file: verify/ports_task.yml
+  when:
+    - domino__install_domrestapi

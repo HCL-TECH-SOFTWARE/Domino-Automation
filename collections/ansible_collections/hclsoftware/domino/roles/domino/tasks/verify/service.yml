@@ -20,6 +20,15 @@
         fail_msg: 'The service "domino.service" must have status "enabled"; it has status: {{ domino_service_status }}'
         success_msg: 'The service "domino.service" has correct status: {{ domino_service_status }}'
 
+    - name: Assert that the Domino service is running
+      vars:
+        domino_service_state: '{{ ansible_facts.services["domino.service"].state }}'
+      ansible.builtin.assert:
+        that:
+          - domino_service_state == 'running'
+        fail_msg: 'The service "domino.service" must have state "running"; it has status: {{ domino_service_state }}'
+        success_msg: 'The service "domino.service" has correct status: {{ domino_service_state }}'
+
     - name: Mark service verification as PASS
       vars:
         index: '{{ verify_info | ansible.utils.index_of("eq", "service", "name") }}'
