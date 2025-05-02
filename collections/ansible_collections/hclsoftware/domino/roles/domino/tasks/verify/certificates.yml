@@ -1,0 +1,38 @@
+- name: Download and check server TLS certificates
+  block:
+    - name: Get number of certificates from the local Domino server '{{ domino__domino_hostname }}'
+      ansible.builtin.shell:
+        chdir: '/opt/hcl/domino/notes/latest/linux/jvm/bin'
+        cmd: 'set -o pipefail && ./keytool -printcert -rfc -sslserver {{ domino__domino_hostname }} | grep "END CERTIFICATE" | wc -l'
+      register: domino_certificates
+      changed_when: false
+      failed_when:
+        - domino_certificates.stdout | int == 0
+
+    - name: Mark certificates verification as PASS
+      vars:
+        index: '{{ verify_info | ansible.utils.index_of("eq", "certificates", "name") }}'
+      ansible.utils.update_fact:
+        updates:
+          - path: 'verify_info.{{ index }}.result'
+            value: 'PASS'
+          - path: 'verify_info.{{ index }}.note'
+            value: '{{ domino_certificates.stdout }} certificates downloaded.'
+      changed_when: false
+      register: certificates_verify_updated_result
+
+  rescue:
+    - name: Mark certificates verification as FAIL
+      vars:
+        index: '{{ verify_info | ansible.utils.index_of("eq", "certificates", "name") }}'
+      ansible.utils.update_fact:
+        updates:
+          - path: 'verify_info.{{ index }}.result'
+            value: 'FAIL'
+      changed_when: false
+      register: certificates_verify_updated_result
+
+  always:
+    - name: Store the updated value into the master fact
+      ansible.builtin.set_fact:
+        verify_info: '{{ certificates_verify_updated_result.verify_info }}'

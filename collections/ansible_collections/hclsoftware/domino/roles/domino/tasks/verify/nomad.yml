@@ -1,0 +1,38 @@
+- name: Check that Nomad is running
+  block:
+    - name: Check that Nomad homepage is responding
+      ansible.builtin.uri:
+        url: 'https://{{ domino__domino_hostname }}:9443/nomad/'
+        user: '{{ domino__admin_first_name }} {{ domino__admin_last_name }}'
+        password: '{{ domino__admin_password }}'
+        force_basic_auth: true
+        return_content: true
+        status_code: 200
+        validate_certs: false
+      register: nomad_status_response
+
+    - name: Mark nomad verification as PASS
+      vars:
+        index: '{{ verify_info | ansible.utils.index_of("eq", "nomad", "name") }}'
+      ansible.utils.update_fact:
+        updates:
+          - path: 'verify_info.{{ index }}.result'
+            value: 'PASS'
+      changed_when: false
+      register: nomad_verify_updated_result
+
+  rescue:
+    - name: Mark nomad verification as FAIL
+      vars:
+        index: '{{ verify_info | ansible.utils.index_of("eq", "nomad", "name") }}'
+      ansible.utils.update_fact:
+        updates:
+          - path: 'verify_info.{{ index }}.result'
+            value: 'FAIL'
+      changed_when: false
+      register: nomad_verify_updated_result
+
+  always:
+    - name: Store the updated value into the master fact
+      ansible.builtin.set_fact:
+        verify_info: '{{ nomad_verify_updated_result.verify_info }}'

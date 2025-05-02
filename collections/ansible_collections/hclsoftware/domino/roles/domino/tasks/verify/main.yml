@@ -17,6 +17,40 @@
   ansible.builtin.import_tasks:
     file: verify/notesini.yml
 
+- name: Check Domino TLS certificates
+  ansible.builtin.import_tasks:
+    file: verify/certificates.yml
+
+- name: Check Traveler
+  ansible.builtin.import_tasks:
+    file: verify/traveler.yml
+  when:
+    - domino__install_traveler
+
+- name: Check Verse
+  ansible.builtin.import_tasks:
+    file: verify/verse.yml
+  when:
+    - domino__install_verse
+
+- name: Check Leap
+  ansible.builtin.import_tasks:
+    file: verify/leap.yml
+  when:
+    - domino__install_leap
+
+- name: Check Nomad
+  ansible.builtin.import_tasks:
+    file: verify/nomad.yml
+  when:
+    - domino__install_nomad
+
+- name: Check DRAPI
+  ansible.builtin.import_tasks:
+    file: verify/drapi.yml
+  when:
+    - domino__install_domrestapi
+
 - name: Print final report
   ansible.builtin.import_tasks:
     file: verify/report.yml

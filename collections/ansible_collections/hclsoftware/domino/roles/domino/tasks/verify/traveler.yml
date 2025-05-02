@@ -1,0 +1,40 @@
+- name: Check that the Traveler server is running
+  block:
+    - name: Check that Traveler returns the correct response on a status page
+      ansible.builtin.uri:
+        url: 'https://{{ domino__domino_hostname }}/traveler?action=getStatus'
+        user: '{{ domino__admin_first_name }} {{ domino__admin_last_name }}'
+        password: '{{ domino__admin_password }}'
+        force_basic_auth: true
+        return_content: true
+        status_code: 200
+        validate_certs: false
+      register: traveler_status_response
+      failed_when:
+        - "'Traveler server is available.' not in traveler_status_response.content"
+
+    - name: Mark traveler verification as PASS
+      vars:
+        index: '{{ verify_info | ansible.utils.index_of("eq", "traveler", "name") }}'
+      ansible.utils.update_fact:
+        updates:
+          - path: 'verify_info.{{ index }}.result'
+            value: 'PASS'
+      changed_when: false
+      register: traveler_verify_updated_result
+
+  rescue:
+    - name: Mark traveler verification as FAIL
+      vars:
+        index: '{{ verify_info | ansible.utils.index_of("eq", "traveler", "name") }}'
+      ansible.utils.update_fact:
+        updates:
+          - path: 'verify_info.{{ index }}.result'
+            value: 'FAIL'
+      changed_when: false
+      register: traveler_verify_updated_result
+
+  always:
+    - name: Store the updated value into the master fact
+      ansible.builtin.set_fact:
+        verify_info: '{{ traveler_verify_updated_result.verify_info }}'
