@@ -30,7 +30,7 @@
       vars:
         index: '{{ product_info | ansible.utils.index_of("eq", "domrestapi", "name") }}'
         domrestapi_target_version: '{{ product_info | json_query("[?name==`domrestapi`].version") | first  }}'
-        target_version_is_newer: '{{ domrestapi_version is version(domrestapi_target_version, "<", version_type="loose") }}'
+        target_version_is_newer: '{{ (domrestapi_version.split("-") | first) is version((domrestapi_target_version.split("-") | first), "<", version_type="loose") }}'
       ansible.utils.update_fact:
         updates:
           - path: 'product_info.{{ index }}.installed'
