@@ -1,5 +1,4 @@
 domino__assert_values:
-  - { name: domino__server_name, type: alphanumeric }
   - { name: domino__install_path, type: path }
   - { name: domino__software_dir, type: path }
   - { name: domino__download_installers, type: boolean }
@@ -20,10 +19,10 @@ domino__assert_values:
   - { name: domino__use_existing_certifier_id, type: boolean }
   - { name: domino__use_existing_admin_id, type: boolean }
   - { name: domino__register_users, type: boolean }
+  - { name: domino__mail_template, type: alphanumeric-ext }
   - { name: domino__input_data_users, type: filename }
   - { name: domino__create_microca, type: boolean }
   - { name: domino__enable_dkim, type: boolean }
-  - { name: domino__enable_dkim, type: alphanumeric-ext }
   - { name: domino__restart_after_setup, type: boolean }
   - { name: domino__wait_mins_after_restart, type: number }
   - { name: domino__setup_additional_servers, type: boolean }
@@ -40,6 +39,7 @@ domino__assert_notesini_parameters:
   - { name: 'Domain', value: '{{ domino__domino_domain }}' }
   - { name: "VOP_EXTENSIBILITY_DATA_PROVIDER_NAME", value: 'localFileProvider', condition: '{{ domino__install_verse }}' }
   - { name: "VOP_Extensibility_Applications_Json_FilePath", value: '/local/notesdata/applications.json', condition: '{{ domino__install_verse }}' }
+  - { name: "VOP_Logout_Sametime", value: '1', condition: '{{ domino__sametime_server }}' }
   - { name: "RouterDKIMSigning", value: '1', condition: '{{ domino__enable_dkim }}' }
   - { name: "iNotes_WA_SametimeProxyServerSSL", value: 'https://{{ domino__sametime_server }}', condition: '{{ domino__sametime_server | trim | length > 0 }}' }
   - { name: "VOP_GK_sametime", value: '1', condition: '{{ domino__sametime_server | trim | length > 0 }}' }

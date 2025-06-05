@@ -88,6 +88,7 @@ USERS
   Register users:             {{ domino__register_users }}
 {% if domino__register_users %}
   Users input CSV file:       {{ domino__input_data_users }}
+  Mail template:              {{ domino__mail_template }}
   Users records in CSV:
 {% for user in users %}
                               {{ "%-12s"|format(user.firstName) }} {{ "%-12s"|format(user.lastName) }} {{ user.password }}
