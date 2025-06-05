@@ -10,5 +10,4 @@ domino__input_data_location: '{{ playbook_dir }}/../local'
 domino__setup_additional_servers: true
 domino__additional_servers:
   - Beta
-domino__domino_version: 14.0
 domino__wait_mins_after_restart: 0

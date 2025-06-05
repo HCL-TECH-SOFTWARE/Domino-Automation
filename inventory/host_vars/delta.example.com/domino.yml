@@ -4,6 +4,7 @@ domino__install_products:
   - nomad
   - traveler
   - leap
+  - domrestapi
 
 domino__server_name: Delta
 domino__domino_hostname: delta.example.com
@@ -17,5 +18,3 @@ domino__enable_dkim: true
 
 domino__input_data_location: '{{ playbook_dir }}/../local'
 domino__wait_mins_after_restart: 0
-
-# domino__domino_version: 14.0FP3

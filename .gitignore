@@ -5,6 +5,7 @@ inventory/host_vars/*
 !inventory/host_vars/*example.com
 inventory/group_vars/*
 !inventory/group_vars/example
+.ansible
 .ansible-lint
 ansible.cfg
 
@@ -20,7 +21,7 @@ ansible.cfg
 # Custom input files
 local/*
 !local/example/
-!local/reports/
+!local/reports/example/
 
 # SSH
 *.pem
@@ -34,6 +35,12 @@ local/*
 # Visual Studio Code
 .vscode
 
+# Just
+justfile
+
+# Multitail
+multitail.conf
+
 # MacOS
 .DS_Store
 ._*
@@ -44,3 +51,6 @@ ehthumbs.*
 [Dd]esktop.ini
 $RECYCLE.BIN/
 *.lnk
+
+# GitHub
+.GitHub
