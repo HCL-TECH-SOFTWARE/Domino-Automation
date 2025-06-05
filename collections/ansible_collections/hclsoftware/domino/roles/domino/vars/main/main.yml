@@ -84,9 +84,17 @@ domino__dkim_info: dkim-info.txt
 
 domino__verify_tasks:
   - { name: service, description: 'Domino service registered in the OS.' }
-  - { name: port_http, description: 'HTTP port 80 is listening.' }
-  - { name: port_https, description: 'HTTPS port 443 is listening.' }
-  - { name: port_nrpc, description: 'NRPC port 1352 is listening.' }
-  - { name: port_ldap, description: 'LDAP port 389 is listening.' }
+  - { name: port_http, description: 'Server listens on port 80   (HTTP).' }
+  - { name: port_https, description: 'Server listens on port 443  (HTTPS).' }
+  - { name: port_nrpc, description: 'Server listens on port 1352 (NRPC).' }
+  - { name: port_ldap, description: 'Server listens on port 389  (LDAP).' }
+  - { name: port_nomad, description: 'Server listens on port 9443 (Nomad).' }
+  - { name: port_drapi, description: 'Server listens on port 8880 (DRAPI).' }
   - { name: notesini, description: 'Custom notes.ini parameters validated.' }
   - { name: users, description: 'Initial users created.' }
+  - { name: certificates, description: 'Domino TLS certificates created.' }
+  - { name: traveler, description: 'Traveler is running.' }
+  - { name: verse, description: 'Verse is running.' }
+  - { name: leap, description: 'Domino Leap is running.' }
+  - { name: nomad, description: 'Nomad is running.' }
+  - { name: drapi, description: 'DRAPI is running.' }

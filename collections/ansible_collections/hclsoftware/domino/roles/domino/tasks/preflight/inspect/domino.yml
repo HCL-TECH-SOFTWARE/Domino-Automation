@@ -8,11 +8,13 @@
   when: domino_installed_result.stat.exists
   block:
     # Example of the line in notes.ini: FaultRecovery_Build=Release 14.0FP2
-    # The command cuts away characters right to the space
+    # The command cuts away characters right to the space (cut -d ' ' -f 2)
+    # ...and left to the underscore (| cut -d '_' -f 1)
+    # Undescore is used in Early Access versions (example: Build V1450_04162025)
     - name: Get Domino version from a file
       ansible.builtin.shell:
         chdir: /local/notesdata
-        cmd: set -o pipefail && grep "FaultRecovery_Build" notes.ini | cut -d ' ' -f 2
+        cmd: set -o pipefail && grep "FaultRecovery_Build" notes.ini | cut -d ' ' -f 2 | cut -d '_' -f 1
       changed_when: false
       register: domino_version_result
 
@@ -57,6 +59,12 @@
         domino_fp_if_version: 14.0FP3IF3
       when: domino_fp_if_version == '14.0FP3HF34'
 
+    - name: Rename installed Early Access version (V1450 -> 14.5)
+      ansible.builtin.set_fact:
+        domino_fp_if_version: 14.5
+        domino_main_version: 14.5
+      when: domino_fp_if_version == 'V1450'
+
     - name: Print target versions for Domino, FP and IF
       ansible.builtin.debug:
         msg: |
@@ -68,15 +76,6 @@
 
     - name: Process Domino version
       block:
-        # - name: Compare existing version and target version
-        #   vars:
-        #     domino_target_version: '{{ product_info | json_query("[?name==`domino`].version") | first  }}'
-        #   debug:
-        #     msg: |
-        #       - NEW: {{ domino_target_version }}
-        #       - CURRENT: {{ domino_main_version }}
-        #       - IS NEW BIGGER: {{ domino_main_version is version(domino_target_version, "<", version_type="loose") }}
-
         - name: Mark Domino as installed (single variable) - {{ domino_main_version }}
           ansible.builtin.set_fact:
             domino_is_installed: true
@@ -119,7 +118,6 @@
           ansible.utils.update_fact:
             updates:
               - path: 'product_info.{{ index }}.installed'
-                # value: true
                 value: '{{ fixpack_version | trim | length > 0 }}'
               - path: 'product_info.{{ index }}.installed_version'
                 value: '{{ domino_fp_version }}'
@@ -150,7 +148,6 @@
           ansible.utils.update_fact:
             updates:
               - path: 'product_info.{{ index }}.installed'
-                # value: true
                 value: '{{ interim_version | trim | length > 0 }}'
               - path: 'product_info.{{ index }}.installed_version'
                 value: '{{ domino_fp_if_version }}'
