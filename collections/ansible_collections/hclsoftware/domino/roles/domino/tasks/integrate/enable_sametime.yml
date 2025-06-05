@@ -88,13 +88,3 @@
   changed_when:
     - cacerts_sametime_import_result.changed
     - cacerts_sametime_import_result.rc == 0
-
-- name: Print certificates stored in cacerts
-  ansible.builtin.shell:
-    chdir: '/opt/hcl/domino/notes/latest/linux/jvm/bin'
-    cmd: './keytool -list -storepass changeit -cacerts'
-  register: cacerts_list_result
-  changed_when:
-    - cacerts_list_result.changed
-    - cacerts_list_result.rc == 0
-    - '"Your keystore contains" not in cacerts_list_result.stdout'

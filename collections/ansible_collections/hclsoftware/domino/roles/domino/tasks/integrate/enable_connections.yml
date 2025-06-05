@@ -1,20 +1,4 @@
 ---
-- name: Get certificate from Connections HTTP server '{{ domino__connections_server }}'
-  ansible.builtin.shell:
-    cmd: >-
-      set -o pipefail && echo |
-      openssl s_client -connect {{ domino__connections_server }}:443 2>&1 |
-      sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'
-      > {{ domino__input_data_location }}/{{ domino__connections_server }}.cer
-  delegate_to: localhost
-  run_once: true
-  register: connections_certificate
-  changed_when:
-    - connections_certificate.changed
-    - connections_certificate.rc == 0
-
-# ---------
-
 - name: Enable Connections integration in notes.ini [VOP_LLN2_BSSUIServer_URL]
   become: true
   become_user: notes
@@ -48,9 +32,25 @@
     - connections_referer_result.changed
     - connections_referer_result.rc == 0
 
+# ---------- IMPORT CONNECTIONS CERTIFICATE
+
+- name: Get certificate from Connections HTTP server '{{ domino__connections_server }}'
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail && echo |
+      openssl s_client -connect {{ domino__connections_server }}:443 2>&1 |
+      sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'
+      > {{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/{{ domino__connections_server }}.cer
+  delegate_to: localhost
+  run_once: true
+  register: connections_certificate
+  changed_when:
+    - connections_certificate.changed
+    - connections_certificate.rc == 0
+
 - name: Upload Connections server certificate
   ansible.builtin.copy:
-    src: '{{ domino__input_data_location }}/{{ domino__connections_server }}.cer'
+    src: '{{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/{{ domino__connections_server }}.cer'
     dest: '{{ domino__domino_install }}/{{ domino__connections_server }}.cer'
     mode: 'u=rw,g=r,o=r'
 
@@ -72,38 +72,3 @@
   changed_when:
     - cacerts_connections_import_result.changed
     - cacerts_connections_import_result.rc == 0
-
-- name: Upload Domino server certificate (Micro CA)
-  ansible.builtin.copy:
-    src: '{{ domino__input_data_location }}/{{ domino__domino_domain }}-CA-MicroCA.cer'
-    dest: '{{ domino__domino_install }}/{{ domino__domino_domain }}-CA-MicroCA.cer'
-    mode: 'u=rw,g=r,o=r'
-
-- name: 'Import certificate "{{ domino__domino_domain }} Micro CA" into cacerts'
-  become: true
-  ansible.builtin.shell:
-    chdir: '/opt/hcl/domino/notes/latest/linux/jvm/bin'
-    cmd: >-
-      ./keytool -import -storepass changeit
-      -cacerts
-      -noprompt -trustcacerts
-      -alias {{ domino__domino_domain | lower }}_micro_ca
-      -file {{ domino__domino_install }}/{{ domino__domino_domain }}-CA-MicroCA.cer
-  register: cacerts_domino_import_result
-  failed_when:
-    - cacerts_domino_import_result.changed
-    - cacerts_domino_import_result.rc != 0
-    - '"already exists" not in cacerts_domino_import_result.stdout'
-  changed_when:
-    - cacerts_domino_import_result.changed
-    - cacerts_domino_import_result.rc == 0
-
-- name: Print certificates stored in cacerts
-  ansible.builtin.shell:
-    chdir: '/opt/hcl/domino/notes/latest/linux/jvm/bin'
-    cmd: './keytool -list -storepass changeit -cacerts'
-  register: cacerts_list_result
-  changed_when:
-    - cacerts_list_result.changed
-    - cacerts_list_result.rc == 0
-    - '"Your keystore contains" not in cacerts_list_result.stdout'
