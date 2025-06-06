@@ -4,22 +4,10 @@ version: 1.0.0
 readme: README.md
 authors:
   - Thomas Hampel <thomas.hampel@pnp-hcl.com>
-  - Petr Kunc <petr.kunc@hclsoftware.com>
+  - Petr Kunc <petr.kunc@hcl-software.com>
 description: Deploys HCL Domino server on a Linux machine
 license:
   - Apache-2.0
-# The path to the license file for the collection. This path is relative to the root of the collection. This key is
-# mutually exclusive with 'license'
-# license_file: LICENSE
 tags: [linux, application, hclsoftware, domino]
 dependencies: {}
 repository: https://github.com/HCL-TECH-SOFTWARE/Domino-Automation
-
-# The URL to any online docs
-# documentation: http://docs.example.com
-
-# The URL to the homepage of the collection/project
-# homepage: http://example.com
-
-# The URL to the collection issue tracker
-# issues: http://example.com/issue/tracker

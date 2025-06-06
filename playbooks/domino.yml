@@ -44,9 +44,9 @@
       ansible.builtin.fail:
         msg: |
           Parameter 'command' is not defined correctly.
-          Valid options are: start, stop.
+          Valid options are: install, start, stop.
           Example: ansible-playbook domino.yml -e command=install -e server=alpha.example.com
-      when: command is not in ['install', 'uninstall', 'start', 'stop']
+      when: command is not in ['install', 'start', 'stop']
       tags:
         - always
 

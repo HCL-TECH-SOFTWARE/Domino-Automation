@@ -77,3 +77,6 @@ domino__connections_server: ''
 
 # Monitoring components
 domino__install_monitoring: false
+
+# Other
+domino__print_credentials: false

@@ -30,7 +30,7 @@ DOMINO - SETUP
   Organization name:          /{{ domino__org_name }}
   Certifier password:         {{ domino__certifier_password }}
   Admin name:                 {{ domino__admin_first_name }} {{ domino__admin_last_name }}
-  Admin password:             {{ domino__admin_password }}
+  {% if domino__print_credentials %}Admin password:             {{ domino__admin_password }}{% endif %}
 
   Create MicroCA:             {{ domino__create_microca }}
   Enable DKIM:                {{ domino__enable_dkim }}
@@ -91,6 +91,6 @@ USERS
   Mail template:              {{ domino__mail_template }}
   Users records in CSV:
 {% for user in users %}
-                              {{ "%-12s"|format(user.firstName) }} {{ "%-12s"|format(user.lastName) }} {{ user.password }}
+                              {{ "%-12s"|format(user.firstName) }} {{ "%-12s"|format(user.lastName) }} {% if domino__print_credentials %}{{ user.password }}{% endif %}{{''}}
 {% endfor %}
 {% endif %}

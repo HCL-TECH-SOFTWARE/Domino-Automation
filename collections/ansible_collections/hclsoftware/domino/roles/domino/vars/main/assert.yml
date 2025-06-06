@@ -34,6 +34,7 @@ domino__assert_values:
   - { name: domino__additional_servers, type: list, condition: '{{ domino__setup_additional_servers }}' }
   - { name: domino__existing_server_name, type: string, condition: '{{ domino__install_as_additional }}' }
   - { name: domino__existing_server_address, type: string, condition: '{{ domino__install_as_additional }}' }
+  - { name: domino__print_credentials, type: boolean }
 
 domino__assert_notesini_parameters:
   - { name: 'Domain', value: '{{ domino__domino_domain }}' }
