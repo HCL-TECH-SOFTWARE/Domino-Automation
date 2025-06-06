@@ -43,7 +43,8 @@
             'view_id': {{ view_number | int }},
             'playbook': '{{ template.playbook }}',
             'description': '{{ template.description | default("") }}',
-            "arguments": '{{ template.arguments | default([]) | to_json }}',
+            'arguments': '{{ template.arguments | default([]) | to_json }}',
+            'app': 'ansible'
           }
         status_code: 201
         headers:

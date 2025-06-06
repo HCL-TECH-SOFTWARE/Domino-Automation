@@ -61,7 +61,7 @@ Options:
 
 Available commands:
   start           Start a Semaphore container
-  check           Check the configuration parameters for Domino tasks
+  check           Check the configuration parameters for Domino tasks (not yet implemented)
   create          Create tasks for a Domino installation
   info            Prints Semaphore container status and connection info
   delete          Delete tasks for a Domino installation
@@ -290,10 +290,12 @@ stop_semaphore() {
 check_semaphore() {
   action "CHECK server ${server}"
 
-  docker compose exec "${sempahore_container}" ansible-playbook ${verbose_string} \
-    -e server="${server}" \
-    -e role_start=assert \
-    "${ansible_playbook}"
+  # docker compose exec "${sempahore_container}" ansible-playbook ${verbose_string} \
+  #   -e server="${server}" \
+  #   -e role_start=assert \
+  #   "${ansible_playbook}"
+
+  msg "Not yet implemented"
 
   return 0
 }

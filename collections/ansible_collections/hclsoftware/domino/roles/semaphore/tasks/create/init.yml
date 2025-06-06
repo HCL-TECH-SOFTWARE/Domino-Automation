@@ -34,10 +34,10 @@
     active_tokens: '{{ semaphore_cookie_result.json | selectattr("expired", "equalto", false) }}'
     admin_tokens: '{{ active_tokens | selectattr("user_id", "equalto", 1) }}'
   ansible.builtin.set_fact:
-    semaphore_token: '{{ ((admin_tokens | length) == 0) | ternary ("", (admin_tokens | first)["id"]) }}'
+    semaphore_token_id: '{{ ((admin_tokens | length) == 0) | ternary ("", (admin_tokens | first)["id"]) }}'
 
 - name: Create a new token (when none exists)
-  when: semaphore_token | length == 0
+  when: semaphore_token_id | length == 0
   block:
     - name: Create a new token
       ansible.builtin.uri:
@@ -54,6 +54,20 @@
     - name: Store the newly created token
       ansible.builtin.set_fact:
         semaphore_token: '{{ semaphore_token_result.json.id }}'
+
+    - name: Store token in a local file
+      ansible.builtin.copy:
+        content: '{{ semaphore_token }}'
+        dest: './semaphore.token'
+        mode: u=rw,g=,o=
+        force: true
+
+- name: Read existing token from a local file
+  when: semaphore_token_id | length > 0
+  block:
+    - name: Read a token
+      ansible.builtin.set_fact:
+        semaphore_token: '{{ lookup("file", "./semaphore.token") }}'
 
 - name: Print token
   ansible.builtin.debug:

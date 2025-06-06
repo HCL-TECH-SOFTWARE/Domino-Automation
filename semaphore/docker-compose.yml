@@ -18,6 +18,7 @@ services:
     image: ${SEMAPHORE_IMAGE:-semaphoreui/semaphore:latest}
     volumes:
       - ..:/repo
+      - ${SOFTWARE_DIRECTORY}:/tmp/semaphore/software
       - ./ansible.cfg:/tmp/semaphore/ansible.cfg
     environment:
       SEMAPHORE_DB_USER: semaphore

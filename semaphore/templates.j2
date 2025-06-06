@@ -1,6 +1,6 @@
 [
   {
-    "name": "{{ domino__server_name }} - Domino [ALL]",
+    "name": "{{ domino__server_name }} - OS + Domino [ALL]",
     "playbook": "playbooks/domino.yml",
     "description": "Configure OS and install Domino server",
     "arguments": ["-e", "server={{ domino__domino_hostname | lower }}", "-e", "command=install"]
@@ -9,7 +9,7 @@
     "name": "{{ domino__server_name }} - 1 - OS [ALL]",
     "playbook": "playbooks/domino.yml",
     "description": "Configure operating system for Domino server installation",
-    "arguments": ["-e", "server={{ domino__domino_hostname | lower }}", "-e", "command=install", "--tags", "os"]
+    "arguments": ["-e", "server={{ domino__domino_hostname | lower }}", "-e", "command=install", "--tags", "os", "--skip-tags", "domino"]
   },
   {
     "name": "{{ domino__server_name }} - 1.1 - OS [Preflight check]",
@@ -21,7 +21,7 @@
     "name": "{{ domino__server_name }} - 1.2 - OS [Configure]",
     "playbook": "playbooks/domino.yml",
     "description": "Configure operating system for Domino server installation",
-    "arguments": ["-e", "server={{ domino__domino_hostname | lower }}", "-e", "command=install", "--tags", "os"]
+    "arguments": ["-e", "server={{ domino__domino_hostname | lower }}", "-e", "command=install", "--tags", "os", "--skip-tags", "domino"]
   },
   {
     "name": "{{ domino__server_name }} - 2 - Domino [ALL]",
@@ -46,5 +46,23 @@
     "playbook": "playbooks/domino.yml",
     "description": "Install Domino server",
     "arguments": ["-e", "server={{ domino__domino_hostname | lower }}", "-e", "command=install", "--tags", "install", "--skip-tags", "os"]
+  },
+  {
+    "name": "{{ domino__server_name }} - 2.4 - Domino [Configure]",
+    "playbook": "playbooks/domino.yml",
+    "description": "Configure Domino server",
+    "arguments": ["-e", "server={{ domino__domino_hostname | lower }}", "-e", "command=install", "--tags", "configure", "--skip-tags", "os"]
+  },
+  {
+    "name": "{{ domino__server_name }} - 2.5 - Domino [Integrate]",
+    "playbook": "playbooks/domino.yml",
+    "description": "Configure Domino server integration with Sametime and/or Connections",
+    "arguments": ["-e", "server={{ domino__domino_hostname | lower }}", "-e", "command=install", "--tags", "integrate", "--skip-tags", "os"]
+  },
+  {
+    "name": "{{ domino__server_name }} - 2.6 - Domino [Verify]",
+    "playbook": "playbooks/domino.yml",
+    "description": "Verify Domino server installation and configuration",
+    "arguments": ["-e", "server={{ domino__domino_hostname | lower }}", "-e", "command=install", "--tags", "verify", "--skip-tags", "os"]
   }
 ]

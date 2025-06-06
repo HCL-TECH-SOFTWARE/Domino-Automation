@@ -39,15 +39,15 @@
             'project_id': {{ project_number | int }},
             'git_url': '{{ semaphore__repository_path }}',
             'git_branch': '',
-            'ssh_key_id': 1
+            'ssh_key_id': {{ key_number | int }}
           }
-        status_code: 204
+        status_code: 201
         headers:
           Content-Type: application/json
           Accept: application/json
           Authorization: 'Bearer {{ semaphore_token }}'
         return_content: true
-      changed_when: create_repo_result.status == 204
+      changed_when: create_repo_result.status == 201
       register: create_repo_result
 
     - name: Get list of repositories

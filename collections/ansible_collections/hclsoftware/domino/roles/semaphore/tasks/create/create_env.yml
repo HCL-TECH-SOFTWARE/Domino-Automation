@@ -41,13 +41,13 @@
             'json': '{{ semaphore__environment_json | to_json }}',
             'env': '{}'
           }
-        status_code: 204
+        status_code: 201
         headers:
           Content-Type: application/json
           Accept: application/json
           Authorization: 'Bearer {{ semaphore_token }}'
         return_content: true
-      changed_when: create_env_result.status == 204
+      changed_when: create_env_result.status == 201
       register: create_env_result
 
     - name: Get list of enviroments

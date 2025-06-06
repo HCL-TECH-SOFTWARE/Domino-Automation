@@ -11,13 +11,13 @@
   ansible.builtin.import_tasks:
     file: create/create_project.yml
 
-- name: Create a repository
-  ansible.builtin.import_tasks:
-    file: create/create_repo.yml
-
 - name: Create keys
   ansible.builtin.import_tasks:
     file: create/create_key.yml
+
+- name: Create a repository
+  ansible.builtin.import_tasks:
+    file: create/create_repo.yml
 
 - name: Create inventory
   ansible.builtin.import_tasks:
