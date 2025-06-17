@@ -1,5 +1,5 @@
 ---
-- name: Get list of templates with the name {{ template.name }}
+- name: Get list of all templates
   ansible.builtin.uri:
     url: '{{ semaphore__url }}/project/{{ project_number }}/templates'
     method: GET
@@ -10,9 +10,9 @@
       Authorization: 'Bearer {{ semaphore_token }}'
   register: temp_list_result
 
-- name: Get list of templates with the name "{{ template.name }}"
+- name: Get list of templates with the name "{{ template.name }}" in view number "{{ view_number }}"
   ansible.builtin.set_fact:
-    temps: '{{ temp_list_result.json | selectattr("name", "equalto", template.name) }}'
+    temps: '{{ temp_list_result.json | selectattr("name", "equalto", template.name) | selectattr("view_id", "equalto", view_number | int) }}'
 
 - name: Check if multiple templates with this name exist
   ansible.builtin.assert:
@@ -44,7 +44,11 @@
             'playbook': '{{ template.playbook }}',
             'description': '{{ template.description | default("") }}',
             'arguments': '{{ template.arguments | default([]) | to_json }}',
-            'app': 'ansible'
+            'app': 'ansible',
+            'task_params': {
+              'tags': {{ template.tags | default([]) }},
+              'skip_tags': {{ template.skip_tags | default([]) }}
+            }
           }
         status_code: 201
         headers:

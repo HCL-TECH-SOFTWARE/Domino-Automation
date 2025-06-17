@@ -20,6 +20,8 @@
 - name: Check Domino TLS certificates
   ansible.builtin.import_tasks:
     file: verify/certificates.yml
+  when:
+    - domino__create_microca
 
 - name: Check Traveler
   ansible.builtin.import_tasks:

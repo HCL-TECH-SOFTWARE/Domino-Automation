@@ -56,7 +56,7 @@
         semaphore__environment_json: {
           domino_domain: '{{ domino__domino_domain }}',
         }
-        semaphore__view: '{{ domino__domino_domain }}'
+        semaphore__view: '{{ domino__domino_domain }} - {{ domino__server_name }}'
         semaphore__templates: '{{ input_templates }}'
       delegate_to: localhost
 
