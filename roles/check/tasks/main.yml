@@ -1,0 +1,4 @@
+---
+- name: Check connectivity to a remote server
+  ansible.builtin.import_tasks:
+    file: connectivity.yml

@@ -1,0 +1,39 @@
+---
+- name: Print connection parameters
+  ansible.builtin.debug:
+    msg: |
+      Trying to connect to the server using this values, specified in the inventory file
+        - Inventory name:         {{ inventory_hostname }}
+        - Server Host:            {{ ansible_host }}
+        - Ansible user name:      {{ ansible_user }}
+        - Ansible user key file:  {{ ansible_ssh_private_key_file }}
+
+- name: Print connection info
+  block:
+    - name: Connect to the server and gather facts
+      ansible.builtin.debug:
+        msg: |
+          SUCCESSFULLY connected to the server and gather the following info
+            - Nodename: {{ ansible_nodename }}
+            - Hostname: {{ ansible_hostname }}
+            - FQDN: {{ ansible_fqdn }}
+            - IP addreses: {{ ansible_all_ipv4_addresses | join(', ') }}
+            - Ansible default IP address: {{ ansible_default_ipv4.address }}
+            - OS: {{ ansible_os_family }} {{ ansible_distribution }}, version: {{ ansible_distribution_major_version }} {{ ansible_distribution_release }}
+            - Number vCPUs: {{ ansible_processor_vcpus }}
+            - RAM: {{ ansible_memtotal_mb }} MB
+      register: connection_result
+
+  rescue:
+    - name: Print connection error info
+      ansible.builtin.debug:
+        msg: |
+          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+          Unable to connect to the remote server.
+          Please check the values in the inventory/ directory.
+          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+- name: Print Summary - Success
+  ansible.builtin.debug:
+    msg: |
+      connection_result: {{ connection_result.failed }}

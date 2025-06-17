@@ -1,0 +1,44 @@
+#!/usr/bin/env ansible-playbook
+
+# Example usage: ansible-playbook check_server.yml -e server=alpha.example.com
+---
+- name: Check the server hostname
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Check that the server hostname was entered as an '-e' parameter
+      ansible.builtin.fail:
+        msg: |
+          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+          Parameter 'server' is not defined.
+          Run the playbook with the '-e' paramter.
+          Example: ansible-playbook check_server.yml -e server=alpha.example.com
+          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      when: server is not defined
+      tags:
+        - always
+
+    - name: Check if the hostname is in the inventory
+      ansible.builtin.fail:
+        msg: |
+          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+          "{{ server }}" not found in the inventory: {{ ansible_inventory_sources }}
+          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      when: server not in hostvars
+      tags:
+        - always
+
+    - name: Store the server name
+      ansible.builtin.set_fact:
+        server_to_run: '{{ server }}'
+      tags:
+        - always
+
+
+- name: Check connectivity to a server
+  hosts: '{{ hostvars["localhost"]["server_to_run"] | default([]) }}'
+
+  roles:
+    - role: check
+      tags: check
