@@ -12,6 +12,8 @@
   changed_when:
     - install_result.changed
     - install_result.rc == 0
+  failed_when:
+    - '"Failed" in install_result.stdout'
 
 
 # ----- PREPARE DOMINO SETUP FILES

@@ -2,9 +2,16 @@
 - name: Stop the Domino server
   ansible.builtin.import_tasks: manage/domino_stop.yml
 
+- name: Calculate Verse extract path (based on the Domino server version)
+  vars:
+    verse_v14_path: '/local/notesdata/domino/workspace/applications'
+    verse_v14_5_path: '/opt/hcl/domino/notes/latest/linux/osgi/shared'
+  ansible.builtin.set_fact:
+    verse_extract_path: '{{ (domino_main_version == "14.5") | ternary(verse_v14_5_path, verse_v14_path) }}'
+
 - name: Get list of previous Verse binary files
   ansible.builtin.find:
-    paths: /local/notesdata/domino/workspace/applications/eclipse/plugins
+    paths: '{{ verse_path }}'
     patterns: 'ats-*.jar,core-*.jar,sequoia-osgi-*.jar,servlet-*.jar,servers-lookup-*.jar'
   register: verse_files_result
 
@@ -24,7 +31,7 @@
   become: true
   ansible.builtin.unarchive:
     src: '{{ domino__verse_install }}/HCL_Verse.zip'
-    dest: /local/notesdata/domino/workspace/applications
+    dest: '{{ verse_extract_path }}'
     remote_src: true
     owner: notes
     group: notes

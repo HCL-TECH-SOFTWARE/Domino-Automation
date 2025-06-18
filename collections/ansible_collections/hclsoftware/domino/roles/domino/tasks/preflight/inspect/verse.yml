@@ -1,7 +1,14 @@
 ---
+- name: Calculate Verse binaries path (based on the Domino server version)
+  vars:
+    verse_v14_path: '/local/notesdata/domino/workspace/applications/eclipse/plugins'
+    verse_v14_5_path: '/opt/hcl/domino/notes/latest/linux/osgi/shared/eclipse/plugins'
+  ansible.builtin.set_fact:
+    verse_path: '{{ (domino_main_version == "14.5") | ternary(verse_v14_5_path, verse_v14_path) }}'
+
 - name: Check that at least one Verse binary file exists
   ansible.builtin.find:
-    paths: /local/notesdata/domino/workspace/applications/eclipse/plugins
+    paths: '{{ verse_path }}'
     patterns: 'core-*.jar'
     file_type: file
     recurse: false
