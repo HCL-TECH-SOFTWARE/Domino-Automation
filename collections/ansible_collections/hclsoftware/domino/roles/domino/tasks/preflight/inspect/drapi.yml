@@ -13,6 +13,7 @@
       ansible.builtin.shell:
         chdir: /opt/hcl/restapi/
         cmd: set -o pipefail && grep "Notices and Information" drapi_notices.txt | cut -d ' ' -f 5
+        executable: /bin/bash
       changed_when: false
       register: drapi_version_result
 

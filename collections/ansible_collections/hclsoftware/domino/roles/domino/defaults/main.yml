@@ -39,7 +39,7 @@ domino__use_existing_certifier_id: false
 domino__use_existing_server_id: false
 domino__use_existing_admin_id: false
 domino__register_users: false
-domino__mail_template: mail14.ntf
+domino__mail_template: mail145.ntf
 domino__use_custom_login: false
 domino__create_microca: false
 domino__enable_dkim: false

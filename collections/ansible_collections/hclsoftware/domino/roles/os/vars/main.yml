@@ -1,7 +1,15 @@
-os__default_packages_to_install:
+os__default_packages_to_install_redhat:
   - tar
   - nc
   - net-tools
   - openldap-clients
+  - unzip
+  - chrony
+
+os__default_packages_to_install_debian:
+  - tar
+  - netcat-traditional
+  - net-tools
+  - ldap-utils
   - unzip
   - chrony

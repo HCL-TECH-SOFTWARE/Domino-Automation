@@ -13,6 +13,7 @@
         # cmd: set -o pipefail && grep "HCL Traveler" notices.txt | cut -d ' ' -f 3
         # Cut off the substring "HCL Traveler" and replace " Fix Pack " with "FP"
         cmd: set -o pipefail && grep "HCL Traveler" notices.txt | sed "s/HCL Traveler //" | sed "s/ Fix Pack /FP/"
+        executable: /bin/bash
       changed_when: false
       register: traveler_version_result
 

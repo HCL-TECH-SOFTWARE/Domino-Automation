@@ -15,6 +15,7 @@
         chdir: /opt/hcl/domino/notes/latest/linux
         # cmd: set -o pipefail && cat nomad-web-version.txt | sed 's|\(.*\)\..*|\1|'
         cmd: set -o pipefail && cat nomad-server-version.txt | cut -d '-' -f2- | cut -d '-' -f1  | sed -e 's/-//g'
+        executable: /bin/bash
       changed_when: false
       register: nomad_version_result
 

@@ -6,6 +6,8 @@
   become: true
   args:
     chdir: '{{ domino__domino_install }}/linux64/'
+  environment:
+    INSTALL_NO_CHECK: 1
   ansible.builtin.shell:
     cmd: './install -f {{ domino__response_file }} -i silent'
   register: install_result

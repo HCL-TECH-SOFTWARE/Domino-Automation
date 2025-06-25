@@ -4,6 +4,7 @@
       ansible.builtin.shell:
         chdir: '/opt/hcl/domino/notes/latest/linux/jvm/bin'
         cmd: 'set -o pipefail && ./keytool -printcert -rfc -sslserver {{ domino__domino_hostname }} | grep "END CERTIFICATE" | wc -l'
+        executable: /bin/bash
       register: domino_certificates
       changed_when: false
       failed_when:

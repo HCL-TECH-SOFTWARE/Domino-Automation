@@ -41,6 +41,7 @@
       openssl s_client -connect {{ domino__connections_server }}:443 2>&1 |
       sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'
       > {{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/{{ domino__connections_server }}.cer
+    executable: /bin/bash
   delegate_to: localhost
   run_once: true
   register: connections_certificate

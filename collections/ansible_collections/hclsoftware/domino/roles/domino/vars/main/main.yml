@@ -7,6 +7,7 @@ domino__action_switch: {
 
 domino__supported_os:
   - redhat
+  - debian
 
 domino__enable_fw_services:
   - https

@@ -28,9 +28,9 @@ DOMINO - SETUP
   Server hostname:            {{ domino__domino_hostname }}
   Domino domain:              {{ domino__domino_domain }}
   Organization name:          /{{ domino__org_name }}
-  Certifier password:         {{ domino__certifier_password }}
+{% if domino__print_credentials %}  Certifier password:         {{ domino__certifier_password }}{% endif %}{{''}}
   Admin name:                 {{ domino__admin_first_name }} {{ domino__admin_last_name }}
-  {% if domino__print_credentials %}Admin password:             {{ domino__admin_password }}{% endif %}
+{% if domino__print_credentials %}  Admin password:             {{ domino__admin_password }}{% endif %}
 
   Create MicroCA:             {{ domino__create_microca }}
   Enable DKIM:                {{ domino__enable_dkim }}

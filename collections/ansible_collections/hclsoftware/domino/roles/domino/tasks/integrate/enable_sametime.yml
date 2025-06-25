@@ -64,6 +64,7 @@
       openssl s_client -connect {{ domino__sametime_server }}:443 2>&1 |
       sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'
       > {{ domino__install_path }}/{{ domino__sametime_server }}.cer
+    executable: /bin/bash
     creates: '{{ domino__install_path }}/{{ domino__sametime_server }}.cer'
   register: sametime_certificate
   changed_when:

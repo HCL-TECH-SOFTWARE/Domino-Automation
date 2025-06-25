@@ -22,12 +22,12 @@
     update_cache: true
   when: os__update_all_packages
 
-- name: 'Install default packages: {{ os__default_packages_to_install }}'
+- name: 'Install default packages: os__default_packages_to_install_{{ ansible_os_family | lower }}'
   become: true
   ansible.builtin.package:
-    name: '{{ os__default_packages_to_install }}'
+    name: "{{ lookup('vars', 'os__default_packages_to_install_' + (ansible_os_family | lower)) }}"
     state: present
-  when: os__default_packages_to_install | length > 0
+  when: lookup('vars', 'os__default_packages_to_install_' + (ansible_os_family | lower)) | length > 0
 
 - name: 'Install custom packages: {{ os__packages_to_install }}'
   become: true
