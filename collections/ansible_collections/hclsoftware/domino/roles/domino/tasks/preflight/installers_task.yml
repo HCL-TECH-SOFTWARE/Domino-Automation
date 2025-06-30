@@ -14,7 +14,11 @@
         tasks_from: assert_file
 
   rescue:
-    - name: Print info that installer was not found (download disabled) and stop the script
+    - name: Check whether the playbook runs inside a Semaphore container
+      ansible.builtin.set_fact:
+        runs_in_semaphore: "{{ ('/semaphore/' in domino__software_dir) | ternary(true, false) }}"
+
+    - name: Print info that installer was not found and automatic download is disabled, and stop the script
       ansible.builtin.fail:
         msg: |
           - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -24,6 +28,17 @@
           - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       when:
         - not domino__download_installers
+
+    - name: Print info that installer was not found and the playbook runs in Semaphore container
+      ansible.builtin.fail:
+        msg: |
+          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+          Installer "{{ product.installer }}" was not found in the installers directory "{{ domino__software_dir }}".
+          Automatic download is not allowed when the playbook is launched from the Sempahore UI so you have to download the installer manually.
+          The installation script stops now.
+          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      when:
+        - runs_in_semaphore
 
     - name: Print info that installer was not found (download enabled)
       ansible.builtin.debug:
