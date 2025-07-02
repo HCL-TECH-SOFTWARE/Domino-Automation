@@ -57,7 +57,6 @@ domino__existing_server_name: ''
 domino__existing_server_address: ''
 
 # Custom input files
-# domino__input_data_location: local
 domino__input_data_location: '{{ playbook_dir }}/../local'
 domino__cert_id: '{{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/ids/cert.id'
 domino__server_id: '{{ domino__input_data_location }}/{{ domino__domino_domain | lower }}/ids/server-{{ domino__server_name | lower }}.id'

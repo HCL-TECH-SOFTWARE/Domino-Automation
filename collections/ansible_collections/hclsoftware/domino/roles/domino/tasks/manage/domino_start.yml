@@ -9,11 +9,11 @@
   ansible.builtin.pause:
     minutes: '{{ domino__wait_mins_after_restart }}'
 
-- name: Wait until HTTP task is logged in the console.log file
+- name: Wait until Server started is logged in the console.log file
   become: true
   ansible.builtin.wait_for:
     path: /local/notesdata/IBM_TECHNICAL_SUPPORT/console.log
-    search_regex: 'HTTP Server: Started'
+    search_regex: 'Server started on physical node'
     timeout: 120
   register: start_wait_result
   changed_when:

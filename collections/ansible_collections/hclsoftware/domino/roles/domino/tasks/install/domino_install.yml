@@ -1,4 +1,11 @@
 ---
+- name: Set whether it is a new Domino installation or an upgrade
+  ansible.builtin.set_fact:
+    is_domino_upgrade: '{{ product_info | json_query("[?name==`domino`].installed") | first }}'
+
+- name: Stop the Domino server
+  ansible.builtin.import_tasks: manage/domino_stop.yml
+
 
 # ----- INSTALL DOMINO
 
@@ -7,7 +14,7 @@
   args:
     chdir: '{{ domino__domino_install }}/linux64/'
   environment:
-    INSTALL_NO_CHECK: 1
+    INSTALL_NO_CHECK: "1"
   ansible.builtin.shell:
     cmd: './install -f {{ domino__response_file }} -i silent'
   register: install_result
@@ -53,16 +60,44 @@
   changed_when:
     - setup_result.changed
     - setup_result.rc == 0
+  when:
+    - not is_domino_upgrade
+
+- name: Start Domino server after the new version is installed
+  become: true
+  become_user: notes
+  ansible.builtin.shell:
+    chdir: '/local/notesdata'
+    cmd: '/opt/hcl/domino/bin/server 2>&1 &'
+  register: setup_result
+  changed_when:
+    - setup_result.changed
+    - setup_result.rc == 0
+  when:
+    - is_domino_upgrade
+
+- name: Send "Y" to Domino console for the case when Domino Directory design upgrade is requested
+  become: true
+  become_user: notes
+  ansible.builtin.shell:
+    chdir: '/local/notesdata'
+    cmd: '/opt/hcl/domino/bin/server -c "Y" 2>&1 &'
+  register: setup_result
+  changed_when:
+    - setup_result.changed
+    - setup_result.rc == 0
+  when:
+    - is_domino_upgrade
 
 - name: Wait for 1 minute to finish the initialization
   ansible.builtin.pause:
     minutes: 1
 
-- name: Wait until HTTP task is logged in the console.log file
+- name: Wait until Server started is logged in the console.log file
   become: true
   ansible.builtin.wait_for:
     path: /local/notesdata/IBM_TECHNICAL_SUPPORT/console.log
-    search_regex: 'HTTP Server: Started'
+    search_regex: 'Server started on physical node'
     timeout: 120
   register: setup_wait_result
   changed_when:

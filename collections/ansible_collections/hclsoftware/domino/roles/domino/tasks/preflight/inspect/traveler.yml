@@ -27,9 +27,14 @@
 
     - name: Mark Traveler as installed (sw dictionary)
       vars:
+        domino_current_version: '{{ product_info | json_query("[?name==`domino`].installed_version") | first }}'
+        domino_target_version: '{{ product_info | json_query("[?name==`domino`].version") | first }}'
+        domino_major_upgrade: '{{ domino_current_version != domino_target_version }}'
         index: '{{ product_info | ansible.utils.index_of("eq", "traveler", "name") }}'
         traveler_target_version: '{{ product_info | json_query("[?name==`traveler`].version") | first  }}'
         target_version_is_newer: '{{ traveler_version is version(traveler_target_version, "<", version_type="loose") }}'
+        traveler_do_installation: '{{ target_version_is_newer or domino_major_upgrade }}'
+
       ansible.utils.update_fact:
         updates:
           - path: 'product_info.{{ index }}.installed'
@@ -37,7 +42,7 @@
           - path: 'product_info.{{ index }}.installed_version'
             value: '{{ traveler_version }}'
           - path: 'product_info.{{ index }}.do_installation'
-            value: '{{ target_version_is_newer }}'
+            value: '{{ traveler_do_installation }}'
       changed_when: false
       register: product_info_updated_result
 

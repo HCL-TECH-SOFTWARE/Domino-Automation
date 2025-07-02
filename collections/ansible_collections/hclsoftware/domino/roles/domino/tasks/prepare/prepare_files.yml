@@ -51,8 +51,8 @@
     group: '{{ ansible_effective_group_id }}'
     mode: '0755'
   loop:
-    - '{{ domino__installers_dir }}'
     - '{{ domino__install_path }}'
+    - '{{ domino__installers_dir }}'
     - '{{ domino__domino_install }}'
     - '{{ domino__fixpack_install }}'
     - '{{ domino__if_install }}'
