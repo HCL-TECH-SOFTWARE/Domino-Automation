@@ -4,10 +4,13 @@
 
 - name: Install DRAPI binaries
   become: true
+  vars:
+    # "domino_version_compressed" has value either 12, 14 or 145, based on the Domino version.
+    domino_version_compressed: '{{ (product_info | json_query("[?name==`domrestapi`].version") | first | split("-"))[1] |replace(".", "") }}'
   ansible.builtin.shell:
     chdir: '{{ domino__domrestapi_install }}'
     cmd: |
-      /opt/hcl/domino/notes/latest/linux/jvm/bin/java -jar restapiInstall-r14.jar \
+      /opt/hcl/domino/notes/latest/linux/jvm/bin/java -jar restapiInstall-r{{ domino_version_compressed }}.jar \
         --dataDir=/local/notesdata \
         --ini=/local/notesdata/notes.ini \
         --restapiDir=/opt/hcl/restapi \

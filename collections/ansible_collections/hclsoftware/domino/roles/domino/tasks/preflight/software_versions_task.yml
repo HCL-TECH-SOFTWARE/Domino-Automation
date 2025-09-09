@@ -171,13 +171,24 @@
     - product == 'nomad'
     - 'version_to_install is version("1.0.13", "<", version_type="loose")'
 
-- name: Perform a special task necessary just for DRAPI – change version to {{ version_to_install }}-{{ domino_main_version }}
+- name: Perform a special task necessary just for DRAPI (< 1.1.5) – change version to {{ version_to_install }}-{{ domino_main_version }}
   vars:
     domino_main_version_major: '{{ domino_main_version.split(".").0 }}'
   ansible.builtin.set_fact:
     version_to_install: '{{ version_to_install }}-{{ domino_main_version_major }}'
   when:
     - product == 'domrestapi'
+    - 'version_to_install is version("1.1.5", "<", version_type="loose")'
+
+
+- name: Perform a special task necessary just for DRAPI (>= 1.1.5) – change version to {{ version_to_install }}-{{ domino_main_version }}
+  vars:
+    domino_main_version_major: '{{ domino_main_version.split(".").0 }}'
+  ansible.builtin.set_fact:
+    version_to_install: '{{ version_to_install }}-{{ domino_main_version }}'
+  when:
+    - product == 'domrestapi'
+    - 'version_to_install is version("1.1.5", ">=", version_type="loose")'
 
 
 - name: Update the software info in the dictionary - {{ product }} {{ version_to_install }}
