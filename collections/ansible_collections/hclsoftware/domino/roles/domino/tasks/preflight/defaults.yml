@@ -136,6 +136,13 @@
     - domino__use_custom_login
     - domino__custom_login_db[0] != '/'
 
+- name: Set the full path value for Verse customization file, if not set in values
+  ansible.builtin.set_fact:
+    domino__custom_verse_json_file: '{{ domino__input_data_location | realpath }}/{{ domino__domino_domain | lower }}/{{ domino__custom_verse_json_file }}'
+  when:
+    - domino__custom_verse_json_file | trim | length > 0
+    - domino__custom_verse_json_file[0] != '/'
+
 
 # ---------- Convert relative path to absolute path
 

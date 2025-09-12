@@ -31,6 +31,7 @@ domino__assert_values:
   - { name: domino__connections_server, type: hostname }
   - { name: domino__custom_login_db, type: filename, condition: '{{ domino__use_custom_login }}' }
   - { name: domino__custom_login_form, type: alphanumeric-ext, condition: '{{ domino__use_custom_login }}' }
+  - { name: domino__custom_verse_json_file, type: filename, condition: '{{ domino__custom_verse_json_file | trim | length > 0 }}' }
   - { name: domino__additional_servers, type: list, condition: '{{ domino__setup_additional_servers }}' }
   - { name: domino__existing_server_name, type: string, condition: '{{ domino__install_as_additional }}' }
   - { name: domino__existing_server_address, type: string, condition: '{{ domino__install_as_additional }}' }

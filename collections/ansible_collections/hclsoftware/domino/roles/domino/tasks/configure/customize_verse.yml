@@ -1,4 +1,10 @@
 ---
+- name: Read JSON from the Verse customization file
+  ansible.builtin.set_fact:
+    verse_json_customization: "{{ lookup('ansible.builtin.file', domino__custom_verse_json_file) }}"
+  when:
+    - domino__custom_verse_json_file | trim | length > 0
+
 - name: Copy and customize Verse customization file
   become: true
   become_user: notes

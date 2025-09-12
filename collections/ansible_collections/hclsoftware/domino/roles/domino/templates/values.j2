@@ -17,7 +17,7 @@ DOMINO - CALCULATED PRODUCT VERSIONS
   {{ "%-10s"|format("PRODUCT") }} {{ "%-12s"|format("REQUESTED") }} {{ "%-12s"|format("INSTALLED") }} {{ "%-44s"|format("INSTALLER NAME") }} {{ "%-10s"|format("WILL BE INSTALLED?") }}
 {% for product in product_info | sort(attribute='name') | json_query("[?install]") %}
   {%- set do_installation = "YES" if product.do_installation else "no" %}
-  {{ "%-10s"|format(product.name) }} {{ "%-12s"|format(product.version) }} {{ "%-12s"|format(product.installed_version) }} {{ "%-44s"|format(product.installer) }} {{ do_installation }}
+  {{ "%-10s"|format(product.name) }} {{ "%-12s"|format(product.version) }} {{ "%-12s"|format(product.installed_version) }} {{ "%-45s"|format(product.installer) }} {{ do_installation }}
 {% endfor %}
 {% if if_uninstall %}
   * Note: Interim fix {{ domino_fp_if_version }} will be uninstalled first before installing other products.
@@ -74,6 +74,10 @@ LOCAL - CUSTOM FILES
 {% if domino__use_custom_login %}
   Custom web login database:  {{ domino__custom_login_db }}
   Custom web login form:      {{ domino__custom_login_form }}
+{% endif %}
+
+{% if domino__custom_verse_json_file | trim | length > 0 %}
+  Custom Verse JSON file:     {{ domino__custom_verse_json_file }}
 {% endif %}
 
 SERVER

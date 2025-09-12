@@ -17,113 +17,83 @@
         "description": "New menu group",
         "title": "Collaboration"
       },
+      {% if domino__install_ontime -%}
+      {
+        "type" : "com.ibm.action.menu.link",
+        "name" : "Team_Calendar_Link",
+        "title" : "Team Calendar",
+        "description" : "Team Calendar",
+        "path" : "CollaborationMenuContainer.a",
+        "payload" : {
+          "link" : "https://{{ domino__domino_hostname }}/ontime/client.nsf/desktop#",
+          "target" : "ontimegcverse"
+        }
+      },
+      {% endif -%}
       {% if domino__sametime_server | trim | length > 0 -%}
       {
         "type": "com.ibm.action.menu.link",
-        "path": "CollaborationMenuContainer.a",
+        "path": "CollaborationMenuContainer.b",
         "name": "collaboration.chat",
         "description": "Sametime Chat link",
+        "title": "Chat",
         "payload": {
           "link": "https://{{ domino__sametime_server }}/chat",
           "target":"_blank"
-        },
-        "title": "Chat"
+        }
       },
       {
         "type": "com.ibm.action.menu.link",
-        "path": "CollaborationMenuContainer.b",
+        "path": "CollaborationMenuContainer.c",
         "name": "collaboration.meetings",
         "description": "Sametime Meetings link",
+        "title": "Meetings",
         "payload": {
           "link": "https://{{ domino__sametime_server }}/meeting",
           "target":"_blank"
-        },
-        "title": "Meetings"
+        }
       },
       {% endif -%}
       {% if domino__connections_server | trim | length > 0 -%}
       {
         "type": "com.ibm.action.menu.link",
-        "path": "CollaborationMenuContainer.c",
+        "path": "CollaborationMenuContainer.d",
         "name": "collaboration.profiles",
         "description": "Profiles link",
+        "title": "Org Directory",
         "payload": {
           "link": "https://{{ domino__connections_server }}/profiles/html/searchProfiles.do",
           "target":"_blank"
-        },
-        "title": "Org Directory"
+        }
       },
       {
         "type": "com.ibm.action.menu.link",
-        "path": "CollaborationMenuContainer.d",
+        "path": "CollaborationMenuContainer.e",
         "name": "collaboration.files",
         "description": "Files link",
+        "title": "Files",
         "payload": {
           "link": "https://{{ domino__connections_server }}/files",
           "target":"_blank"
-        },
-        "title": "Files"
+        }
       },
       {% endif -%}
       {
         "type": "com.ibm.action.menu.link",
-        "path": "CollaborationMenuContainer.e",
+        "path": "CollaborationMenuContainer.f",
         "name": "collaboration.leap",
         "description": "Leap link",
+        "title": "Web Apps",
         "payload": {
           "link": "https://{{ domino__domino_hostname }}/volt-apps/",
           "target":"_blank"
-        },
-        "title": "Web Apps"
-      }
+        }
+      }{% if domino__custom_verse_json_file | trim | length > 0 -%},
+{{ verse_json_customization }}
+      {% endif -%}
     ],
     "services": [
       "Verse"
     ]
-  },
-
-  {% if domino__install_ontime -%}
-  {
-    "name" : "OnTimeGC",
-    "title" : "OnTime Group Calendar",
-    "description" : "OnTime Group Calendar intgration in Verse",
-    "services" : [
-      "TopNavigationBar",
-      "Verse"
-    ],
-    "extensions" : [
-      {
-        "type" : "com.ibm.action.link",
-        "name" : "OnTime_Calendar_Link",
-        "title" : "OnTime",
-        "description" : "OnTime Group Calendar",
-        "path" : "com.ibm.navbar.order.4000",
-        "payload" : {
-          "link" : "https://{{ domino__domino_hostname }}/ontime/client.nsf/desktopverse#",
-          "target" : "ontimegcverse"
-        }
-      },
-      {
-        "type" : "com.ibm.verse.ext.widget",
-        "name" : "OnTime_Calendar_MailRead",
-        "payload" : {
-          "url" : "https://{{ domino__domino_hostname }}/ontime/client.nsf/versewidget",
-          "features" : [
-            "core"
-          ],
-          "actions" : [
-            {
-              "id" : "com.ibm.verse.ext.mail.read.action",
-              "path" : "mail.read",
-              "text" : "Create OnTime Poll",
-              "title" : "OnTime Pollarity",
-              "location" : "tab",
-              "icon" : "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIiB3aWR0aD0iMzAiIGhlaWdodD0iMzAiPgoJPHBhdGggZD0iTTIzOC42NSw1NS4xOEE5OS4xMyw5OS4xMywwLDAsMCwyMjUuMywzNS4xMiw5Nyw5NywwLDAsMCwyMDksMjAuMDZhMTAwLjE2LDEwMC4xNiwwLDAsMC0xNi41OS05LjgyLDEwNiwxMDYsMCwwLDAtMjAuNy03LjE4LDExNS4yOSwxMTUuMjksMCwwLDAtMjItMywxMjQuNzUsMTI0Ljc1LDAsMCwwLTIxLjkyLDEuMDhBMTM0LjUzLDEzNC41MywwLDAsMCwxMDYuMzEsNiwxNDUuNTIsMTQ1LjUyLDAsMCwwLDg1LjQsMTQuMzEsMTU0LjIzLDE1NC4yMywwLDAsMCw1MSwzNy40NFE0Ny40MSw0MC42LDQ0LDQ0cS0xLjQzLDEuNDQtMi44MiwyLjlBMTU4LjQ4LDE1OC40OCwwLDAsMCwyNC44LDY3LjM1LDE1MC4wNywxNTAuMDcsMCwwLDAsNy4xMSwxMDIuODcsMTMxLjY1LDEzMS42NSwwLDAsMCwwLDE0My41N2ExMTcuNzYsMTE3Ljc2LDAsMCwwLDEuNDUsMjAsMTA4LjE0LDEwOC4xNCwwLDAsMCw0LjkyLDE5LjIyLDEwMi4wNywxMDIuMDcsMCwwLDAsOC41MywxOC4wNiw5OC42Niw5OC42NiwwLDAsMCwzMC42NywzMS45MiwxMDIuNDEsMTAyLjQxLDAsMCwwLDIzLjMsMTEuMywxMTAuNzUsMTEwLjc1LDAsMCwwLDI4LDUuNTJjMS41Ni4xLDMuMTQuMTgsNC43My4yMmExMjYuNzYsMTI2Ljc2LDAsMCwwLDI3LjIyLTIuMjVsNS4xNC0xLTcuNi0zOC45MS00Ljc2LDEuMTNhOTcuMTEsOTcuMTEsMCwwLDEtMjMuMjYsMi42OCw4NC45Myw4NC45MywwLDAsMS0yMC44OS0yLjc1LDc3LjU0LDc3LjU0LDAsMCwxLTE3LjkxLTcuMTVBNzMuNjgsNzMuNjgsMCwwLDEsNDQuOTEsMTkxYTcyLjkxLDcyLjkxLDAsMCwxLTEwLjE1LTExLjc0LDc0LjY4LDc0LjY4LDAsMCwxLTcuMzUtMTMuMzUsNzkuMDgsNzkuMDgsMCwwLDEtNC41Ny0xNC41OUE4Ni42MSw4Ni42MSwwLDAsMSwyMSwxMzUuNzhhOTguNzgsOTguNzgsMCwwLDEsNC42OS0zMi4zOEExMTQuODQsMTE0Ljg0LDAsMCwxLDM5LjU4LDc0LjYxLDEyMi41LDEyMi41LDAsMCwxLDYwLjc3LDUwLjM3YTExOC4yNiwxMTguMjYsMCwwLDEsMjgtMTguMywxMDkuMTYsMTA5LjE2LDAsMCwxLDE2LjY5LTYuMjEsMTAwLjU3LDEwMC41NywwLDAsMSwxNy0zLjI1LDkyLjQ1LDkyLjQ1LDAsMCwxLDE3LjE0LS4xNSw4NC4yLDg0LjIsMCwwLDEsMTYuODcsMy4xOCw3OCw3OCwwLDAsMSw5LjgzLDMuNjYsNzQuMjcsNzQuMjcsMCwwLDEsOS4zOCw1LjA2QTcxLjgsNzEuOCwwLDAsMSwxOTIuNCw0OS4wN2wtMTUsOC43M0wxNTIuNjIsNzIuMjYsMTI5LjQ5LDg1Ljc1bC0xMS4zOCw2LjY0LDEuNjgsMy4yOWMuMTMuMjUuMjUuNS4zNi43NnMuMjIuNTIuMzIuNzkuMTkuNTQuMjcuODEuMTYuNTUuMjIuODNsLjg2LDMuNjksODguNzEtMzIuMTMsMTkuODktNy4yNy0uNzktMS43QTkyLjU1LDkyLjU1LDAsMCwwLDIxNy40LDQyLjU5YTkwLjM3LDkwLjM3LDAsMCwwLTE1LTE0LjIxLDkzLjM4LDkzLjM4LDAsMCwwLTE2LjgtMTAsOTkuNyw5OS43LDAsMCwwLTE3Ljc5LTYuMjQsMTA3Ljg1LDEwNy44NSwwLDAsMC0yMC40NC0zLDExNi40MSwxMTYuNDEsMCwwLDAtMjAuNDQuNzgsMTI1LjEzLDEyNS4xMywwLDAsMC0yMC4xLDQuMjVBMTM1LDEzNSwwLDAsMCw4Ny4yMSwyMS43LDE0My43OSwxNDMuNzksMCwwLDAsNTQuODgsNDIuOTEsMTQ3LjgsMTQ3LjgsMCwwLDAsMzAuMTUsNzAuNTRhMTQwLjExLDE0MC4xMSwwLDAsMC0xNi44NywzMywxMjMuMSwxMjMuMSwwLDAsMC03LDM3LjM4di0xLjg0YTEyNiwxMjYsMCwwLDEsNy4yMS0zOC44QTE0My40OCwxNDMuNDgsMCwwLDEsMzAuNzUsNjYuNDksMTUxLjM4LDE1MS4zOCwwLDAsMSw1Ni4wNiwzOC4yMWExNDcuMiwxNDcuMiwwLDAsMSwzMy4xLTIxLjcyLDEzOCwxMzgsMCwwLDEsMjAtNy43MywxMjgsMTI4LDAsMCwxLDIwLjU4LTQuMzUsMTE5LDExOSwwLDAsMSwyMC45My0uOEExMTAsMTEwLDAsMCwxLDE3MS42LDYuNjlhMTAyLDEwMiwwLDAsMSwxOC4yMSw2LjM5QTk1LjYsOTUuNiwwLDAsMSwyMDcsMjMuMzNhOTIuNDQsOTIuNDQsMCwwLDEsMTUuMzgsMTQuNTVBOTQuNjksOTQuNjksMCwwLDEsMjM1LDU3LjE5bDEuNywzLjY4LDQtMS40NloiIGZpbGw9IiNmYmJhMDAiPjwvcGF0aD4KCTxwYXRoIGQ9Ik0xNjguNywxMDMuOWE2Ny44OSw2Ny44OSwwLDAsMS05LjEyLDI1LjgyLDc3LjY0LDc3LjY0LDAsMCwxLTE4LjQxLDIxLDczLjg4LDczLjg4LDAsMCwxLTI0LDEyLjgyQTYwLjA2LDYwLjA2LDAsMCwxLDkxLjcsMTY2YTUyLjU0LDUyLjU0LDAsMCwxLTYuNjItMS4yOSw0OC43LDQ4LjcsMCwwLDEtNi4wNy0yQTQ2LjY1LDQ2LjY1LDAsMCwxLDczLjUyLDE2MGE0NC41MSw0NC41MSwwLDAsMS0xNS0xNC4xLDQ3LjE0LDQ3LjE0LDAsMCwxLTYtMTMuMjJBNTIuNTQsNTIuNTQsMCwwLDEsNTAuNiwxMThhNjEuMTEsNjEuMTEsMCwwLDEsMi4yLTE1LjU2Yy4xMy0uNDkuMjctMSwuNDEtMS40N3MuMzItMSwuNDktMS41N2MuMy0uOTMuNjItMS44NSwxLTIuNzdhNzIuNTUsNzIuNTUsMCwwLDEsNy42Mi0xNSw3OCw3OCwwLDAsMSwyNC0yMy4wOSw3MS42Myw3MS42MywwLDAsMSwxNS40MS03LjFjMCwxLjM4LS4wOCw0LjI0LS4xNCw3Ljgycy0uMTQsOC0uMjIsMTIuMjgtLjE2LDguNjQtLjIyLDEyLS4xLDUuNzItLjExLDYuMTVsMy43Ny0uNzEuNzMtLjEyLjczLS4wOS43My0uMDZoLjczbDMuODItLjA2LDktNDMuNzcsMi44MS0xMy45My0zLjc4LjM5YTkwLjc5LDkwLjc5LDAsMCwwLTI4LDguMDYsMTAxLjg4LDEwMS44OCwwLDAsMC0xOC40NCwxMS4xcS0yLjcyLDIuMDctNS4zMSw0LjMyQTEwNSwxMDUsMCwwLDAsNDkuMTcsNzYsOTYuNDIsOTYuNDIsMCwwLDAsMzcsMTAyLjE2LDg3LjgyLDg3LjgyLDAsMCwwLDM0LjEsMTE2YTc4LjIxLDc4LjIxLDAsMCwwLS40OCwxMy43OSw3MC43Nyw3MC43NywwLDAsMCwyLjA2LDEzLjU0LDY2LjQzLDY2LjQzLDAsMCwwLDQuODEsMTNxMS4zOCwyLjgsMyw1LjQyQTYxLjYyLDYxLjYyLDAsMCwwLDQ3LDE2Ni44OWE2MC43Miw2MC43MiwwLDAsMCw0LDQuNzJxLjU2LjU5LDEuMTQsMS4xNywxLjY0LDEuNjQsMy40MSwzLjE1YTYxLjA2LDYxLjA2LDAsMCwwLDYuNTYsNC44OSw2Mi42OSw2Mi42OSwwLDAsMCw3LjM4LDQuMDgsNjUuMDcsNjUuMDcsMCwwLDAsOC4xOCwzLjE4LDcwLjc5LDcwLjc5LDAsMCwwLDksMi4xOCw4MC4yNyw4MC4yNywwLDAsMCwzNS41Ni0yLDk5LjI5LDk5LjI5LDAsMCwwLDM0LjIxLTE3LjUsMTA1LjQ0LDEwNS40NCwwLDAsMCw5LjU4LTguNDUsMTAzLjU4LDEwMy41OCwwLDAsMCwxNi4yNi0yMSw5MS40NSw5MS40NSwwLDAsMCwxMi4zMS0zNy4wN2wuNDUtNC41Ni0yNS43OS0uMTJaIiBmaWxsPSIjMDA3M2M2Ij48L3BhdGg+Cgo8L3N2Zz4="
-            }
-          ]
-        }
-      }
-    ]
   }
-  {% endif -%}
 ]

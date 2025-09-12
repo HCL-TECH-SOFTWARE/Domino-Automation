@@ -66,6 +66,8 @@ domino__input_data_users: ''      # default value: users.csv
 domino__custom_login_db: ''
 domino__custom_login_form: ''
 
+domino__custom_verse_json_file: ''
+
 # Reports
 domino__save_reports: true
 domino__reports_dir: '{{ domino__input_data_location }}/reports/{{ domino__domino_domain | lower }}'
